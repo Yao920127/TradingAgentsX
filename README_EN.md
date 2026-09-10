@@ -514,6 +514,7 @@ Full documentation: http://localhost:8000/docs
 
 ![12 Analyst Reports](web_screenshot/5_en.png)
 ![12 Analyst Reports](web_screenshot/5_1_en.png)
+![12 Analyst Reports](web_screenshot/5_2_en.png)
 
 ---
 

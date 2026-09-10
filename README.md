@@ -513,6 +513,7 @@ GET /api/task/{task_id}
 
 ![12位分析師報告](web_screenshot/5.png)
 ![12位分析師報告](web_screenshot/5_1.png)
+![12位分析師報告](web_screenshot/5_2.png)
 
 ---
 
