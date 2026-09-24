@@ -451,8 +451,7 @@ export const zhTW = {
       bullBearDebate: "多空辯論",
       riskDebate: "風險辯論",
       fullReport: "完整報告",
-      expand: "展開全文",
-      collapse: "收合",
+      enlarge: "放大檢視",
       empty: "未產生",
     },
 

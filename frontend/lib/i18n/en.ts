@@ -568,8 +568,7 @@ export const en = {
       bullBearDebate: "Bull vs. Bear Debate",
       riskDebate: "Risk Debate",
       fullReport: "Full Report",
-      expand: "Expand",
-      collapse: "Collapse",
+      enlarge: "Enlarge",
       empty: "Not generated",
     },
 
