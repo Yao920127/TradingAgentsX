@@ -560,16 +560,16 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Anthropic (Official model IDs) */}
-                          <SelectItem value="claude-fable-5">
+                          <SelectItem value="claude-fable-5-1">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Fable 5</span>
+                              <span>Claude Fable 5.1</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="claude-opus-5">
+                          <SelectItem value="claude-opus-5-5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Opus 5</span>
+                              <span>Claude Opus 5.5</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="claude-sonnet-5">
@@ -735,16 +735,16 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Anthropic (Official model IDs) */}
-                          <SelectItem value="claude-fable-5">
+                          <SelectItem value="claude-fable-5-1">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Fable 5</span>
+                              <span>Claude Fable 5.1</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="claude-opus-5">
+                          <SelectItem value="claude-opus-5-5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Opus 5</span>
+                              <span>Claude Opus 5.5</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="claude-sonnet-5">
