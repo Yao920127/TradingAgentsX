@@ -25,6 +25,7 @@ from tradingagents.agents.utils.agent_states import (
     RiskDebateState,
 )
 from tradingagents.dataflows.config import set_config
+from tradingagents.graph.progress import ProgressTracker, ProgressCallback
 
 # 從 agent_utils 匯入新的抽象工具方法
 from tradingagents.agents.utils.agent_utils import (
@@ -198,6 +199,7 @@ class TradingAgentsXGraph:
         self.log_states_dict = {}  # 日期到完整狀態字典的映射
 
         # 設定圖
+        self.selected_analysts = list(selected_analysts)
         self.graph = self.graph_setup.setup_graph(selected_analysts)
 
     def _create_tool_nodes(self) -> Dict[str, ToolNode]:
@@ -237,13 +239,14 @@ class TradingAgentsXGraph:
             ),
         }
 
-    def propagate(self, company_name, trade_date):
+    def propagate(self, company_name, trade_date, progress_callback: Optional[ProgressCallback] = None):
         """
         在特定日期為某家公司執行交易代理圖。
 
         Args:
             company_name (str): 公司名稱或股票代碼。
             trade_date (str): 交易日期。
+            progress_callback: 可選。每當代理節點開始或結束時，以進度快照 dict 呼叫。
 
         Returns:
             tuple: 包含最終狀態和處理後信號的元組。
@@ -259,17 +262,37 @@ class TradingAgentsXGraph:
         )
         args = self.propagator.get_graph_args()
 
-        if self.debug:
-            # 帶有追蹤的除錯模式
+        tracker = None
+        if progress_callback is not None:
+            tracker = ProgressTracker(
+                self.selected_analysts,
+                self.config.get("max_debate_rounds", 1),
+                self.config.get("max_risk_discuss_rounds", 1),
+                progress_callback,
+            )
+            tracker.emit()
+
+        if self.debug or tracker is not None:
+            # 串流模式："values" 取得狀態；有追蹤器時額外串流 "tasks" 取得節點開始/結束事件
+            stream_modes = ["values", "tasks"] if tracker is not None else ["values"]
             trace = []
-            for chunk in self.graph.stream(init_agent_state, **args): # type: ignore
+            for mode, chunk in self.graph.stream(init_agent_state, **{**args, "stream_mode": stream_modes}): # type: ignore
+                if mode == "tasks":
+                    if "input" in chunk:
+                        tracker.on_node_start(chunk["name"]) # type: ignore
+                    else:
+                        tracker.on_node_end(chunk["name"], chunk.get("result")) # type: ignore
+                    continue
                 if len(chunk["messages"]) == 0:
                     pass
                 else:
-                    chunk["messages"][-1].pretty_print()
+                    if self.debug:
+                        chunk["messages"][-1].pretty_print()
                     trace.append(chunk)
 
             final_state = trace[-1]
+            if tracker is not None:
+                tracker.finish()
         else:
             # 不帶追蹤的標準模式
             final_state = self.graph.invoke(init_agent_state, **args) # type: ignore

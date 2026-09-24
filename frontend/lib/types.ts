@@ -119,12 +119,37 @@ export interface TaskCreatedResponse {
   message: string;
 }
 
+// Agent progress (from backend tradingagents/graph/progress.py; timestamps are epoch seconds)
+
+export interface ProgressStep {
+  key: string;
+  status: "pending" | "running" | "completed";
+  started_at: number | null;
+  completed_at: number | null;
+  // Only on debate steps (research_debate / risk_debate)
+  turns_done?: number;
+  total_turns?: number;
+}
+
+export interface ProgressDetail {
+  started_at: number;
+  updated_at: number;
+  percent: number;
+  finished: boolean;
+  current_step: string | null;
+  current_agent: string | null;
+  current_tools: string[];
+  steps: ProgressStep[];
+}
+
 export interface TaskStatusResponse {
   task_id: string;
   status: "pending" | "running" | "completed" | "failed";
   created_at: string;
   updated_at: string;
   progress?: string;
+  progress_detail?: ProgressDetail | null;
+  server_time?: number;
   result?: AnalysisResponse;
   error?: string;
   completed_at?: string;

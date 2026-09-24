@@ -18,7 +18,8 @@ import {
   ShieldCheck,
   Users,
   Target,
-  BarChart3
+  BarChart3,
+  FileText
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -102,6 +103,20 @@ export function AgentFlowDiagram() {
 
       {/* Arrow */}
       <FlowArrow label={t.flowDiagram.reportIntegration} color="purple" />
+
+      {/* Report Summarizer */}
+      <div className="max-w-md mx-auto">
+        <ManagerCard
+          name={t.agents.report_summarizer}
+          icon={<FileText className="w-6 h-6" />}
+          gradient="from-sky-500 to-indigo-500"
+          description={t.flowDiagram.summarizerDesc}
+          tasks={[t.flowDiagram.keepKeyData, t.flowDiagram.structuredSummary, t.flowDiagram.saveTokens]}
+        />
+      </div>
+
+      {/* Arrow */}
+      <FlowArrow label={t.flowDiagram.summaryHandoff} color="purple" />
 
       {/* Researchers Layer - 2 agents */}
       <div>

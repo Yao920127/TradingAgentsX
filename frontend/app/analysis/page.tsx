@@ -6,7 +6,7 @@
 import { useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { AnalysisForm } from "@/components/analysis/AnalysisForm";
-import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { AnalysisProgress } from "@/components/analysis/AnalysisProgress";
 import { ErrorAlert } from "@/components/shared/ErrorAlert";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useAnalysisContext } from "@/context/AnalysisContext";
@@ -19,7 +19,7 @@ import type { AnalysisRequest } from "@/lib/types";
 export default function AnalysisPage() {
   const router = useRouter();
   const { setAnalysisResult, setTaskId, setMarketType, marketType } = useAnalysisContext();
-  const { runAnalysis, loading, error, result, taskId } = useAnalysis();
+  const { runAnalysis, loading, error, result, taskId, progressDetail, clockOffset, startedAt } = useAnalysis();
   const { isAuthenticated } = useAuth();
   const { t, locale } = useLanguage();
   
@@ -156,7 +156,11 @@ export default function AnalysisPage() {
         <AnalysisForm onSubmit={handleSubmit} loading={loading} />
 
         {loading && (
-          <LoadingSpinner message={t.form.analysisLoading} />
+          <AnalysisProgress
+            detail={progressDetail}
+            clockOffset={clockOffset}
+            startedAt={startedAt}
+          />
         )}
 
         {error && <ErrorAlert error={error} />}

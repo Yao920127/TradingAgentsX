@@ -28,7 +28,7 @@
 
 | Feature                      | Description                                                                  |
 | ---------------------------- | ---------------------------------------------------------------------------- |
-| 🤖 **Multi-Agent Architecture** | 12 specialized AI agents (analysts, researchers, traders, risk managers) working together |
+| 🤖 **Multi-Agent Architecture** | 13 specialized AI agents (analysts, researchers, traders, risk managers) working together |
 | 🌐 **Multi-Model Support**   | LLM providers including OpenAI, Anthropic, Gemini, Grok, DeepSeek, Qwen, etc. |
 | 🔒 **Google OAuth Login**    | Cloud-synced API settings and history reports, supporting multi-device sync  |
 | 📊 **US & Taiwan Stock Support** | Full support for US stocks (Yahoo Finance) and Taiwan stocks (FinMind) data |
@@ -69,7 +69,7 @@ flowchart TB
 
     subgraph Core["🤖 AI Agent Core (LangGraph)"]
         direction TB
-        P1["1️⃣ Analysis Phase<br/>Market · News · Social · Fundamentals (parallel)"]
+        P1["1️⃣ Analysis Phase<br/>Market · News · Social · Fundamentals (sequential)<br/>→ Report Summarizer condenses"]
         P2["2️⃣ Research Debate<br/>Bull vs Bear → Research Manager"]
         P3["3️⃣ Risk Debate<br/>Aggressive · Conservative · Neutral → Risk Manager"]
         P4["4️⃣ Trading Decision<br/>BUY / SELL / HOLD"]
@@ -177,7 +177,8 @@ TradingAgentsX/
     │   │   ├── market_analyst.py       # Market analyst
     │   │   ├── news_analyst.py         # News analyst
     │   │   ├── social_media_analyst.py # Social media analyst
-    │   │   └── fundamentals_analyst.py # Fundamentals analyst
+    │   │   ├── fundamentals_analyst.py # Fundamentals analyst
+    │   │   └── report_summarizer.py    # Report summarizer
     │   ├── researchers/        # Research team
     │   │   ├── bull_researcher.py      # Bull researcher
     │   │   └── bear_researcher.py      # Bear researcher
@@ -226,6 +227,14 @@ TradingAgentsX/
 | Social Media Analyst   | Sentiment Assessment  | Reddit/Twitter sentiment indicators, investor confidence |
 | News Analyst           | News Analysis         | Latest news summaries, event impact assessment     |
 | Fundamentals Analyst   | Financial Analysis    | Financial report data, P/E, P/B, profitability     |
+
+### Report Synthesis (1 Agent)
+
+| Agent             | Role             | Output                                                                  |
+| ----------------- | ---------------- | ----------------------------------------------------------------------- |
+| Report Summarizer | Report Synthesis | ~700-word, five-section summary: key data snapshot, technicals, sentiment, news, fundamentals |
+
+The Report Summarizer runs after the four analysts. It uses the quick-thinking model to condense the four full reports into one summary, keeping every number, ratio and price level verbatim. The bull/bear researchers and the three risk debaters read this summary instead of the full reports, which cuts token usage substantially across multi-round debates. If summarization fails, it returns an empty summary and the analysis continues.
 
 ### Research Team (3 Agents)
 

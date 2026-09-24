@@ -85,6 +85,9 @@ export default function HomePage() {
               <AgentCard name={t.agents.news_analyst} role={t.agents.news_analyst_role} description={t.agents.news_analyst_desc} />
               <AgentCard name={t.agents.fundamentals_analyst} role={t.agents.fundamentals_analyst_role} description={t.agents.fundamentals_analyst_desc} />
             </div>
+            <div className="grid grid-cols-1 gap-4 max-w-md mt-4">
+              <AgentCard name={t.agents.report_summarizer} role={t.agents.report_summarizer_role} description={t.agents.report_summarizer_desc} />
+            </div>
           </div>
 
           {/* Research Team */}

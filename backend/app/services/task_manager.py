@@ -7,6 +7,7 @@ falls back to in-memory storage (local development).
 import uuid
 import json
 import threading
+import time
 import logging
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
@@ -172,6 +173,23 @@ class HybridTaskManager:
             task_data["updated_at"] = datetime.now().isoformat()
             self._save_to_storage(task_id, task_data)
     
+    def update_task_progress_detail(self, task_id: str, detail: Dict[str, Any], progress: Optional[str] = None):
+        """
+        Update structured agent progress (steps, current agent, timings)
+
+        Args:
+            task_id: Task ID
+            detail: Progress snapshot from tradingagents.graph.progress.ProgressTracker
+            progress: Optional one-line progress message
+        """
+        task_data = self._get_from_storage(task_id)
+        if task_data:
+            task_data["progress_detail"] = detail
+            if progress:
+                task_data["progress"] = progress
+            task_data["updated_at"] = datetime.now().isoformat()
+            self._save_to_storage(task_id, task_data)
+
     def set_task_result(self, task_id: str, result: Any):
         """
         Set task result and mark as completed.
@@ -253,6 +271,9 @@ class HybridTaskManager:
             "created_at": created_at,
             "updated_at": updated_at,
             "progress": task.get("progress"),
+            "progress_detail": task.get("progress_detail"),
+            # Epoch seconds, lets clients compute elapsed time without clock skew
+            "server_time": time.time(),
             "result": task.get("result"),
             "error": task.get("error"),
             "completed_at": task.get("completed_at"),

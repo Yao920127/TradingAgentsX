@@ -109,7 +109,7 @@ export const en = {
     features: {
       multiAgent: "Multi-Agent Collaboration",
       multiAgentDesc:
-        "12 specialized AI agent teams working together, simulating real trading firm operations",
+        "13 specialized AI agent teams working together, simulating real trading firm operations",
       multiModel: "Multi-Model Support",
       multiModelDesc:
         "Support for OpenAI, Claude, Gemini, Grok, DeepSeek, Qwen and more LLMs",
@@ -136,7 +136,7 @@ export const en = {
     },
 
     // 12 Professional Agents Section
-    professionalAgents: "12 Professional Agent Teams",
+    professionalAgents: "13 Professional Agent Teams",
     professionalAgentsDesc:
       "Each agent has specialized responsibilities, collaborating to produce high-quality trading decisions",
     analystsTeamTitle: "Analysts Team (4)",
@@ -157,9 +157,9 @@ export const en = {
           "Gather stock prices, news, social sentiment from yfinance, Reddit, RSS and more",
       },
       analysts: {
-        title: "Parallel Analysis by Analysts Team",
+        title: "Analysis by Analysts Team",
         description:
-          "Market, Sentiment, News, and Fundamentals analysts evaluate simultaneously, producing professional reports",
+          "Market, Sentiment, News, and Fundamentals analysts each produce a professional report, then the Report Summarizer condenses them into one summary",
       },
       researchers: {
         title: "Research Team Debate",
@@ -220,7 +220,7 @@ export const en = {
     // CTA Section
     readyToStart: "Ready to Start Smart Trading Analysis?",
     ctaDescription:
-      "Experience 12 professional AI agents working together to provide comprehensive stock analysis reports",
+      "Experience 13 professional AI agents working together to provide comprehensive stock analysis reports",
   },
 
   // Agents
@@ -245,6 +245,11 @@ export const en = {
     fundamentals_analyst_role: "Fundamental Analysis",
     fundamentals_analyst_desc:
       "Financial data analysis, valuation metrics, company fundamentals evaluation",
+
+    report_summarizer: "Report Summarizer",
+    report_summarizer_role: "Report Synthesis",
+    report_summarizer_desc:
+      "Condenses the four analyst reports into one structured summary, keeping every key figure verbatim, for the downstream debates",
 
     // Researchers
     bull_researcher: "Bull Researcher",
@@ -291,6 +296,45 @@ export const en = {
       "Formulates final trading recommendation with entry, exit, and position sizing",
   },
 
+  // Analysis progress
+  progress: {
+    title: "Agents at work",
+    elapsed: "Elapsed",
+    stepsDone: "{done} / {total} steps done",
+    initializing: "Initializing agents and loading data...",
+    finalizing: "All agents finished, preparing the report...",
+    working: "is working",
+    fetchingData: "Fetching: ",
+    listSeparator: ", ",
+    turn: "Turn {done} / {total}",
+    research_debate: "Bull vs. Bear Debate",
+    risk_debate: "Risk Debate",
+    stepDesc: {
+      market_analyst: "Analyzing price action and technical indicators",
+      social_analyst: "Gauging social media and market sentiment",
+      news_analyst: "Gathering and assessing relevant news",
+      fundamentals_analyst: "Reviewing financials and valuation",
+      report_summarizer: "Condensing analyst reports for the debate",
+      research_debate: "Bull and bear researchers take turns arguing",
+      research_manager: "Weighing both sides into an investment plan",
+      trader: "Drafting the trade recommendation",
+      risk_debate: "Aggressive, conservative and neutral analysts debate risk",
+      risk_judge: "Making the final risk assessment and decision",
+    },
+    tools: {
+      get_stock_data: "price data",
+      get_indicators: "technical indicators",
+      get_fundamentals: "fundamentals",
+      get_balance_sheet: "balance sheet",
+      get_cashflow: "cash flow statement",
+      get_income_statement: "income statement",
+      get_news: "company news",
+      get_global_news: "macro news",
+      get_insider_sentiment: "insider sentiment",
+      get_insider_transactions: "insider transactions",
+    },
+  },
+
   // Flow Diagram
   flowDiagram: {
     // Layer titles
@@ -309,6 +353,11 @@ export const en = {
     // Arrow labels
     dataFetch: "Data Fetching & Cleaning",
     reportIntegration: "Report Integration",
+    summaryHandoff: "Summary Sent to Debaters",
+    summarizerDesc: "Condenses four reports into one summary",
+    keepKeyData: "Keeps key figures and price levels verbatim",
+    structuredSummary: "~700-word, five-section summary",
+    saveTokens: "Cuts token usage for the debating agents",
     researchPrep: "Research Integration & Debate Prep",
     riskDebate: "Risk Assessment & Management",
     finalDecision: "Final Trading Decision",
@@ -371,7 +420,7 @@ export const en = {
     finalOutput_label: "Final Output:",
     completeReportSet: "Complete Analysis Report Set",
     comprehensiveSupport:
-      "Integrating 12 professional agents for comprehensive investment decision support",
+      "Integrating 13 professional agents for comprehensive investment decision support",
 
     // Report sections
     analystReports: "Analyst Reports (4)",

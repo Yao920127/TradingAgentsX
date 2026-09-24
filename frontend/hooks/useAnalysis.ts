@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { api } from "@/lib/api";
-import type { AnalysisRequest, AnalysisResponse } from "@/lib/types";
+import type { AnalysisRequest, AnalysisResponse, ProgressDetail } from "@/lib/types";
 
 export function useAnalysis() {
   const [loading, setLoading] = useState(false);
@@ -18,6 +18,11 @@ export function useAnalysis() {
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
+  const [progressDetail, setProgressDetail] = useState<ProgressDetail | null>(null);
+  // Server clock minus client clock, in seconds — step timestamps are server epoch seconds
+  const [clockOffset, setClockOffset] = useState(0);
+  // Client epoch ms when the user submitted, for the overall elapsed timer
+  const [startedAt, setStartedAt] = useState<number | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   // Count consecutive transient failures (network / 5xx) so we can give up
   // instead of polling a dead backend forever. Reset on any successful poll.
@@ -41,6 +46,12 @@ export function useAnalysis() {
       if (status.progress) {
         setProgress(status.progress);
       }
+      if (status.progress_detail) {
+        setProgressDetail(status.progress_detail);
+      }
+      if (typeof status.server_time === "number") {
+        setClockOffset(status.server_time - Date.now() / 1000);
+      }
       
       // Check if completed
       if (status.status === "completed") {
@@ -49,6 +60,7 @@ export function useAnalysis() {
         }
         setLoading(false);
         setProgress(null);
+        setProgressDetail(null);
         
         // Clear pending task since it's completed
         const { clearPendingTask } = await import('@/lib/pending-task');
@@ -83,6 +95,7 @@ export function useAnalysis() {
         }
         setLoading(false);
         setProgress(null);
+        setProgressDetail(null);
         
         // Clear pending task since it failed
         const { clearPendingTask } = await import('@/lib/pending-task');
@@ -119,6 +132,7 @@ export function useAnalysis() {
         setError(detail);
         setLoading(false);
         setProgress(null);
+        setProgressDetail(null);
         stopPolling();
         return true;
       }
@@ -130,6 +144,7 @@ export function useAnalysis() {
         setError("Lost connection to the analysis service. Please try again.");
         setLoading(false);
         setProgress(null);
+        setProgressDetail(null);
         stopPolling();
         return true;
       }
@@ -169,6 +184,8 @@ export function useAnalysis() {
     setError(null);
     setResult(null);
     setProgress("Submitting analysis request...");
+    setProgressDetail(null);
+    setStartedAt(Date.now());
 
     try {
       // Start analysis task
@@ -196,6 +213,7 @@ export function useAnalysis() {
       setError(errorMessage);
       setLoading(false);
       setProgress(null);
+      setProgressDetail(null);
       throw err;
     }
   };
@@ -212,6 +230,8 @@ export function useAnalysis() {
     setResult(null);
     setTaskId(null);
     setProgress(null);
+    setProgressDetail(null);
+    setStartedAt(null);
   };
 
   return {
@@ -221,6 +241,9 @@ export function useAnalysis() {
     result,
     taskId,
     progress,
+    progressDetail,
+    clockOffset,
+    startedAt,
     reset,
   };
 }

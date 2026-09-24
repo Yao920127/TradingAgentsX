@@ -60,7 +60,7 @@ export const zhTW = {
     // 特色卡片
     features: {
       multiAgent: "多代理協作架構",
-      multiAgentDesc: "12 個專業化 AI 代理團隊協同工作，模擬真實交易公司運作模式",
+      multiAgentDesc: "13 個專業化 AI 代理團隊協同工作，模擬真實交易公司運作模式",
       multiModel: "多模型靈活支援",
       multiModelDesc: "支援 OpenAI、Claude、Gemini、Grok、DeepSeek、Qwen 等多家 LLM",
       customEndpoint: "自訂端點配置",
@@ -80,7 +80,7 @@ export const zhTW = {
     },
     
     // 12 位專業代理團隊
-    professionalAgents: "👥 12 位專業代理團隊",
+    professionalAgents: "👥 13 位專業代理團隊",
     professionalAgentsDesc: "每個代理都有其專業職責，協同工作產生高質量的交易決策",
     analystsTeamTitle: "📊 分析師團隊 (4 位)",
     researchTeamTitle: "🔍 研究團隊 (3 位)",
@@ -94,7 +94,7 @@ export const zhTW = {
     // 流程步驟
     processSteps: {
       dataCollection: { title: "資料收集階段", description: "從 yfinance、Reddit、RSS 等多源獲取股價、新聞、社群情緒數據" },
-      analysts: { title: "分析師團隊平行分析", description: "市場、情緒、新聞、基本面四大分析師同時評估，產出專業報告" },
+      analysts: { title: "分析師團隊分析", description: "市場、情緒、新聞、基本面四大分析師依序評估並產出專業報告，再由報告總結分析師整合為精簡摘要" },
       researchers: { title: "研究團隊辯論", description: "看漲與看跌研究員進行結構化辯論，研究經理綜合雙方觀點" },
       trader: { title: "交易員整合分析", description: "審查所有分析師與研究團隊報告，制定具體交易執行計劃" },
       risk: { title: "風險管理評估", description: "激進、保守、中立三方風險分析師評估策略，風險經理做出風控決策" },
@@ -119,7 +119,7 @@ export const zhTW = {
     
     // CTA Section
     readyToStart: "準備好開始智能交易分析了嗎？",
-    ctaDescription: "立即體驗 12 位專業 AI 代理協同工作，為您提供全方位的股票分析報告",
+    ctaDescription: "立即體驗 13 位專業 AI 代理協同工作，為您提供全方位的股票分析報告",
   },
 
   // Agents
@@ -140,6 +140,10 @@ export const zhTW = {
     fundamentals_analyst: "基本面分析師",
     fundamentals_analyst_role: "基本面分析",
     fundamentals_analyst_desc: "財務數據分析、估值指標、公司基本面評估",
+
+    report_summarizer: "報告總結分析師",
+    report_summarizer_role: "報告整合",
+    report_summarizer_desc: "將四份分析師報告壓縮為結構化摘要，逐字保留關鍵數據，供後續辯論使用",
     
     // Researchers
     bull_researcher: "看漲研究員",
@@ -178,6 +182,45 @@ export const zhTW = {
     trader_desc: "制定最終交易建議，包含進場、出場與倉位規模",
   },
 
+  // Analysis progress
+  progress: {
+    title: "代理分析進行中",
+    elapsed: "已用時間",
+    stepsDone: "已完成 {done} / {total} 步驟",
+    initializing: "正在初始化代理與載入資料...",
+    finalizing: "所有代理已完成，正在整理報告...",
+    working: "正在工作",
+    fetchingData: "正在取得資料：",
+    listSeparator: "、",
+    turn: "第 {done} / {total} 輪發言",
+    research_debate: "多空研究辯論",
+    risk_debate: "風險辯論",
+    stepDesc: {
+      market_analyst: "分析股價走勢與技術指標",
+      social_analyst: "評估社群媒體與市場情緒",
+      news_analyst: "蒐集並評估相關新聞事件",
+      fundamentals_analyst: "檢視財報與估值指標",
+      report_summarizer: "濃縮分析師報告供後續討論",
+      research_debate: "看漲與看跌研究員輪流辯論",
+      research_manager: "整合多空論點形成投資計畫",
+      trader: "制定交易建議",
+      risk_debate: "激進、保守、中立分析師辯論風險",
+      risk_judge: "做出最終風險評估與交易決策",
+    },
+    tools: {
+      get_stock_data: "股價資料",
+      get_indicators: "技術指標",
+      get_fundamentals: "基本面資料",
+      get_balance_sheet: "資產負債表",
+      get_cashflow: "現金流量表",
+      get_income_statement: "損益表",
+      get_news: "公司新聞",
+      get_global_news: "總體經濟新聞",
+      get_insider_sentiment: "內部人情緒",
+      get_insider_transactions: "內部人交易",
+    },
+  },
+
   // Flow Diagram
   flowDiagram: {
     // Layer titles
@@ -196,6 +239,11 @@ export const zhTW = {
     // Arrow labels
     dataFetch: "資料擷取與清理",
     reportIntegration: "分析報告整合",
+    summaryHandoff: "摘要分送辯論代理",
+    summarizerDesc: "壓縮四份報告為精簡摘要",
+    keepKeyData: "逐字保留關鍵數據與價位",
+    structuredSummary: "約 700 字五段式摘要",
+    saveTokens: "減少辯論代理的 token 用量",
     researchPrep: "研究整合與辯論準備",
     riskDebate: "風險評估與管理",
     finalDecision: "制定最終交易決策",
@@ -257,7 +305,7 @@ export const zhTW = {
     riskParams: "風險參數",
     finalOutput_label: "最終輸出:",
     completeReportSet: "完整分析報告集合",
-    comprehensiveSupport: "整合 12 位專業代理的深度分析，提供全方位投資決策支援",
+    comprehensiveSupport: "整合 13 位專業代理的深度分析，提供全方位投資決策支援",
     
     // Report sections
     analystReports: "分析師報告 (4份)",

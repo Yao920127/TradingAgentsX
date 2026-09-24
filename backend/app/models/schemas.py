@@ -147,6 +147,8 @@ class TaskStatusResponse(BaseModel):
     created_at: str = Field(..., description="Task creation timestamp")
     updated_at: str = Field(..., description="Last update timestamp")
     progress: Optional[str] = Field(None, description="Progress message")
+    progress_detail: Optional[Dict[str, Any]] = Field(None, description="Structured agent progress: steps, current agent, timings (epoch seconds)")
+    server_time: Optional[float] = Field(None, description="Server time in epoch seconds, for computing elapsed time client-side")
     # Union fallback: pydantic validates against AnalysisResponse first (typed,
     # documented happy path); if the stored result dict doesn't perfectly match
     # the strict nested models (e.g. PriceData/PriceStats), it falls back to a

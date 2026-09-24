@@ -4,7 +4,7 @@ TradingAgentsX service integration
 import sys
 import os
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Callable, Dict, Any, List, Optional
 import logging
 
 # Add parent directory to path to import tradingagents
@@ -66,6 +66,7 @@ class TradingService:
         deep_think_llm: str = "claude-sonnet-5",
         quick_think_llm: str = "claude-opus-5",
         language: str = "zh-TW",  # Language for agent reports: 'en' or 'zh-TW'
+        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ) -> Dict[str, Any]:
         """
         Run trading analysis for a given ticker and date with user-provided API keys
@@ -84,6 +85,7 @@ class TradingService:
             research_depth: Research depth (1-5)
             deep_think_llm: Deep thinking LLM model
             quick_think_llm: Quick thinking LLM model
+            progress_callback: Called with a progress snapshot as each agent starts/finishes
             
         Returns:
             Dict containing analysis results
@@ -221,7 +223,9 @@ class TradingService:
                 
                 # Run analysis
                 logger.info(f"Running analysis for {ticker}")
-                final_state, decision = graph.propagate(ticker, analysis_date)
+                final_state, decision = graph.propagate(
+                    ticker, analysis_date, progress_callback=progress_callback
+                )
             
                 # Extract reports from final state
                 reports = {

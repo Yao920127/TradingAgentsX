@@ -124,6 +124,15 @@ async def run_analysis(
             detail=f"Task creation failed ({type(e).__name__}). The task service may be temporarily unavailable. Please try again."
         )
     
+    def report_progress(detail: dict):
+        if detail.get("finished"):
+            message = "Agents finished, preparing report..."
+        elif detail.get("current_agent"):
+            message = f"Running: {detail['current_agent']}"
+        else:
+            message = "Starting agents..."
+        task_manager.update_task_progress_detail(task_id, detail, progress=message)
+
     # Start background analysis
     def run_background_analysis():
         import asyncio
@@ -156,6 +165,7 @@ async def run_analysis(
                 alpha_vantage_api_key=request.alpha_vantage_api_key or "",
                 finmind_api_key=request.finmind_api_key or "",
                 language=request.language or "zh-TW",  # Pass language for agent reports
+                progress_callback=report_progress,
             ))
             
             # Check for errors in result
