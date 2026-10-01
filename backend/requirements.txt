@@ -13,7 +13,9 @@ python-multipart==0.0.6
 python-dotenv==1.0.0
 
 # Database (PostgreSQL)
-sqlalchemy>=2.0.0
+# [asyncio] extra pulls in greenlet — required by sqlalchemy.ext.asyncio.
+# SQLAlchemy 2.1+ no longer installs greenlet by default.
+sqlalchemy[asyncio]>=2.0.0
 asyncpg>=0.29.0
 psycopg2-binary>=2.9.9
 
