@@ -276,7 +276,7 @@ TradingAgentsX/
 #### 1️⃣ 克隆專案
 
 ```bash
-git clone https://github.com/MarkLo127/TradingAgentsX.git
+git clone https://github.com/Yao920127/TradingAgentsX.git
 cd TradingAgentsX
 ```
 
