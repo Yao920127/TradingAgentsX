@@ -201,7 +201,7 @@ export default function HomePage() {
               {t.home.ctaDescription}
             </p>
             <Link href="/analysis">
-              <Button size="lg" variant="outline" className="text-lg px-10 py-4 animate-clay-bounce">
+              <Button size="lg" variant="outline" className="text-lg px-10 py-4 animate-cta-pulse">
                 {t.home.startAnalysis} →
               </Button>
             </Link>

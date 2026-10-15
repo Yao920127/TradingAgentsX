@@ -131,7 +131,7 @@ export function LoginPrompt() {
   if (isAuthenticated) return null;
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <CloudOff className="w-5 h-5 text-gray-400" />

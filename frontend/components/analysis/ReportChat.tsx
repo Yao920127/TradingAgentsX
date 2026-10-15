@@ -153,13 +153,13 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl hover:from-purple-700 hover:to-pink-700 animate-fade-in"
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl hover:from-blue-700 hover:to-cyan-700 animate-fade-in"
           aria-label={t.chat?.title || "Chat"}
         >
           <MessageCircle className="h-6 w-6" />
           <span className="absolute -top-1 -right-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-pink-500" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-cyan-500" />
           </span>
         </button>
       )}
@@ -168,7 +168,7 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
       {isOpen && (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[400px] h-[520px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-2xl animate-slide-up overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
               <span className="font-semibold text-sm">
@@ -212,7 +212,7 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
                   className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white text-xs ${
                     msg.role === "user"
                       ? "bg-gradient-to-br from-blue-500 to-cyan-500"
-                      : "bg-gradient-to-br from-purple-500 to-pink-500"
+                      : "bg-gradient-to-br from-amber-500 to-orange-500"
                   }`}
                 >
                   {msg.role === "user" ? (
@@ -246,7 +246,7 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
             {/* Loading indicator */}
             {isLoading && (
               <div className="flex gap-2">
-                <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xs">
+                <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-amber-500 to-orange-500 text-white text-xs">
                   <Bot className="h-3.5 w-3.5" />
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3">
@@ -279,13 +279,13 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
                 onKeyDown={handleKeyDown}
                 placeholder={t.chat?.placeholder || "Ask about this report..."}
                 disabled={isLoading}
-                className="flex-1 text-sm rounded-full border-gray-200 dark:border-gray-700 focus-visible:ring-purple-500"
+                className="flex-1 text-sm rounded-full border-gray-200 dark:border-gray-700 focus-visible:ring-cyan-500"
               />
               <Button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
                 size="icon"
-                className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 h-9 w-9 flex-shrink-0"
+                className="rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 h-9 w-9 flex-shrink-0"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

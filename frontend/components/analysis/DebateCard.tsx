@@ -73,9 +73,9 @@ const TONE_THEME: Record<
   },
   investmentPlan: {
     icon: ClipboardCheck,
-    header: "bg-violet-50/80 dark:bg-violet-950/30",
-    label: "text-violet-700 dark:text-violet-400",
-    ring: "border-violet-200/80 dark:border-violet-900/60",
+    header: "bg-cyan-50/80 dark:bg-cyan-950/30",
+    label: "text-cyan-700 dark:text-cyan-400",
+    ring: "border-cyan-200/80 dark:border-cyan-900/60",
   },
   riskDecision: {
     icon: Gavel,

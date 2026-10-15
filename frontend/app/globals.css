@@ -75,7 +75,7 @@
   --chart-2: #0EA5E9;
   --chart-3: #10B981;
   --chart-4: #F59E0B;
-  --chart-5: #8B5CF6;
+  --chart-5: #F43F5E;
   --sidebar: #EFF6FF;
   --sidebar-foreground: #0F172A;
   --sidebar-primary: #2563EB;
@@ -110,7 +110,7 @@
   --chart-2: #0EA5E9;
   --chart-3: #34D399;
   --chart-4: #FCD34D;
-  --chart-5: #A78BFA;
+  --chart-5: #FB7185;
   --sidebar: #111827;
   --sidebar-foreground: #E2E8F0;
   --sidebar-primary: #3B82F6;
@@ -375,29 +375,13 @@
    GRADIENT UTILITIES
    ======================================== */
 
-/* Gradient Backgrounds — blue-pink (light) / blue-purple (dark) */
+/* Gradient Backgrounds — blue-cyan (light) / blue-teal (dark) */
 .gradient-bg-primary {
-  background: linear-gradient(135deg, #60A5FA 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #60A5FA 0%, #22D3EE 100%);
 }
 
 .dark .gradient-bg-primary {
-  background: linear-gradient(135deg, #60A5FA 0%, #8B5CF6 100%);
-}
-
-.gradient-bg-secondary {
-  background: linear-gradient(135deg, #93C5FD 0%, #F9A8D4 100%);
-}
-
-.dark .gradient-bg-secondary {
-  background: linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%);
-}
-
-.gradient-bg-accent {
-  background: linear-gradient(135deg, #DBEAFE 0%, #FBCFE8 100%);
-}
-
-.dark .gradient-bg-accent {
-  background: linear-gradient(135deg, #1D4ED8 0%, #6D28D9 100%);
+  background: linear-gradient(135deg, #60A5FA 0%, #2DD4BF 100%);
 }
 
 .gradient-bg-radial {
@@ -409,7 +393,7 @@
     ),
     radial-gradient(
       ellipse 50% 40% at bottom left,
-      rgba(236, 72, 153, 0.08),
+      rgba(20, 184, 166, 0.08),
       transparent 60%
     );
 }
@@ -423,55 +407,17 @@
     ),
     radial-gradient(
       ellipse 50% 40% at bottom left,
-      rgba(139, 92, 246, 0.14),
+      rgba(13, 148, 136, 0.14),
       transparent 60%
     );
 }
 
-.gradient-bg-mesh {
-  background: linear-gradient(
-    135deg,
-    #3B82F6 0%,
-    #7C3AED 25%,
-    #EC4899 50%,
-    #F472B6 75%,
-    #60A5FA 100%
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-}
-
-.dark .gradient-bg-mesh {
-  background: linear-gradient(
-    135deg,
-    #1E3A8A 0%,
-    #1E2A4A 25%,
-    #4C1D95 50%,
-    #2E1065 75%,
-    #1D4ED8 100%
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Gradient Page Backgrounds — blue-pink (light) / blue-purple (dark) */
+/* Gradient Page Backgrounds — blue-cyan (light) / blue-teal (dark) */
 .gradient-page-bg {
   background-color: #F8FAFC;
   background-image:
     radial-gradient(ellipse 70% 50% at 5% 10%, rgba(59, 130, 246, 0.10) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 95% 90%, rgba(236, 72, 153, 0.07) 0%, transparent 55%);
+    radial-gradient(ellipse 50% 40% at 95% 90%, rgba(20, 184, 166, 0.07) 0%, transparent 55%);
   min-height: 100vh;
 }
 
@@ -479,51 +425,8 @@
   background-color: #0A0F1E;
   background-image:
     radial-gradient(ellipse 70% 50% at 5% 10%, rgba(37, 99, 235, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 95% 90%, rgba(139, 92, 246, 0.14) 0%, transparent 55%);
+    radial-gradient(ellipse 50% 40% at 95% 90%, rgba(13, 148, 136, 0.14) 0%, transparent 55%);
   min-height: 100vh;
-}
-
-/* Gradient Borders — blue-pink (light) / blue-purple (dark) */
-.gradient-border {
-  position: relative;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(var(--background), var(--background)) padding-box,
-    linear-gradient(135deg, #60A5FA, #EC4899) border-box;
-}
-
-.dark .gradient-border {
-  background:
-    linear-gradient(var(--background), var(--background)) padding-box,
-    linear-gradient(135deg, #3B82F6, #8B5CF6) border-box;
-}
-
-.gradient-border-animated {
-  position: relative;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(var(--background), var(--background)) padding-box,
-    linear-gradient(135deg, #60A5FA, #3B82F6, #EC4899, #60A5FA) border-box;
-  background-size: 300% 300%;
-  animation: gradientBorder 4s ease infinite;
-}
-
-.dark .gradient-border-animated {
-  background:
-    linear-gradient(var(--background), var(--background)) padding-box,
-    linear-gradient(135deg, #3B82F6, #60A5FA, #8B5CF6, #3B82F6) border-box;
-  background-size: 300% 300%;
-  animation: gradientBorder 4s ease infinite;
-}
-
-@keyframes gradientBorder {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
 }
 
 /* Gradient Text — ocean (light) / ocean vivid (dark) */
@@ -536,27 +439,6 @@
 
 .dark .gradient-text-primary {
   background: linear-gradient(135deg, #38bdf8 0%, #22d3ee 40%, #2dd4bf 70%, #34d399 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-secondary {
-  background: linear-gradient(135deg, #60A5FA 0%, #F472B6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.dark .gradient-text-secondary {
-  background: linear-gradient(135deg, #93C5FD 0%, #C4B5FD 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-accent {
-  background: linear-gradient(135deg, #3B82F6 0%, #DB2777 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -635,7 +517,7 @@
   box-shadow:
     0 1px 3px rgba(15, 23, 42, 0.06),
     0 8px 24px rgba(37, 99, 235, 0.06);
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.25s ease;
 }
 
@@ -669,23 +551,6 @@
    SURFACE UTILITIES (formerly Claymorphism)
    ======================================== */
 
-/* Page background — blue-slate with soft radial glow */
-.clay-bg {
-  background-color: #F8FAFC;
-  background-image:
-    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(236, 72, 153, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 50% 50%, rgba(244, 114, 182, 0.03) 0%, transparent 70%);
-  min-height: 100vh;
-}
-
-.dark .clay-bg {
-  background-color: #0A0F1E;
-  background-image:
-    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(37, 99, 235, 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 50% 50%, rgba(109, 40, 217, 0.08) 0%, transparent 70%);
-}
 
 /* Surface card */
 .clay-card {
@@ -695,7 +560,7 @@
   box-shadow:
     0 1px 3px rgba(15, 23, 42, 0.06),
     0 8px 24px rgba(37, 99, 235, 0.06);
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.25s ease;
 }
 
@@ -758,7 +623,7 @@
 }
 
 .glass-hover {
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.25s ease;
 }
 
@@ -789,7 +654,7 @@
     0 1px 0 rgba(14, 116, 144, 0.5);
   color: #ffffff;
   font-weight: 700;
-  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.15s ease;
 }
 
@@ -824,16 +689,13 @@
 }
 
 /* Clay spring bounce keyframe */
-@keyframes clay-bounce {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.06) translateY(-4px); }
-  60% { transform: scale(0.97) translateY(0); }
-  80% { transform: scale(1.02) translateY(-2px); }
-  100% { transform: scale(1); }
+@keyframes cta-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
 }
 
-.animate-clay-bounce {
-  animation: clay-bounce 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+.animate-cta-pulse {
+  animation: cta-pulse 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 /* Clay heading font */
@@ -875,7 +737,7 @@
   z-index: 0;
   background:
     radial-gradient(ellipse 70% 55% at 50% 48%, rgba(37, 99, 235, 0.16), transparent 62%),
-    radial-gradient(ellipse 45% 40% at 18% 22%, rgba(236, 72, 153, 0.10), transparent 60%),
+    radial-gradient(ellipse 45% 40% at 18% 22%, rgba(6, 182, 212, 0.10), transparent 60%),
     radial-gradient(ellipse 50% 45% at 82% 80%, rgba(45, 212, 191, 0.12), transparent 60%);
   transform: scale(calc(1 + var(--p, 0) * 0.6));
   opacity: calc(1 - var(--p, 0) * 0.35);
@@ -884,7 +746,7 @@
 .dark .portal-backdrop {
   background:
     radial-gradient(ellipse 70% 55% at 50% 48%, rgba(59, 130, 246, 0.28), transparent 62%),
-    radial-gradient(ellipse 45% 40% at 18% 22%, rgba(139, 92, 246, 0.18), transparent 60%),
+    radial-gradient(ellipse 45% 40% at 18% 22%, rgba(6, 182, 212, 0.18), transparent 60%),
     radial-gradient(ellipse 50% 45% at 82% 80%, rgba(45, 212, 191, 0.18), transparent 60%);
 }
 
@@ -895,9 +757,9 @@
   background-image:
     radial-gradient(1.5px 1.5px at 20% 30%, rgba(59, 130, 246, 0.55), transparent),
     radial-gradient(1.5px 1.5px at 75% 25%, rgba(45, 212, 191, 0.5), transparent),
-    radial-gradient(1px 1px at 50% 60%, rgba(236, 72, 153, 0.5), transparent),
+    radial-gradient(1px 1px at 50% 60%, rgba(6, 182, 212, 0.5), transparent),
     radial-gradient(1.5px 1.5px at 85% 70%, rgba(56, 189, 248, 0.5), transparent),
-    radial-gradient(1px 1px at 12% 78%, rgba(124, 58, 237, 0.45), transparent),
+    radial-gradient(1px 1px at 12% 78%, rgba(52, 211, 153, 0.45), transparent),
     radial-gradient(1.5px 1.5px at 35% 15%, rgba(56, 189, 248, 0.45), transparent);
   background-repeat: repeat;
   background-size: 50% 50%;
@@ -1033,7 +895,7 @@
   background: radial-gradient(
     220px circle at var(--mx) var(--my),
     rgba(56, 189, 248, 0.22),
-    rgba(139, 92, 246, 0.12) 40%,
+    rgba(45, 212, 191, 0.12) 40%,
     transparent 70%
   );
 }
@@ -1091,6 +953,19 @@
   .portal-section { height: auto; }
   .portal-stage { position: relative; height: auto; min-height: 100vh; padding: 6rem 0; }
   .portal-intro { position: relative; opacity: 1; transform: none; }
+}
+
+/* Infinite decorative loops elsewhere in the app — stop them outright under
+   reduced motion rather than just softening their easing. These are emphasis
+   flourishes, not state feedback, so removing them loses nothing meaningful. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-heartbeat,
+  .gradient-shimmer,
+  .animate-cta-pulse,
+  .portal-cue,
+  .portal-stars {
+    animation: none !important;
+  }
 }
 
 /* ========================================
@@ -1171,5 +1046,5 @@
 .cursor-ring.is-down {
   width: 24px;
   height: 24px;
-  border-color: rgba(236, 72, 153, 0.7);
+  border-color: rgba(20, 184, 166, 0.7);
 }

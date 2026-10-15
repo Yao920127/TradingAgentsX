@@ -56,7 +56,7 @@ export function AgentFlowDiagram() {
             icon={<DollarSign className="w-5 h-5" />}
             name="Alpha Vantage / FinMind"
             description={t.flowDiagram.financialData}
-            color="purple"
+            color="amber"
           />
         </div>
       </div>
@@ -94,7 +94,7 @@ export function AgentFlowDiagram() {
           <AgentCard
             name={t.agents.fundamentals_analyst}
             icon={<DollarSign className="w-5 h-5" />}
-            gradient="from-purple-500 to-pink-500"
+            gradient="from-amber-500 to-orange-500"
             description={t.flowDiagram.fundamentalsAnalysis}
             tasks={[t.flowDiagram.financialAnalysis, t.flowDiagram.valuationMetrics, t.flowDiagram.profitEvaluation]}
           />
@@ -102,21 +102,21 @@ export function AgentFlowDiagram() {
       </div>
 
       {/* Arrow */}
-      <FlowArrow label={t.flowDiagram.reportIntegration} color="purple" />
+      <FlowArrow label={t.flowDiagram.reportIntegration} color="amber" />
 
       {/* Report Summarizer */}
       <div className="max-w-md mx-auto">
         <ManagerCard
           name={t.agents.report_summarizer}
           icon={<FileText className="w-6 h-6" />}
-          gradient="from-sky-500 to-indigo-500"
+          gradient="from-sky-500 to-teal-500"
           description={t.flowDiagram.summarizerDesc}
           tasks={[t.flowDiagram.keepKeyData, t.flowDiagram.structuredSummary, t.flowDiagram.saveTokens]}
         />
       </div>
 
       {/* Arrow */}
-      <FlowArrow label={t.flowDiagram.summaryHandoff} color="purple" />
+      <FlowArrow label={t.flowDiagram.summaryHandoff} color="amber" />
 
       {/* Researchers Layer - 2 agents */}
       <div>
@@ -149,7 +149,7 @@ export function AgentFlowDiagram() {
         <ManagerCard
           name={t.flowDiagram.researchManager}
           icon={<Users className="w-6 h-6" />}
-          gradient="from-indigo-500 to-purple-500"
+          gradient="from-teal-500 to-cyan-600"
           description={t.flowDiagram.integrateViews}
           tasks={[t.flowDiagram.balanceArguments, t.flowDiagram.comprehensiveAdvice, t.flowDiagram.preliminaryStrategy]}
         />
@@ -174,7 +174,7 @@ export function AgentFlowDiagram() {
           <AgentCard
             name={t.agents.neutral_debator}
             icon={<Shield className="w-5 h-5" />}
-            gradient="from-blue-500 to-indigo-500"
+            gradient="from-blue-500 to-sky-600"
             description={t.flowDiagram.balancedRisk}
             tasks={[t.flowDiagram.prudentStrategy, t.flowDiagram.riskBalance, t.flowDiagram.rationalDecision]}
           />
@@ -210,7 +210,7 @@ export function AgentFlowDiagram() {
         <TraderCard
           name={t.flowDiagram.trader}
           icon={<Target className="w-7 h-7" />}
-          gradient="from-blue-600 via-purple-600 to-pink-600"
+          gradient="from-blue-600 via-cyan-600 to-teal-600"
           description={t.flowDiagram.executeTrade}
           outputs={[t.flowDiagram.tradeSignal, t.flowDiagram.targetPrice, t.flowDiagram.tradeQuantity, t.flowDiagram.riskParams]}
         />
@@ -224,9 +224,9 @@ export function AgentFlowDiagram() {
         <h3 className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 mb-4">
           📊 {t.flowDiagram.finalOutput}
         </h3>
-        <Card className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 dark:from-blue-600/20 dark:via-purple-600/20 dark:to-pink-600/20 border-2 border-dashed border-blue-300 dark:border-blue-700 p-6">
+        <Card className="bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-teal-500/10 dark:from-blue-600/20 dark:via-cyan-600/20 dark:to-teal-600/20 border-2 border-dashed border-blue-300 dark:border-blue-700 p-6">
           <div className="text-center mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg mb-3">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg mb-3">
               <BarChart3 className="w-8 h-8" />
             </div>
             <h4 className="font-bold text-lg mb-2 gradient-text-primary">{t.flowDiagram.completeReportSet}</h4>
@@ -267,13 +267,13 @@ function DataSourceCard({
   icon: React.ReactNode;
   name: string;
   description: string;
-  color: "blue" | "orange" | "green" | "purple";
+  color: "blue" | "orange" | "green" | "amber";
 }) {
   const colorClasses = {
     blue: "from-blue-500 to-cyan-500 border-blue-300 dark:border-blue-700",
     orange: "from-orange-500 to-red-500 border-orange-300 dark:border-orange-700",
     green: "from-green-500 to-emerald-500 border-green-300 dark:border-green-700",
-    purple: "from-purple-500 to-pink-500 border-purple-300 dark:border-purple-700",
+    amber: "from-amber-500 to-orange-500 border-amber-300 dark:border-amber-700",
   };
 
   return (
@@ -385,7 +385,7 @@ function TraderCard({
           <div className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br ${gradient} text-white mb-3 shadow-2xl animate-pulse-slow`}>
             {icon}
           </div>
-          <h4 className="font-bold text-lg mb-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{name}</h4>
+          <h4 className="font-bold text-lg mb-1 gradient-text-primary">{name}</h4>
           <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">{description}</p>
         </div>
 
@@ -406,7 +406,7 @@ function TraderCard({
 function FlowArrow({ label, color }: { label: string; color: string }) {
   const colorClasses = {
     blue: "text-blue-500 dark:text-blue-400",
-    purple: "text-purple-500 dark:text-purple-400",
+    amber: "text-amber-500 dark:text-amber-400",
     green: "text-green-500 dark:text-green-400",
     orange: "text-orange-500 dark:text-orange-400",
     red: "text-red-500 dark:text-red-400",
@@ -416,7 +416,7 @@ function FlowArrow({ label, color }: { label: string; color: string }) {
     <div className="flex justify-center">
       <div className="flex flex-col items-center">
         <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">{label}</div>
-        <ArrowDown className={`w-7 h-7 ${colorClasses[color as keyof typeof colorClasses]} animate-bounce`} />
+        <ArrowDown className={`w-7 h-7 ${colorClasses[color as keyof typeof colorClasses]} motion-safe:animate-pulse`} />
       </div>
     </div>
   );

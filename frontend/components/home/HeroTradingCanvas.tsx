@@ -11,8 +11,8 @@ import { useEffect, useRef } from "react";
  *   2. A couple of flowing price-line waves scrolling leftward, like a quiet ticker.
  *   3. A soft pointer-reactive parallax so the whole field leans toward the cursor.
  *
- * Colours are pulled straight from the existing brand palette (blue / cyan / teal /
- * pink / purple) so it reads as the same product, just alive. Honors
+ * Colours are pulled straight from the existing brand palette (blue / sky /
+ * cyan / teal / emerald) so it reads as the same product, just alive. Honors
  * prefers-reduced-motion and pauses while the tab is hidden.
  */
 
@@ -29,9 +29,9 @@ type Node = {
 const NODE_COLORS = [
   "59, 130, 246", // blue-500
   "56, 189, 248", // sky-400
+  "6, 182, 212", // cyan-500
   "45, 212, 191", // teal-400
-  "236, 72, 153", // pink-500
-  "139, 92, 246", // violet-500
+  "52, 211, 153", // emerald-400
 ];
 
 export function HeroTradingCanvas() {
@@ -110,7 +110,7 @@ export function HeroTradingCanvas() {
       // ── Flowing price waves (back layer) ──
       drawWave(t * 0.012 + py * 0.01, height * 0.05, height * 0.62 + py * 0.4, "56, 189, 248", 0.28);
       drawWave(t * 0.009 + 2, height * 0.07, height * 0.74 + py * 0.6, "45, 212, 191", 0.22);
-      drawWave(t * 0.015 + 4, height * 0.04, height * 0.5 + py * 0.3, "236, 72, 153", 0.16);
+      drawWave(t * 0.015 + 4, height * 0.04, height * 0.5 + py * 0.3, "6, 182, 212", 0.16);
 
       // ── Agent constellation ──
       ctx.save();

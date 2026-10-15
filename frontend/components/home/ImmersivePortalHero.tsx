@@ -90,7 +90,7 @@ export function ImmersivePortalHero() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pointer-events-auto">
             <Link href="/analysis">
-              <Button size="lg" className="text-base px-9 py-3.5 animate-clay-bounce">
+              <Button size="lg" className="text-base px-9 py-3.5 animate-cta-pulse">
                 {t.home.startAnalysis} →
               </Button>
             </Link>

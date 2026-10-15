@@ -1071,7 +1071,7 @@ export default function HistoryPage() {
                             >
                               {pdfGenerating && pdfPreviewReport?.id === report.id ? (
                                 <>
-                                  <Download className="h-4 w-4 animate-bounce" />
+                                  <Download className="h-4 w-4 animate-pulse" />
                                   {t.history.downloading}
                                 </>
                               ) : (

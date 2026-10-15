@@ -943,7 +943,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-pink-500 dark:from-blue-600 dark:to-purple-600 hover:from-blue-600 hover:to-pink-600 dark:hover:from-blue-700 dark:hover:to-purple-700 shadow-lg hover:shadow-xl transition-all animate-heartbeat"
+              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 dark:from-blue-600 dark:to-teal-600 hover:from-blue-600 hover:to-cyan-600 dark:hover:from-blue-700 dark:hover:to-teal-700 shadow-lg hover:shadow-xl transition-all animate-heartbeat"
               disabled={loading}
               size="lg"
               style={{

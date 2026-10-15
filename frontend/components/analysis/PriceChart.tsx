@@ -148,7 +148,7 @@ export function PriceChart({ priceData, priceStats, ticker }: PriceChartProps) {
             <p className="text-sm text-muted-foreground">{labels.duration}</p>
             <p className="text-2xl font-bold">{priceStats.duration_days} {labels.days}</p>
           </div>
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+          <div className="bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-800/40 dark:to-gray-800/40 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
             <p className="text-sm text-muted-foreground">{labels.startPrice}</p>
             <p className="text-lg font-semibold">${formatNumber(priceStats.start_price)}</p>
             <p className="text-xs text-muted-foreground">{priceStats.start_date}</p>

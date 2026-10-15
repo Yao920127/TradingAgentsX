@@ -188,7 +188,7 @@ export function DownloadReports({
       >
         {isDownloading ? (
           <>
-            <Download className="h-4 w-4 animate-bounce" />
+            <Download className="h-4 w-4 animate-pulse" />
             {t.download.generating}
           </>
         ) : (
@@ -208,11 +208,11 @@ export function DownloadReports({
         onClick={handleDownload}
         disabled={isDownloading}
         size="lg"
-        className="gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+        className="gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
       >
         {isDownloading ? (
           <>
-            <Download className="h-5 w-5 animate-bounce" />
+            <Download className="h-5 w-5 animate-pulse" />
             {t.download.generating}
           </>
         ) : (
