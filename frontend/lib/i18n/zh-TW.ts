@@ -82,7 +82,7 @@ export const zhTW = {
     // 12 位專業代理團隊
     professionalAgents: "👥 13 位專業代理團隊",
     professionalAgentsDesc: "每個代理都有其專業職責，協同工作產生高質量的交易決策",
-    analystsTeamTitle: "📊 分析師團隊 (4 位)",
+    analystsTeamTitle: "📊 分析師團隊 (5 位)",
     researchTeamTitle: "🔍 研究團隊 (3 位)",
     tradingTeamTitle: "💼 交易團隊 (1 位)",
     riskTeamTitle: "🛡️ 風險管理團隊 (4 位)",

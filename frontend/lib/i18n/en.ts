@@ -139,7 +139,7 @@ export const en = {
     professionalAgents: "13 Professional Agent Teams",
     professionalAgentsDesc:
       "Each agent has specialized responsibilities, collaborating to produce high-quality trading decisions",
-    analystsTeamTitle: "Analysts Team (4)",
+    analystsTeamTitle: "Analysts Team (5)",
     researchTeamTitle: "Research Team (3)",
     tradingTeamTitle: "Trading Team (1)",
     riskTeamTitle: "Risk Management Team (4)",
