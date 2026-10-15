@@ -276,7 +276,7 @@ The Report Summarizer runs after the four analysts. It uses the quick-thinking m
 #### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/MarkLo127/TradingAgentsX.git
+git clone https://github.com/Yao920127/TradingAgentsX.git
 cd TradingAgentsX
 ```
 
