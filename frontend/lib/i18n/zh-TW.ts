@@ -613,6 +613,11 @@ export const zhTW = {
     clearSettings: "清除設定",
     processing: "處理中...",
     settingsSaved: "✓ 設定已成功儲存",
+    verifyingKeys: "驗證金鑰中...",
+    keyInvalid: "{provider} API Key 無效，請確認後重新輸入",
+    keyUnreachable: "無法連線至 {provider}，暫時無法驗證此金鑰（已儲存）",
+    keyUnverifiedUnsupported: "{provider} 端點不支援自動驗證，已儲存但未經測試",
+    keyUnverified: "無法確認 {provider} 金鑰是否有效，已儲存但未經測試",
     
     // General settings (legacy)
     language: "語言",

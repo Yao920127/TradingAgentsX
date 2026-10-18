@@ -19,6 +19,8 @@ from backend.app.models.schemas import (
     DownloadRequest,
     ChatRequest,
     ChatResponse,
+    ValidateKeysRequest,
+    ValidateKeysResponse,
 )
 from backend.app.services.trading_service import TradingService
 from backend.app.services.task_manager import task_manager
@@ -596,4 +598,21 @@ async def chat_with_report(request: ChatRequest):
             status_code=500,
             detail=f"Chat failed: {str(e)}"
         )
+
+
+@router.post("/validate-keys", response_model=ValidateKeysResponse)
+async def validate_keys(request: ValidateKeysRequest):
+    """
+    Test connectivity/auth for each non-empty API key the user submitted
+    in the settings dialog. Never raises for an individual provider
+    failure — only returns 500 if the whole batch unexpectedly blows up.
+    """
+    from backend.app.services.key_validation_service import validate_api_keys
+
+    try:
+        results = await validate_api_keys(request.model_dump(exclude_none=True, exclude_unset=True))
+        return ValidateKeysResponse(results=results)
+    except Exception as e:
+        logger.error(f"Key validation batch failed unexpectedly: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Key validation service unavailable")
 

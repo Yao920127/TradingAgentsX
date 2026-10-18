@@ -78,6 +78,11 @@ export const en = {
     clearSettings: "Clear Settings",
     processing: "Processing...",
     settingsSaved: "✓ Settings saved successfully",
+    verifyingKeys: "Verifying keys...",
+    keyInvalid: "Invalid {provider} API key — please check and re-enter it",
+    keyUnreachable: "Could not reach {provider} to verify this key (it has been saved)",
+    keyUnverifiedUnsupported: "{provider}'s endpoint doesn't support automatic verification — saved but untested",
+    keyUnverified: "Could not confirm this {provider} key is valid — saved but untested",
   },
 
   // Navigation

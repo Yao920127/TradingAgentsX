@@ -225,3 +225,39 @@ class ChatResponse(BaseModel):
     """Response model for chat"""
     reply: str = Field(..., description="Assistant's answer")
 
+
+# API Key Validation Schemas
+
+class ValidateKeysRequest(BaseModel):
+    """One optional field per key the settings dialog can submit.
+    Only non-empty fields are tested; empty/omitted fields are skipped."""
+    openai_api_key: Optional[str] = Field(None, min_length=0)
+    anthropic_api_key: Optional[str] = Field(None, min_length=0)
+    google_api_key: Optional[str] = Field(None, min_length=0)
+    grok_api_key: Optional[str] = Field(None, min_length=0)
+    deepseek_api_key: Optional[str] = Field(None, min_length=0)
+    qwen_api_key: Optional[str] = Field(None, min_length=0)
+    custom_base_url: Optional[str] = Field(None, min_length=0)
+    custom_api_key: Optional[str] = Field(None, min_length=0)
+    alpha_vantage_api_key: Optional[str] = Field(None, min_length=0)
+    finmind_api_key: Optional[str] = Field(None, min_length=0)
+
+
+class KeyValidationResult(BaseModel):
+    """Result of testing a single API key against its provider."""
+    field: str = Field(..., description="Settings field name this result corresponds to")
+    provider: str = Field(..., description="Display name of the provider, e.g. 'Anthropic'")
+    status: Literal["valid", "invalid", "unknown"] = Field(
+        ..., description="valid=confirmed working, invalid=confirmed auth failure, unknown=inconclusive"
+    )
+    reason: Literal[
+        "ok", "auth_failed", "timeout", "network_error",
+        "rate_limited", "server_error", "unsupported", "unknown_error",
+    ] = Field(..., description="Machine-readable reason code for frontend i18n mapping")
+    detail: Optional[str] = Field(None, description="Truncated raw error for backend logs/debugging")
+
+
+class ValidateKeysResponse(BaseModel):
+    """Keyed by field name; only fields that were actually tested appear."""
+    results: Dict[str, KeyValidationResult]
+

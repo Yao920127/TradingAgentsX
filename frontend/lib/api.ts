@@ -12,6 +12,8 @@ import type {
   TaskStatusResponse,
   ChatMessageRequest,
   ChatMessageResponse,
+  ValidateKeysRequest,
+  ValidateKeysResponse,
 } from "./types";
 
 const apiClient = axios.create({
@@ -89,6 +91,18 @@ export const api = {
   async sendChatMessage(request: ChatMessageRequest): Promise<ChatMessageResponse> {
     const response = await apiClient.post<ChatMessageResponse>(
       "/api/chat",
+      request
+    );
+    return response.data;
+  },
+
+  /**
+   * Test connectivity/auth for each non-empty API key. Never throws for
+   * individual-provider failures — those come back as per-field results.
+   */
+  async validateApiKeys(request: ValidateKeysRequest): Promise<ValidateKeysResponse> {
+    const response = await apiClient.post<ValidateKeysResponse>(
+      "/api/validate-keys",
       request
     );
     return response.data;

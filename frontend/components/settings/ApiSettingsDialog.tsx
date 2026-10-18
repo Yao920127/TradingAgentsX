@@ -39,6 +39,9 @@ import {
 } from "@/lib/storage";
 import { useAuth } from "@/contexts/auth-context";
 import { getCloudSettings, saveCloudSettings, isCloudSyncEnabled } from "@/lib/user-api";
+import { api } from "@/lib/api";
+import type { KeyValidationResult } from "@/lib/types";
+import type { TranslationKeys } from "@/lib/i18n";
 
 const formSchema = z.object({
   // All API keys are optional - users only need the ones for their selected models
@@ -62,10 +65,29 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Maps a key validation result to localized, user-facing copy based on its
+// `reason` code. The backend never returns pre-localized messages — it only
+// returns machine-readable codes — so this mapping lives on the frontend.
+function keyValidationMessage(result: KeyValidationResult, t: TranslationKeys): string {
+  if (result.status === "invalid") {
+    return t.settings.keyInvalid.replace("{provider}", result.provider);
+  }
+  switch (result.reason) {
+    case "timeout":
+    case "network_error":
+      return t.settings.keyUnreachable.replace("{provider}", result.provider);
+    case "unsupported":
+      return t.settings.keyUnverifiedUnsupported.replace("{provider}", result.provider);
+    default:
+      return t.settings.keyUnverified.replace("{provider}", result.provider);
+  }
+}
+
 export function ApiSettingsDialog() {
   const [open, setOpen] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [validating, setValidating] = useState(false);
   const [syncStatus, setSyncStatus] = useState<"local" | "cloud" | "syncing">("local");
   const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
@@ -115,25 +137,71 @@ export function ApiSettingsDialog() {
 
   const onSubmit = async (values: FormValues) => {
     setLoading(true);
+    form.clearErrors();
     try {
       // Encrypt and save settings locally
       await saveApiSettingsAsync(values as ApiSettings);
-      
+
       // If authenticated, also save to cloud
       if (isAuthenticated && isCloudSyncEnabled()) {
         setSyncStatus("syncing");
         const cloudSaved = await saveCloudSettings(values as ApiSettings);
         setSyncStatus(cloudSaved ? "cloud" : "local");
       }
-      
+
       setSaveSuccess(true);
-      setTimeout(() => {
-        setSaveSuccess(false);
-        setOpen(false);
-      }, 1500);
+      setLoading(false);
+
+      // Best-effort key validation layered on top of the save above. It
+      // never blocks or undoes the save that already happened — a failed
+      // or unreachable validation just means we can't vouch for the key,
+      // not that the save itself failed.
+      setValidating(true);
+      try {
+        const { results } = await api.validateApiKeys({
+          openai_api_key: values.openai_api_key || undefined,
+          anthropic_api_key: values.anthropic_api_key || undefined,
+          google_api_key: values.google_api_key || undefined,
+          grok_api_key: values.grok_api_key || undefined,
+          deepseek_api_key: values.deepseek_api_key || undefined,
+          qwen_api_key: values.qwen_api_key || undefined,
+          custom_base_url: values.custom_base_url || undefined,
+          custom_api_key: values.custom_api_key || undefined,
+          alpha_vantage_api_key: values.alpha_vantage_api_key || undefined,
+          finmind_api_key: values.finmind_api_key || undefined,
+        });
+
+        const problems = Object.entries(results).filter(
+          ([, r]) => r.status === "invalid" || r.status === "unknown"
+        );
+
+        if (problems.length > 0) {
+          for (const [field, result] of problems) {
+            form.setError(field as keyof FormValues, {
+              type: result.status === "invalid" ? "invalid_key" : "unknown_key",
+              message: keyValidationMessage(result, t),
+            });
+          }
+          // Leave the dialog open so the user can see which key(s) need attention.
+        } else {
+          setTimeout(() => {
+            setSaveSuccess(false);
+            setOpen(false);
+          }, 1500);
+        }
+      } catch (validationError) {
+        // Validation endpoint itself unreachable — settings are already
+        // saved, so don't claim anything about key validity either way.
+        console.error("Key validation request failed:", validationError);
+        setTimeout(() => {
+          setSaveSuccess(false);
+          setOpen(false);
+        }, 1500);
+      } finally {
+        setValidating(false);
+      }
     } catch (error) {
       console.error("Failed to save settings:", error);
-    } finally {
       setLoading(false);
     }
   };
@@ -387,8 +455,12 @@ export function ApiSettingsDialog() {
             )}
 
             <div className="flex gap-2 pt-4">
-              <Button type="submit" className="flex-1" disabled={loading}>
-                {loading ? t.settings.processing : t.settings.saveSettings}
+              <Button type="submit" className="flex-1" disabled={loading || validating}>
+                {loading
+                  ? t.settings.processing
+                  : validating
+                    ? t.settings.verifyingKeys
+                    : t.settings.saveSettings}
               </Button>
               <Button
                 type="button"

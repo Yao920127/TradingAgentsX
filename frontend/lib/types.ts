@@ -172,3 +172,42 @@ export interface ChatMessageRequest {
 export interface ChatMessageResponse {
   reply: string;
 }
+
+// API Key Validation Types
+
+export interface ValidateKeysRequest {
+  openai_api_key?: string;
+  anthropic_api_key?: string;
+  google_api_key?: string;
+  grok_api_key?: string;
+  deepseek_api_key?: string;
+  qwen_api_key?: string;
+  custom_base_url?: string;
+  custom_api_key?: string;
+  alpha_vantage_api_key?: string;
+  finmind_api_key?: string;
+}
+
+export type KeyValidationStatus = "valid" | "invalid" | "unknown";
+
+export type KeyValidationReason =
+  | "ok"
+  | "auth_failed"
+  | "timeout"
+  | "network_error"
+  | "rate_limited"
+  | "server_error"
+  | "unsupported"
+  | "unknown_error";
+
+export interface KeyValidationResult {
+  field: string;
+  provider: string;
+  status: KeyValidationStatus;
+  reason: KeyValidationReason;
+  detail?: string | null;
+}
+
+export interface ValidateKeysResponse {
+  results: Record<string, KeyValidationResult>;
+}
