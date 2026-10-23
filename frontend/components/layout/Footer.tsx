@@ -13,7 +13,7 @@ export function Footer() {
   return (
     <footer className="border-t bg-gradient-to-r from-blue-50/50 via-cyan-50/50 to-teal-50/50 dark:from-gray-900/50 dark:via-cyan-900/20 dark:to-blue-900/20 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-2">
           <div className="text-sm text-gray-600 dark:text-gray-400">
             © 2025{" "}
             <span
@@ -26,6 +26,14 @@ export function Footer() {
             </span>
             . All rights reserved.
           </div>
+          <a
+            href="https://github.com/Yao920127/TradingAgentsX"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gray-500 hover:text-cyan-600 dark:text-gray-400 dark:hover:text-cyan-400 transition-colors"
+          >
+            GitHub
+          </a>
         </div>
       </div>
     </footer>
