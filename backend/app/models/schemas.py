@@ -25,8 +25,8 @@ class AnalysisRequest(BaseModel):
         default="us",
         description="Market type: 'us' for US stocks, 'twse' for Taiwan TWSE (上市), 'tpex' for Taiwan TPEx/ROTC (上櫃/興櫃)"
     )
-    deep_think_llm: Optional[str] = Field(default="claude-sonnet-5", description="Deep thinking LLM model")
-    quick_think_llm: Optional[str] = Field(default="claude-haiku-4-5-20251001", description="Quick thinking LLM model")
+    deep_think_llm: Optional[str] = Field(default="claude-sonnet-5-5", description="Deep thinking LLM model")
+    quick_think_llm: Optional[str] = Field(default="claude-haiku-5-5", description="Quick thinking LLM model")
     
     # API Configuration
     openai_api_key: Optional[str] = Field(None, description="OpenAI API Key (optional if set on server)", min_length=0)

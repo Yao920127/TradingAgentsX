@@ -70,18 +70,18 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
       // Determine which model/key to use (prefer quick think model)
       // We'll try to detect the model from saved settings
       // Default to the first available key
-      let model = "claude-haiku-4-5-20251001";
+      let model = "claude-haiku-5-5";
       let apiKey = "";
       let baseUrl = "https://api.anthropic.com/v1";
 
       // Try each provider in order of preference
       const providers = [
-        { key: settings.anthropic_api_key, model: "claude-haiku-4-5-20251001", prefix: "claude-" },
-        { key: settings.openai_api_key, model: "gpt-5.6-luna", prefix: "gpt-" },
-        { key: settings.google_api_key, model: "gemini-3.5-flash-lite", prefix: "gemini-" },
-        { key: settings.grok_api_key, model: "grok-4.20-0309-reasoning", prefix: "grok-" },
-        { key: settings.deepseek_api_key, model: "deepseek-v4-flash", prefix: "deepseek-" },
-        { key: settings.qwen_api_key, model: "qwen3.5-flash", prefix: "qwen" },
+        { key: settings.anthropic_api_key, model: "claude-haiku-5-5", prefix: "claude-" },
+        { key: settings.openai_api_key, model: "gpt-6-luna", prefix: "gpt-" },
+        { key: settings.google_api_key, model: "gemini-3.6-flash", prefix: "gemini-" },
+        { key: settings.grok_api_key, model: "grok-4.5", prefix: "grok-" },
+        { key: settings.deepseek_api_key, model: "deepseek-flash", prefix: "deepseek-" },
+        { key: settings.qwen_api_key, model: "qwen3.7-plus", prefix: "qwen" },
       ];
 
       for (const provider of providers) {

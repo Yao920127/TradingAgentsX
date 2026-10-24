@@ -143,12 +143,12 @@ export default function HomePage() {
             {t.home.llmSupportDesc}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <LLMProviderCard name="OpenAI" models={["GPT-5.6 Sol", "GPT-5.6 Terra", "GPT-5.6 Luna"]} />
-            <LLMProviderCard name="Anthropic" models={["Claude Fable 5.1","Claude Opus 5.5","Claude Sonnet 5","Claude Haiku 4.5"]} />
-            <LLMProviderCard name="Google Gemini" models={["Gemini 3.5 Flash","Gemini 3.1 Flash-Lite"]} />
-            <LLMProviderCard name="Grok (xAI)" models={["Grok 4.5","Grok 4.3","Grok 4.20","Grok 4.20 (Non-Reasoning)"]} />
-            <LLMProviderCard name="DeepSeek" models={["Deepseek V4 Pro", "Deepseek V4 Flash"]} />
-            <LLMProviderCard name="Qwen (Alibaba)" models={["Qwen3.7-Max","Qwen3.7-Plus","Qwen3.5-Flash"]} />
+            <LLMProviderCard name="OpenAI" models={["GPT-6 Astra", "GPT-6.1 Sol", "GPT-6 Luna"]} />
+            <LLMProviderCard name="Anthropic" models={["Claude Fable 5.1","Claude Opus 5.5","Claude Sonnet 5.5","Claude Haiku 4.5"]} />
+            <LLMProviderCard name="Google Gemini" models={["Gemini 3.8 Flash","Gemini 3.1 Flash-Lite"]} />
+            <LLMProviderCard name="Grok (xAI)" models={["Grok 4.7","Grok 4.6","Grok 4.5","Grok 4.3"]} />
+            <LLMProviderCard name="DeepSeek" models={["DeepSeek-V4-Pro", "DeepSeek-V4.1-Flash"]} />
+            <LLMProviderCard name="Qwen (Alibaba)" models={["Qwen3.8-Max","Qwen3.8-Flash","Qwen3.7-Plus"]} />
           </div>
           <div className="mt-6 text-center">
             <p className="text-sm text-blue-500/70 dark:text-blue-400/70 font-medium">

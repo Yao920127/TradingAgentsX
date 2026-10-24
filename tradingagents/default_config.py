@@ -15,8 +15,8 @@ DEFAULT_CONFIG = {
     )),
     # LLM 設定
     "llm_provider": "anthropic",
-    "deep_think_llm": "claude-sonnet-5",
-    "quick_think_llm": "claude-haiku-4-5-20251001",
+    "deep_think_llm": "claude-sonnet-5-5",
+    "quick_think_llm": "claude-haiku-5-5",
     "backend_url": "https://api.anthropic.com/v1",
     # 辯論與討論設定
     "max_debate_rounds": 1,

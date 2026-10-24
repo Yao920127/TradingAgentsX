@@ -113,8 +113,8 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
       analysts: ["market", "social", "news", "fundamentals"], // 預設全選
       research_depth: 3, // 預設中等層級
       market_type: "us", // 預設美股
-      quick_think_llm: "claude-haiku-4-5-20251001",
-      deep_think_llm: "claude-sonnet-5",
+      quick_think_llm: "claude-haiku-5-5",
+      deep_think_llm: "claude-sonnet-5-5",
       embedding_model: "all-mpnet-base-v2", // 預設使用本地開源模型
       custom_quick_think_model: "",
       custom_deep_think_model: "",
@@ -540,22 +540,22 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                         <SelectContent>
 
                           {/* OpenAI */}
-                          <SelectItem value="gpt-5.6-sol">
+                          <SelectItem value="gpt-6-astra">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
-                              <span>GPT-5.6 Sol</span>
+                              <span>GPT-6 Astra</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="gpt-5.6-terra">
+                          <SelectItem value="gpt-6.1-sol">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
-                              <span>GPT-5.6 Terra</span>
+                              <span>GPT-6.1 Sol</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="gpt-5.6-luna">
+                          <SelectItem value="gpt-6-luna">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
-                              <span>GPT-5.6 Luna</span>
+                              <span>GPT-6 Luna</span>
                             </div>
                           </SelectItem>
 
@@ -572,13 +572,13 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                               <span>Claude Opus 5.5</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="claude-sonnet-5">
+                          <SelectItem value="claude-sonnet-5-5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Sonnet 5</span>
+                              <span>Claude Sonnet 5.5</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="claude-haiku-4-5-20251001">
+                          <SelectItem value="claude-haiku-5-5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
                               <span>Claude Haiku 4.5</span>
@@ -586,26 +586,38 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Google */}
+                          <SelectItem value="gemini-4-argon">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
+                              <span>Gemini 4 Argon</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="gemini-3.8-flash">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
+                              <span>Gemini 3.8 Flash</span>
+                            </div>
+                          </SelectItem>
                           <SelectItem value="gemini-3.6-flash">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
                               <span>Gemini 3.6 Flash</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="gemini-3.5-flash">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
-                              <span>Gemini 3.5 Flash</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="gemini-3.5-flash-lite">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
-                              <span>Gemini 3.5 Flash-Lite</span>
-                            </div>
-                          </SelectItem>
 
                           {/* Grok */}
+                          <SelectItem value="grok-4.7">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <span>Grok 4.7</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="grok-4.6">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <span>Grok 4.6</span>
+                            </div>
+                          </SelectItem>
                           <SelectItem value="grok-4.5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
@@ -618,50 +630,38 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                               <span>Grok 4.3</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="grok-4.20-0309-reasoning">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
-                              <span>Grok 4.20</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="grok-4.20-0309-non-reasoning">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
-                              <span>Grok 4.20 (Non-Reasoning)</span>
-                            </div>
-                          </SelectItem>
 
                           {/* DeepSeek */}
                           <SelectItem value="deepseek-v4-pro">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/deepseek-color.svg" alt="DeepSeek" width={16} height={16} className="shrink-0" />
-                              <span>Deepseek V4 Pro</span>
+                              <span>DeepSeek-V4-Pro</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="deepseek-v4-flash">
+                          <SelectItem value="deepseek-flash">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/deepseek-color.svg" alt="DeepSeek" width={16} height={16} className="shrink-0" />
-                              <span>Deepseek V4 Flash</span>
+                              <span>DeepSeek-V4.1-Flash</span>
                             </div>
                           </SelectItem>
 
                           {/* Qwen */}
-                          <SelectItem value="qwen3.7-max">
+                          <SelectItem value="qwen3.8-max">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
-                              <span>Qwen3.7-Max</span>
+                              <span>Qwen3.8-Max</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="qwen3.8-flash">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
+                              <span>Qwen3.8-Flash</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="qwen3.7-plus">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
                               <span>Qwen3.7-Plus</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="qwen3.5-flash">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
-                              <span>Qwen3.5-Flash</span>
                             </div>
                           </SelectItem>
 
@@ -686,7 +686,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                       <FormItem className="md:col-span-3 animate-scale-up">
                         <FormLabel>自訂快速思維模型名稱</FormLabel>
                         <FormControl>
-                          <Input placeholder="例如：deepseek-v4-flash" {...field} />
+                          <Input placeholder="例如：deepseek-flash" {...field} />
                         </FormControl>
                         <FormDescription>
                           請輸入完整的模型名稱（此模型將使用自訂端點）
@@ -715,22 +715,22 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                         <SelectContent>
                           
                           {/* OpenAI */}
-                          <SelectItem value="gpt-5.6-sol">
+                          <SelectItem value="gpt-6-astra">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
-                              <span>GPT-5.6 Sol</span>
+                              <span>GPT-6 Astra</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="gpt-5.6-terra">
+                          <SelectItem value="gpt-6.1-sol">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
-                              <span>GPT-5.6 Terra</span>
+                              <span>GPT-6.1 Sol</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="gpt-5.6-luna">
+                          <SelectItem value="gpt-6-luna">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
-                              <span>GPT-5.6 Luna</span>
+                              <span>GPT-6 Luna</span>
                             </div>
                           </SelectItem>
 
@@ -747,13 +747,13 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                               <span>Claude Opus 5.5</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="claude-sonnet-5">
+                          <SelectItem value="claude-sonnet-5-5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Sonnet 5</span>
+                              <span>Claude Sonnet 5.5</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="claude-haiku-4-5-20251001">
+                          <SelectItem value="claude-haiku-5-5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
                               <span>Claude Haiku 4.5</span>
@@ -761,27 +761,39 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Google */}
+                          <SelectItem value="gemini-4-argon">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
+                              <span>Gemini 4 Argon</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="gemini-3.8-flash">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
+                              <span>Gemini 3.8 Flash</span>
+                            </div>
+                          </SelectItem>
                           <SelectItem value="gemini-3.6-flash">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
                               <span>Gemini 3.6 Flash</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="gemini-3.5-flash">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
-                              <span>Gemini 3.5 Flash</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="gemini-3.5-flash-lite">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
-                              <span>Gemini 3.5 Flash-Lite</span>
-                            </div>
-                          </SelectItem>
 
 
                           {/* Grok */}
+                          <SelectItem value="grok-4.7">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <span>Grok 4.7</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="grok-4.6">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <span>Grok 4.6</span>
+                            </div>
+                          </SelectItem>
                           <SelectItem value="grok-4.5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
@@ -794,50 +806,38 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                               <span>Grok 4.3</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="grok-4.20-0309-reasoning">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
-                              <span>Grok 4.20</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="grok-4.20-0309-non-reasoning">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
-                              <span>Grok 4.20 (Non-Reasoning)</span>
-                            </div>
-                          </SelectItem>
 
                           {/* DeepSeek */}
                           <SelectItem value="deepseek-v4-pro">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/deepseek-color.svg" alt="DeepSeek" width={16} height={16} className="shrink-0" />
-                              <span>Deepseek V4 Pro</span>
+                              <span>DeepSeek-V4-Pro</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="deepseek-v4-flash">
+                          <SelectItem value="deepseek-flash">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/deepseek-color.svg" alt="DeepSeek" width={16} height={16} className="shrink-0" />
-                              <span>Deepseek V4 Flash</span>
+                              <span>DeepSeek-V4.1-Flash</span>
                             </div>
                           </SelectItem>
 
                           {/* Qwen */}
-                          <SelectItem value="qwen3.7-max">
+                          <SelectItem value="qwen3.8-max">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
-                              <span>Qwen3.7-Max</span>
+                              <span>Qwen3.8-Max</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="qwen3.8-flash">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
+                              <span>Qwen3.8-Flash</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="qwen3.7-plus">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
                               <span>Qwen3.7-Plus</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="qwen3.5-flash">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
-                              <span>Qwen3.5-Flash</span>
                             </div>
                           </SelectItem>
 
@@ -862,7 +862,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                       <FormItem className="md:col-span-3 animate-scale-up">
                         <FormLabel>{t.form.customDeepThinkModelName}</FormLabel>
                         <FormControl>
-                          <Input placeholder="例如：deepseek-v4-flash" {...field} />
+                          <Input placeholder="例如：deepseek-flash" {...field} />
                         </FormControl>
                         <FormDescription>
                           請輸入完整的模型名稱（此模型將使用自訂端點）

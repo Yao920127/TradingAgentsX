@@ -120,33 +120,33 @@ _MODEL_DISPLAY_NAMES: dict[str, str] = {
     # Anthropic Claude
     "claude-fable-5-1": "Claude Fable 5.1",
     "claude-opus-5-5": "Claude Opus 5.5",
-    "claude-sonnet-5": "Claude Sonnet 5",
-    "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
+    "claude-sonnet-5-5": "Claude Sonnet 5.5",
+    "claude-haiku-5-5": "Claude Haiku 4.5",
     
     # Google Gemini
+    "gemini-4-argon": "Gemini 4 Argon",
+    "gemini-3.8-flash": "Gemini 3.8 Flash",
     "gemini-3.6-flash": "Gemini 3.6 Flash",
-    "gemini-3.5-flash": "Gemini 3.5 Flash",
-    "gemini-3.5-flash-lite": "Gemini 3.5 Flash-Lite",
     
     # OpenAI
-    "gpt-5.6-sol": "GPT-5.6 Sol",
-    "gpt-5.6-terra": "GPT-5.6 Terra",
-    "gpt-5.6-luna": "GPT-5.6 Luna",
+    "gpt-6-astra": "GPT-6 Astra",
+    "gpt-6.1-sol": "GPT-6.1 Sol",
+    "gpt-6-luna": "GPT-6 Luna",
     
     # Grok
+    "grok-4.7": "Grok 4.7",
+    "grok-4.6":"Grok 4.6",
     "grok-4.5": "Grok 4.5",
-    "grok-4.3":"Grok 4.3",
-    "grok-4.20-0309-reasoning": "Grok 4.20",
-    "grok-4.20-0309-non-reasoning": "Grok 4.20 (Non-Reasoning)",
+    "grok-4.3": "Grok 4.3",
     
     # DeepSeek
-    "deepseek-v4-pro": "Deepseek V4 Pro",
-    "deepseek-v4-flash": "Deepseek V4 Flash",
+    "deepseek-v4-pro": "DeepSeek-V4-Pro",
+    "deepseek-flash": "DeepSeek-V4.1-Flash",
     
     # Qwen
-    "qwen3.7-max": "Qwen3.7-Max",
+    "qwen3.8-max": "Qwen3.8-Max",
+    "qwen3.8-flash": "Qwen3.8-Flash",
     "qwen3.7-plus": "Qwen3.7-Plus",
-    "qwen3.5-flash": "Qwen3.5-Flash",
 }
 
 

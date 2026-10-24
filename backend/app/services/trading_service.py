@@ -26,8 +26,8 @@ class TradingService:
     def create_config(
         self,
         research_depth: int = 1,
-        deep_think_llm: str = "claude-sonnet-5",
-        quick_think_llm: str = "claude-haiku-4-5-20251001",
+        deep_think_llm: str = "claude-sonnet-5-5",
+        quick_think_llm: str = "claude-haiku-5-5",
     ) -> Dict[str, Any]:
         """Create configuration for TradingAgentsX
 
@@ -63,7 +63,7 @@ class TradingService:
         market_type: str = "us",  # 市場類型：us (美股) 或 tw (台股)
         analysts: Optional[List[str]] = None,
         research_depth: int = 1,
-        deep_think_llm: str = "claude-sonnet-5",
+        deep_think_llm: str = "claude-sonnet-5-5",
         quick_think_llm: str = "claude-opus-5-5",
         language: str = "zh-TW",  # Language for agent reports: 'en' or 'zh-TW'
         progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
@@ -397,38 +397,38 @@ class TradingService:
         """Get list of available OpenAI LLM models"""
         return [
             # OpenAI
-            "gpt-5.6-sol",
-            "gpt-5.6-terra",
-            "gpt-5.6-luna",
+            "gpt-6-astra",
+            "gpt-6.1-sol",
+            "gpt-6-luna",
             # Anthropic (Official model IDs)
             "claude-fable-5-1",
             "claude-opus-5-5",
-            "claude-sonnet-5",
-            "claude-haiku-4-5-20251001",
+            "claude-sonnet-5-5",
+            "claude-haiku-5-5",
             # Google
+            "gemini-4-argon",
+            "gemini-3.8-flash",
             "gemini-3.6-flash",
-            "gemini-3.5-flash",
-            "gemini-3.5-flash-lite",
             # Grok
+            "grok-4.7",
+            "grok-4.6",
             "grok-4.5",
             "grok-4.3",
-            "grok-4.20-0309-reasoning",
-            "grok-4.20-0309-non-reasoning",
             # DeepSeek
             "deepseek-v4-pro",
-            "deepseek-v4-flash",
+            "deepseek-flash",
             # Qwen
-            "qwen3.7-max",
+            "qwen3.8-max",
+            "qwen3.8-flash",
             "qwen3.7-plus",
-            "qwen3.5-flash",
         ]
     
     def get_default_config(self) -> Dict[str, Any]:
         """Get default configuration"""
         return {
             "research_depth": 1,
-            "deep_think_llm": "claude-sonnet-5",
-            "quick_think_llm": "claude-haiku-4-5-20251001",
+            "deep_think_llm": "claude-sonnet-5-5",
+            "quick_think_llm": "claude-haiku-5-5",
             "max_debate_rounds": 1,
             "max_risk_discuss_rounds": 1,
         }

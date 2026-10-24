@@ -11,7 +11,7 @@ async def test():
         "reports": large_reports,
         "ticker": "NVDA",
         "analysis_date": "2025-01-01",
-        "model": "claude-haiku-4-5-20251001",
+        "model": "claude-haiku-5-5",
         "api_key": "dummy_key",
         "base_url": "https://api.anthropic.com/v1",
         "language": "zh-TW"

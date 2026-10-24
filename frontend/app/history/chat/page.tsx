@@ -42,34 +42,34 @@ interface ChatMessage {
 
 const AVAILABLE_MODELS = [
   // OpenAI
-  { id: "gpt-5.6-sol", name: "GPT-5.6 Sol", provider: "openai", logo: "/logos/openai.svg" },
-  { id: "gpt-5.6-terra", name: "GPT-5.6 Terra", provider: "openai", logo: "/logos/openai.svg" },
-  { id: "gpt-5.6-luna", name: "GPT-5.6 Luna", provider: "openai", logo: "/logos/openai.svg" },
+  { id: "gpt-6-astra", name: "GPT-6 Astra", provider: "openai", logo: "/logos/openai.svg" },
+  { id: "gpt-6.1-sol", name: "GPT-6.1 Sol", provider: "openai", logo: "/logos/openai.svg" },
+  { id: "gpt-6-luna", name: "GPT-6 Luna", provider: "openai", logo: "/logos/openai.svg" },
   
   // Anthropic
   { id: "claude-fable-5-1", name: "Claude Fable 5.1", provider: "anthropic", logo: "/logos/claude-color.svg" },
   { id: "claude-opus-5-5", name: "Claude Opus 5.5", provider: "anthropic", logo: "/logos/claude-color.svg" },
-  { id: "claude-sonnet-5", name: "Claude Sonnet 5", provider: "anthropic", logo: "/logos/claude-color.svg" },
-  { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5", provider: "anthropic", logo: "/logos/claude-color.svg" },
+  { id: "claude-sonnet-5-5", name: "Claude Sonnet 5.5", provider: "anthropic", logo: "/logos/claude-color.svg" },
+  { id: "claude-haiku-5-5", name: "Claude Haiku 4.5", provider: "anthropic", logo: "/logos/claude-color.svg" },
 
   // Google
+  { id: "gemini-4-argon", name: "Gemini 4 Argon", provider: "google", logo: "/logos/gemini-color.svg" },
+  { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", provider: "google", logo: "/logos/gemini-color.svg" },
   { id: "gemini-3.6-flash", name: "Gemini 3.6 Flash", provider: "google", logo: "/logos/gemini-color.svg" },
-  { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash", provider: "google", logo: "/logos/gemini-color.svg" },
-  { id: "gemini-3.5-flash-lite", name: "Gemini 3.5 Flash-Lite", provider: "google", logo: "/logos/gemini-color.svg" },
 
   // Grok
+  { id: "grok-4.7", name: "Grok 4.7", provider: "grok", logo: "/logos/grok.svg" },
+  { id: "grok-4.6", name: "Grok 4.6", provider: "grok", logo: "/logos/grok.svg" },
   { id: "grok-4.5", name: "Grok 4.5", provider: "grok", logo: "/logos/grok.svg" },
   { id: "grok-4.3", name: "Grok 4.3", provider: "grok", logo: "/logos/grok.svg" },
-  { id: "grok-4.20-0309-reasoning", name: "Grok 4.20", provider: "grok", logo: "/logos/grok.svg" },
-  { id: "grok-4.20-0309-non-reasoning", name: "Grok 4.20 (Non-Reasoning)", provider: "grok", logo: "/logos/grok.svg" },
   // DeepSeek
-  { id: "deepseek-v4-pro", name: "Deepseek V4 Pro", provider: "deepseek", logo: "/logos/deepseek-color.svg" },
-  { id: "deepseek-v4-flash", name: "Deepseek V4 Flash", provider: "deepseek", logo: "/logos/deepseek-color.svg" },
+  { id: "deepseek-v4-pro", name: "DeepSeek-V4-Pro", provider: "deepseek", logo: "/logos/deepseek-color.svg" },
+  { id: "deepseek-flash", name: "DeepSeek-V4.1-Flash", provider: "deepseek", logo: "/logos/deepseek-color.svg" },
 
   // Qwen
-  { id: "qwen3.7-max", name: "Qwen3.7-Max", provider: "qwen", logo: "/logos/qwen-color.svg" },
+  { id: "qwen3.8-max", name: "Qwen3.8-Max", provider: "qwen", logo: "/logos/qwen-color.svg" },
+  { id: "qwen3.8-flash", name: "Qwen3.8-Flash", provider: "qwen", logo: "/logos/qwen-color.svg" },
   { id: "qwen3.7-plus", name: "Qwen3.7-Plus", provider: "qwen", logo: "/logos/qwen-color.svg" },
-  { id: "qwen3.5-flash", name: "Qwen3.5-Flash", provider: "qwen", logo: "/logos/qwen-color.svg" },
 
   // Custom
   { id: "custom", name: "Other (自訂模型)", provider: "custom", logo: null },
@@ -89,7 +89,7 @@ function HistoryChatContent() {
   const [loadingReport, setLoadingReport] = useState(true);
   
   // Default to 
-  const [selectedModelId, setSelectedModelId] = useState<string>("claude-haiku-4-5-20251001");
+  const [selectedModelId, setSelectedModelId] = useState<string>("claude-haiku-5-5");
   const [customModel, setCustomModel] = useState<string>("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -180,17 +180,17 @@ function HistoryChatContent() {
     try {
       const settings = await getApiSettingsAsync();
 
-      let chatModel = "claude-sonnet-5";
+      let chatModel = "claude-sonnet-5-5";
       let apiKey = "";
       let baseUrl = "https://api.anthropic.com/v1";
 
       const providers = {
-        anthropic: { key: settings.anthropic_api_key, defaultModel: "claude-sonnet-5" },
-        openai: { key: settings.openai_api_key, defaultModel: "gpt-5.6-terra" },
-        google: { key: settings.google_api_key, defaultModel: "gemini-3.5-flash" },
-        grok: { key: settings.grok_api_key, defaultModel: "grok-4.5" },
-        deepseek: { key: settings.deepseek_api_key, defaultModel: "deepseek-v4-flash" },
-        qwen: { key: settings.qwen_api_key, defaultModel: "qwen3.7-plus" },
+        anthropic: { key: settings.anthropic_api_key, defaultModel: "claude-sonnet-5-5" },
+        openai: { key: settings.openai_api_key, defaultModel: "gpt-6.1-sol" },
+        google: { key: settings.google_api_key, defaultModel: "gemini-3.8-flash" },
+        grok: { key: settings.grok_api_key, defaultModel: "grok-4.7" },
+        deepseek: { key: settings.deepseek_api_key, defaultModel: "deepseek-flash" },
+        qwen: { key: settings.qwen_api_key, defaultModel: "qwen3.8-flash" },
       };
 
       const activeModelId = selectedModelId === "custom" ? customModel.trim() : selectedModelId;
