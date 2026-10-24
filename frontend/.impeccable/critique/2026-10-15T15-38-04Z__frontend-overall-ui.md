@@ -80,7 +80,7 @@ Suggested command: /impeccable animate
 
 # Minor Observations
 
-- Duplicate provider label text in Select values ("Claude Claude Haiku 4.5") — a11y snapshot confirmed, likely a composition bug.
+- Duplicate provider label text in Select values ("Claude Claude Haiku 5.5") — a11y snapshot confirmed, likely a composition bug.
 - All 8 analysis-form decision points always-on, no progressive disclosure.
 - AgentFlowDiagram.tsx:393 hardcodes Traditional Chinese outside the t. translation object — i18n gap for English locale.
 - 6 (home) + 3 (analysis) "lazy-loaded images missing explicit dimensions" console warnings.

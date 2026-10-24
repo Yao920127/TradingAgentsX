@@ -581,7 +581,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           <SelectItem value="claude-haiku-5-5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Haiku 4.5</span>
+                              <span>Claude Haiku 5.5</span>
                             </div>
                           </SelectItem>
 
@@ -756,7 +756,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           <SelectItem value="claude-haiku-5-5">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Haiku 4.5</span>
+                              <span>Claude Haiku 5.5</span>
                             </div>
                           </SelectItem>
 

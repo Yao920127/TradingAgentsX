@@ -121,7 +121,7 @@ _MODEL_DISPLAY_NAMES: dict[str, str] = {
     "claude-fable-5-1": "Claude Fable 5.1",
     "claude-opus-5-5": "Claude Opus 5.5",
     "claude-sonnet-5-5": "Claude Sonnet 5.5",
-    "claude-haiku-5-5": "Claude Haiku 4.5",
+    "claude-haiku-5-5": "Claude Haiku 5.5",
     
     # Google Gemini
     "gemini-4-argon": "Gemini 4 Argon",
