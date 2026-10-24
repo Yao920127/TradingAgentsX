@@ -145,7 +145,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <LLMProviderCard name="OpenAI" models={["GPT-6 Astra", "GPT-6.1 Sol", "GPT-6 Luna"]} />
             <LLMProviderCard name="Anthropic" models={["Claude Fable 5.1","Claude Opus 5.5","Claude Sonnet 5.5","Claude Haiku 4.5"]} />
-            <LLMProviderCard name="Google Gemini" models={["Gemini 3.8 Flash","Gemini 3.1 Flash-Lite"]} />
+            <LLMProviderCard name="Google Gemini" models={["Gemini 4 Argon","Gemini 3.8 Flash","Gemini 3.6 Flash"]} />
             <LLMProviderCard name="Grok (xAI)" models={["Grok 4.7","Grok 4.6","Grok 4.5","Grok 4.3"]} />
             <LLMProviderCard name="DeepSeek" models={["DeepSeek-V4-Pro", "DeepSeek-V4.1-Flash"]} />
             <LLMProviderCard name="Qwen (Alibaba)" models={["Qwen3.8-Max","Qwen3.8-Flash","Qwen3.7-Plus"]} />
