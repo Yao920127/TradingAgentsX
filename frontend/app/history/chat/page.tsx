@@ -44,6 +44,7 @@ const AVAILABLE_MODELS = [
   // OpenAI
   { id: "gpt-6-astra", name: "GPT-6 Astra", provider: "openai", logo: "/logos/openai.svg" },
   { id: "gpt-6.1-sol", name: "GPT-6.1 Sol", provider: "openai", logo: "/logos/openai.svg" },
+  { id: "gpt-6.1-terra", name: "GPT-6.1 Terra", provider: "openai", logo: "/logos/openai.svg" },
   { id: "gpt-6-luna", name: "GPT-6 Luna", provider: "openai", logo: "/logos/openai.svg" },
   
   // Anthropic

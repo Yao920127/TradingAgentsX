@@ -552,6 +552,12 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                               <span>GPT-6.1 Sol</span>
                             </div>
                           </SelectItem>
+                          <SelectItem value="gpt-6.1-terra">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <span>GPT-6.1 Terra</span>
+                            </div>
+                          </SelectItem>
                           <SelectItem value="gpt-6-luna">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
@@ -725,6 +731,12 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                             <div className="flex items-center gap-2">
                               <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
                               <span>GPT-6.1 Sol</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="gpt-6.1-terra">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <span>GPT-6.1 Terra</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="gpt-6-luna">
