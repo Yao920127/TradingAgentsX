@@ -42,6 +42,8 @@ import { getCloudSettings, saveCloudSettings, isCloudSyncEnabled } from "@/lib/u
 import { api } from "@/lib/api";
 import type { KeyValidationResult } from "@/lib/types";
 import type { TranslationKeys } from "@/lib/i18n";
+import { ApiKeyHelpLink } from "./ApiKeyHelpLink";
+import { DataSourceKeyFields } from "./DataSourceKeyFields";
 
 const formSchema = z.object({
   // All API keys are optional - users only need the ones for their selected models
@@ -50,6 +52,14 @@ const formSchema = z.object({
   // Stock market data APIs
   alpha_vantage_api_key: z.string().optional().or(z.literal("")),  // 美股基本面資料
   finmind_api_key: z.string().optional().or(z.literal("")),  // 台灣股市資料
+
+  // News & social data APIs
+  finnhub_api_key: z.string().optional().or(z.literal("")),
+  marketaux_api_key: z.string().optional().or(z.literal("")),
+  newsapi_api_key: z.string().optional().or(z.literal("")),
+  jina_api_key: z.string().optional().or(z.literal("")),
+  apify_api_token: z.string().optional().or(z.literal("")),
+  lunarcrush_api_key: z.string().optional().or(z.literal("")),
   
   // LLM Providers
   anthropic_api_key: z.string().optional().or(z.literal("")),
@@ -265,6 +275,7 @@ export function ApiSettingsDialog() {
                     </FormControl>
                     <FormDescription>
                       {t.settings.finmindDesc}
+                      <ApiKeyHelpLink field="finmind_api_key" />
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -287,12 +298,16 @@ export function ApiSettingsDialog() {
                     </FormControl>
                     <FormDescription>
                       {t.settings.alphaVantageDesc}
+                      <ApiKeyHelpLink field="alpha_vantage_api_key" />
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
+            {/* News & Social Data APIs Section */}
+            <DataSourceKeyFields control={form.control} />
 
             {/* LLM Providers Section */}
             <div className="space-y-4 border-t pt-4">
@@ -312,6 +327,7 @@ export function ApiSettingsDialog() {
                     </FormControl>
                     <FormDescription>
                       {t.settings.openaiDesc}
+                      <ApiKeyHelpLink field="openai_api_key" />
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -326,7 +342,10 @@ export function ApiSettingsDialog() {
                     <FormControl>
                       <Input type="password" placeholder="sk-..." {...field} />
                     </FormControl>
-                    <FormDescription>{t.settings.anthropicDesc}</FormDescription>
+                    <FormDescription>
+                      {t.settings.anthropicDesc}
+                      <ApiKeyHelpLink field="anthropic_api_key" />
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -342,7 +361,10 @@ export function ApiSettingsDialog() {
                     <FormControl>
                       <Input type="password" placeholder="..." {...field} />
                     </FormControl>
-                    <FormDescription>{t.settings.googleDesc}</FormDescription>
+                    <FormDescription>
+                      {t.settings.googleDesc}
+                      <ApiKeyHelpLink field="google_api_key" />
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -358,7 +380,10 @@ export function ApiSettingsDialog() {
                     <FormControl>
                       <Input type="password" placeholder="xai-..." {...field} />
                     </FormControl>
-                    <FormDescription>{t.settings.grokDesc}</FormDescription>
+                    <FormDescription>
+                      {t.settings.grokDesc}
+                      <ApiKeyHelpLink field="grok_api_key" />
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -374,7 +399,10 @@ export function ApiSettingsDialog() {
                     <FormControl>
                       <Input type="password" placeholder="sk-..." {...field} />
                     </FormControl>
-                    <FormDescription>{t.settings.deepseekDesc}</FormDescription>
+                    <FormDescription>
+                      {t.settings.deepseekDesc}
+                      <ApiKeyHelpLink field="deepseek_api_key" />
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -390,7 +418,10 @@ export function ApiSettingsDialog() {
                     <FormControl>
                       <Input type="password" placeholder="sk-..." {...field} />
                     </FormControl>
-                    <FormDescription>{t.settings.qwenDesc}</FormDescription>
+                    <FormDescription>
+                      {t.settings.qwenDesc}
+                      <ApiKeyHelpLink field="qwen_api_key" />
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

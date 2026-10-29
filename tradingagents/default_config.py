@@ -31,18 +31,21 @@ DEFAULT_CONFIG = {
     #   - openai: OpenAI 網路搜尋
     #   - google: Google News
     #   - local: 本地資料
+    #   - aggregator: 多來源新聞 / 社群聚合（見 dataflows/news_aggregator.py）
     "data_vendors": {
         "core_stock_apis": "yfinance",       # 選項: yfinance, alpha_vantage, finmind, local
         "technical_indicators": "yfinance",  # 選項: yfinance, alpha_vantage, finmind, local
         "fundamental_data": "alpha_vantage", # 選項: openai, alpha_vantage, yfinance, finmind
-        "news_data": "alpha_vantage",        # 選項: openai, alpha_vantage, google, finmind, local
+        # aggregator：Finnhub / Marketaux / NewsAPI / GDELT 多來源聚合 + Jina Reader 全文
+        "news_data": "aggregator",           # 選項: aggregator, openai, alpha_vantage, google, finmind, local
+        "social_data": "aggregator",         # 社群情緒：StockTwits / X / LunarCrush / Reddit / Hacker News / PTT
     },
     # 工具層級設定 (優先於類別層級設定)
     "tool_vendors": {
         # 範例: "get_stock_data": "alpha_vantage",  # 覆寫類別預設值
         # 範例: "get_news": "openai",               # 覆寫類別預設值
         # 範例: "get_stock_data": "finmind",        # 使用 FinMind 獲取台股資料
-        "get_global_news": "openai",  # get_global_news 不支持 alpha_vantage，使用 openai 作為主要供應商
+        "get_global_news": "aggregator",
     },
     # 混合搜索設定 (Hybrid Search)
     # 結合向量搜索（語意理解）與 BM25 關鍵字搜索（精確匹配股票代號/財務術語）

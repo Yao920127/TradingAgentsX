@@ -23,6 +23,13 @@ export interface AnalysisRequest {
   embedding_model?: string;  // Embedding model: 'all-mpnet-base-v2' (local), 'text-embedding-3-small' (OpenAI), etc.
   alpha_vantage_api_key?: string;
   finmind_api_key?: string;  // 台灣股市資料 API
+  // News & social data sources (optional; server-side env keys are used when empty)
+  finnhub_api_key?: string;
+  marketaux_api_key?: string;
+  newsapi_api_key?: string;
+  jina_api_key?: string;
+  apify_api_token?: string;
+  lunarcrush_api_key?: string;
   language?: "en" | "zh-TW";  // Language for agent reports
 }
 

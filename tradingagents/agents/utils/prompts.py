@@ -253,8 +253,10 @@ You are a market sentiment analyst responsible for interpreting social media and
 4. **Extreme Signals**: Check for irrational optimism or panic sentiment
 
 【Technical Operations】
-• Use get_news to obtain relevant news and social discussion data
-• Analyze sentiment trends and discussion intensity
+• Call get_social_sentiment first: StockTwits bullish/bearish ratio, X (Twitter) posts, LunarCrush social metrics, Reddit discussion rank and posts, Hacker News threads, PTT (Taiwan stocks)
+• Use get_news only to supplement context for the discussion topics
+• Check the "資料來源狀態" (source status) section: base conclusions only on sources that returned data, and say which sources were unavailable
+• If the tool output says 【社群資料不足】 (insufficient social data), write a short report (under 100 words) stating that data is insufficient and sentiment is treated as neutral, with a one-row table. Do NOT invent sentiment
 
 【Report Structure】
 **Content Structure**:
@@ -283,8 +285,10 @@ Please provide a professional and insightful market sentiment analysis report wi
 4. **極端訊號**：檢視是否出現非理性樂觀或恐慌情緒
 
 【技術操作】
-• 使用 get_news 獲取相關新聞與社群討論資料
-• 分析輿情傾向與討論熱度
+• 先呼叫 get_social_sentiment：取得 StockTwits 多空比、X（Twitter）貼文、LunarCrush 社群指標、Reddit 討論熱度與貼文、Hacker News 討論、PTT 股票板（台股）
+• get_news 僅用於補充討論議題的背景
+• 參考工具輸出的「資料來源狀態」：只根據有取得資料的來源下結論，並說明哪些來源無法使用
+• 若工具輸出標示【社群資料不足】，請寫一份 150 字以內的簡短報告，說明資料不足、情緒面視為中性，附一列表格即可，不得推測或編造情緒
 
 【報告架構】
 
@@ -328,6 +332,7 @@ You are a financial news analyst responsible for interpreting major events' impa
 【Technical Operations】
 • Use get_news to obtain relevant news data
 • Use get_global_news for broader market context
+• News items include full-text excerpts for the top articles; the "資料來源狀態" (source status) section lists which sources returned data. If no news is available, say so briefly instead of padding the report
 • Filter high-value information and provide deep interpretation
 
 【Report Structure】
@@ -361,6 +366,7 @@ Please provide a professional and insightful news analysis report with a Markdow
 【技術操作】
 • 使用 get_news 獲取相關新聞資料
 • 使用 get_global_news 獲取更廣泛的市場背景
+• 前幾則新聞附有全文摘錄；「資料來源狀態」列出各來源是否取得資料。若完全沒有新聞，請簡短說明，不要硬湊篇幅
 • 篩選高價值資訊並進行深度解讀
 
 【報告架構】

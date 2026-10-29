@@ -85,6 +85,12 @@ const formSchema = z.object({
   embedding_api_key: z.string().optional().or(z.literal("")), // 本地模型不需要 API Key
   alpha_vantage_api_key: z.string().optional().or(z.literal("")), // 選填
   finmind_api_key: z.string().optional().or(z.literal("")), // 選填
+  finnhub_api_key: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
+  marketaux_api_key: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
+  newsapi_api_key: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
+  jina_api_key: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
+  apify_api_token: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
+  lunarcrush_api_key: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
 });
 
 interface AnalysisFormProps {
@@ -126,6 +132,12 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
       embedding_api_key: "",
       alpha_vantage_api_key: "",
       finmind_api_key: "",
+      finnhub_api_key: "",
+      marketaux_api_key: "",
+      newsapi_api_key: "",
+      jina_api_key: "",
+      apify_api_token: "",
+      lunarcrush_api_key: "",
     },
   });
 
@@ -208,6 +220,17 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
         savedSettings.alpha_vantage_api_key || ""
       );
       form.setValue("finmind_api_key", savedSettings.finmind_api_key || "");
+      // News & social data keys
+      (
+        [
+          "finnhub_api_key",
+          "marketaux_api_key",
+          "newsapi_api_key",
+          "jina_api_key",
+          "apify_api_token",
+          "lunarcrush_api_key",
+        ] as const
+      ).forEach((field) => form.setValue(field, savedSettings[field] || ""));
     };
 
     loadSettings();

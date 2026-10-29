@@ -3,7 +3,7 @@ from typing import Annotated
 # 從特定供應商的模組匯入
 from .local import get_YFin_data, get_finnhub_news, get_finnhub_company_insider_sentiment, get_finnhub_company_insider_transactions, get_simfin_balance_sheet, get_simfin_cashflow, get_simfin_income_statements, get_reddit_global_news, get_reddit_company_news
 from .y_finance import get_YFin_data_online, get_stock_stats_indicators_window, get_balance_sheet as get_yfinance_balance_sheet, get_cashflow as get_yfinance_cashflow, get_income_statement as get_yfinance_income_statement, get_insider_transactions as get_yfinance_insider_transactions, get_fundamentals as get_yfinance_fundamentals
-from .google import get_google_news, get_global_news_google
+from .google import get_google_company_news, get_global_news_google
 from .openai import get_stock_news_openai, get_global_news_openai, get_fundamentals_openai
 from .alpha_vantage import (
     get_stock as get_alpha_vantage_stock,
@@ -32,6 +32,10 @@ from .finmind import (
     get_insider_transactions as get_finmind_insider_transactions,
     FinMindRateLimitError,
 )
+
+# 多來源新聞聚合（Finnhub / Marketaux / NewsAPI / GDELT + Jina Reader）與社群情緒
+from .news_aggregator import get_news as get_aggregated_news, get_global_news as get_aggregated_global_news
+from .social_sentiment import get_social_sentiment as get_aggregated_social_sentiment
 
 # 設定和路由邏輯
 from .config import get_config
@@ -67,7 +71,13 @@ TOOLS_CATEGORIES = {
             "get_insider_sentiment",
             "get_insider_transactions",
         ]
-    }
+    },
+    "social_data": {
+        "description": "社群情緒（StockTwits、X、LunarCrush、Reddit、Hacker News、PTT）",
+        "tools": [
+            "get_social_sentiment",
+        ]
+    },
 }
 
 VENDOR_LIST = [
@@ -77,6 +87,7 @@ VENDOR_LIST = [
     "google",
     "alpha_vantage",
     "finmind",  # 台灣股市資料供應商
+    "aggregator",  # 多來源新聞 / 社群聚合
 ]
 
 # 方法與其特定供應商實現的映射
@@ -121,21 +132,27 @@ VENDOR_METHODS = {
         "finmind": get_finmind_income_statement,  # 台股損益表
     },
     # 新聞數據
+    # 備援順序即此 dict 的順序（主要供應商之後）：免金鑰的 google 排在付費來源之前
     "get_news": {
+        "aggregator": get_aggregated_news,
+        "google": get_google_company_news,
         "alpha_vantage": get_alpha_vantage_news,
         "openai": get_stock_news_openai,
-        "google": get_google_news,
-        "local": [get_finnhub_news, get_reddit_company_news, get_google_news],
+        "local": [get_finnhub_news, get_reddit_company_news, get_google_company_news],
         "finmind": get_finmind_news,  # 台股公告/法人動態
     },
     "get_global_news": {
+        "aggregator": get_aggregated_global_news,
+        "google": get_global_news_google,  # 免金鑰的全球新聞備援（適用非 OpenAI 供應商）
         "openai": get_global_news_openai,
         "alpha_vantage": get_alpha_vantage_global_news,  # 依 topics 的全球新聞（用既有 AV 金鑰）
-        "google": get_global_news_google,  # 免金鑰的全球新聞備援（適用非 OpenAI 供應商）
         # 已移除 "local": get_reddit_global_news —
         # 它依賴本地 Reddit 資料目錄（部署環境不存在），每次都回空結果卻仍「成功」，
         # 導致備援鏈提早停止、全球新聞實質關閉。移除後改由 openai / google / finmind 提供。
         "finmind": get_finmind_global_news,  # 台股市場動態
+    },
+    "get_social_sentiment": {
+        "aggregator": get_aggregated_social_sentiment,
     },
     "get_insider_sentiment": {
         "local": get_finnhub_company_insider_sentiment,
@@ -204,6 +221,10 @@ def route_to_vendor(method: str, *args, **kwargs):
     successful_vendor = None
 
     for vendor in fallback_vendors:
+        # 多供應商設定（如 "finmind,aggregator"）：主要供應商已有結果時，不再呼叫備援供應商
+        if results and vendor not in primary_vendors:
+            print(f"調試：主要供應商已有結果，略過備援供應商 '{vendor}' 之後的嘗試")
+            break
         if vendor not in VENDOR_METHODS[method]:
             if vendor in primary_vendors:
                 print(f"資訊：方法 '{method}' 不支援供應商 '{vendor}'，將備援至下一個供應商")
@@ -236,6 +257,10 @@ def route_to_vendor(method: str, *args, **kwargs):
                 
                 # 執行函數（已由各供應商內部處理timeout）
                 result = impl_func(*args, **kwargs)
+                # 空結果（例如本地資料目錄不存在）不算成功，否則備援鏈會提早停止
+                if result is None or (isinstance(result, str) and not result.strip()):
+                    print(f"失敗：來自供應商 '{vendor_name}' 的 {impl_func.__name__} 回傳空結果")
+                    continue
                 vendor_results.append(result)
                 print(f"成功：來自供應商 '{vendor_name}' 的 {impl_func.__name__} 成功完成")
                     

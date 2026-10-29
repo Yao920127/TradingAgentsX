@@ -12,9 +12,39 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from tradingagents.graph.trading_graph import TradingAgentsXGraph
 from tradingagents.default_config import DEFAULT_CONFIG
+from tradingagents.utils.zh_convert import localize_for
 from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+# 使用者 BYOK 的新聞 / 社群資料金鑰 → 資料層讀取的環境變數名稱。
+# 未提供時保留伺服器端環境變數（部署者可在 Railway 設定共用金鑰）。
+DATA_API_KEY_ENV_VARS = {
+    "finnhub_api_key": "FINNHUB_API_KEY",
+    "marketaux_api_key": "MARKETAUX_API_KEY",
+    "newsapi_api_key": "NEWSAPI_API_KEY",
+    "jina_api_key": "JINA_API_KEY",
+    "apify_api_token": "APIFY_API_TOKEN",
+    "lunarcrush_api_key": "LUNARCRUSH_API_KEY",
+}
+
+
+def _apply_env_overrides(overrides: Dict[str, Optional[str]]) -> Dict[str, Optional[str]]:
+    """寫入非空的覆寫值，回傳被覆寫變數的原始值（None 代表原本不存在）。"""
+    originals: Dict[str, Optional[str]] = {}
+    for env_var, value in overrides.items():
+        if value and value.strip():
+            originals[env_var] = os.environ.get(env_var)
+            os.environ[env_var] = value.strip()
+    return originals
+
+
+def _restore_env(originals: Dict[str, Optional[str]]) -> None:
+    for env_var, original in originals.items():
+        if original is None:
+            os.environ.pop(env_var, None)
+        else:
+            os.environ[env_var] = original
 
 
 class TradingService:
@@ -60,6 +90,7 @@ class TradingService:
         embedding_model: str = "all-mpnet-base-v2",  # Default to local model
         alpha_vantage_api_key: Optional[str] = None,
         finmind_api_key: Optional[str] = None,  # 台灣股市資料 API
+        data_api_keys: Optional[Dict[str, str]] = None,  # 新聞 / 社群資料金鑰，鍵名見 DATA_API_KEY_ENV_VARS
         market_type: str = "us",  # 市場類型：us (美股) 或 tw (台股)
         analysts: Optional[List[str]] = None,
         research_depth: int = 1,
@@ -80,6 +111,7 @@ class TradingService:
             deep_think_base_url: Base URL for Deep Thinking Model
             alpha_vantage_api_key: Alpha Vantage API Key (optional, for US stocks)
             finmind_api_key: FinMind API Token (optional, for Taiwan stocks)
+            data_api_keys: News / social data keys (Finnhub, Marketaux, NewsAPI, Jina, Apify, LunarCrush)
             market_type: Market type - 'us' for US stocks, 'tw' for Taiwan stocks
             analysts: List of analyst types to include
             research_depth: Research depth (1-5)
@@ -96,23 +128,18 @@ class TradingService:
                 analysts = ["market", "social", "news", "fundamentals"]
             
             # Dynamically set environment variables for this request
-            import os
-            original_openai_key = os.environ.get("OPENAI_API_KEY")
-            original_alpha_key = os.environ.get("ALPHA_VANTAGE_API_KEY")
-            original_finmind_key = os.environ.get("FINMIND_API_TOKEN")
-            
+            # (dataflows read keys from env vars; originals are restored in finally)
+            original_env = _apply_env_overrides({
+                "OPENAI_API_KEY": openai_api_key,
+                "ALPHA_VANTAGE_API_KEY": alpha_vantage_api_key,
+                "FINMIND_API_TOKEN": finmind_api_key,
+                **{
+                    env_var: (data_api_keys or {}).get(field)
+                    for field, env_var in DATA_API_KEY_ENV_VARS.items()
+                },
+            })
+
             try:
-                # Set Alpha Vantage API key if provided
-                if alpha_vantage_api_key:
-                    os.environ["ALPHA_VANTAGE_API_KEY"] = alpha_vantage_api_key
-                
-                # Set FinMind API token if provided
-                if finmind_api_key:
-                    os.environ["FINMIND_API_TOKEN"] = finmind_api_key
-                
-                # Set OpenAI API key for dataflows (openai.py reads from env var)
-                if openai_api_key:
-                    os.environ["OPENAI_API_KEY"] = openai_api_key
                 
                 # Create configuration
                 logger.info(f"Initializing TradingAgentsX for {ticker} on {analysis_date}")
@@ -170,9 +197,11 @@ class TradingService:
                         "core_stock_apis": "finmind",
                         "technical_indicators": "finmind",
                         "fundamental_data": "finmind",
-                        "news_data": "finmind",
+                        # 新聞：FinMind 公告／法人動態 + 多來源聚合（國際媒體報導）
+                        "news_data": "finmind,aggregator",
+                        "social_data": "aggregator",  # PTT 股票板等
                     }
-                    # 所有工具也使用 finmind
+                    # 所有工具也使用 finmind（新聞類同時查詢聚合來源）
                     config["tool_vendors"] = {
                         "get_stock_data": "finmind",
                         "get_indicators": "finmind",
@@ -180,40 +209,19 @@ class TradingService:
                         "get_balance_sheet": "finmind",
                         "get_cashflow": "finmind",
                         "get_income_statement": "finmind",
-                        "get_news": "finmind",
-                        "get_global_news": "finmind",
+                        "get_news": "finmind,aggregator",
+                        "get_global_news": "finmind,aggregator",
                         "get_insider_sentiment": "finmind",
                         "get_insider_transactions": "finmind",
                     }
                     # 儲存市場類型供 price_service 使用
                     config["market_type"] = market_type
                 else:
-                    # 美股：依使用者是否持有有效的 OpenAI Key 動態決定新聞供應商
-                    # （避免沒有 OpenAI Key 的 BYOK 使用者每次新聞查詢都先 401 再 fallback）
-                    # 注意：config 為 default_config 的淺拷貝，nested dict 為共用參考，
-                    #       因此一律以「整份重建」方式賦值，切勿就地 mutate。
-                    has_valid_openai_key = bool(openai_api_key and openai_api_key.strip())
-                    if has_valid_openai_key:
-                        # 有 OpenAI Key：使用 OpenAI 具網路搜尋能力的即時新聞（覆寫全域預設）
-                        config["data_vendors"] = {
-                            **config["data_vendors"],
-                            "news_data": "openai",
-                        }
-                        config["tool_vendors"] = {
-                            **config.get("tool_vendors", {}),
-                            "get_global_news": "openai",
-                        }
-                        logger.info("Market type: US stocks - valid OpenAI key present, using OpenAI news providers")
-                    else:
-                        # 無有效 OpenAI Key：新聞避開 openai
-                        #   get_news      → 沿用全域預設 alpha_vantage
-                        #   get_global_news → 不支援 alpha_vantage，改用 local(Reddit 全球新聞)
-                        config["tool_vendors"] = {
-                            **config.get("tool_vendors", {}),
-                            "get_global_news": "local",
-                        }
-                        logger.info("Market type: US stocks - no valid OpenAI key, routing news away from OpenAI (get_news→alpha_vantage, get_global_news→local)")
-                
+                    # 美股與其他市場：新聞 / 社群沿用 default_config 的 aggregator
+                    # （Finnhub / Marketaux / NewsAPI / GDELT + Jina）。聚合來源全部無結果時，
+                    # route_to_vendor 依序備援到 google → alpha_vantage → openai。
+                    logger.info("Market type: US/international stocks - using aggregated news and social providers")
+
                 # Set language for agent reports
                 config["language"] = language
                 logger.info(f"Language for reports: {language}")
@@ -228,7 +236,8 @@ class TradingService:
                 )
             
                 # Extract reports from final state
-                reports = {
+                # 繁體中文報告：把 LLM 混入的簡體字轉為繁體（台灣用語），也避免 PDF 缺字
+                reports = localize_for(language, {
                     "market_report": final_state.get("market_report"),
                     "sentiment_report": final_state.get("sentiment_report"),
                     "news_report": final_state.get("news_report"),
@@ -238,7 +247,8 @@ class TradingService:
                     "final_trade_decision": final_state.get("final_trade_decision"),
                     "investment_debate_state": final_state.get("investment_debate_state"),
                     "risk_debate_state": final_state.get("risk_debate_state"),
-                }
+                })
+                decision = localize_for(language, decision)
 
                 # Log report completeness for debugging
                 for key, value in reports.items():
@@ -301,21 +311,7 @@ class TradingService:
                 
             finally:
                 # Clean up environment variables after request
-                if original_openai_key is not None:
-                    os.environ["OPENAI_API_KEY"] = original_openai_key
-                elif openai_api_key and "OPENAI_API_KEY" in os.environ:
-                    # Only delete if we set it (and there was no original key)
-                    del os.environ["OPENAI_API_KEY"]
-                    
-                if original_alpha_key is not None:
-                    os.environ["ALPHA_VANTAGE_API_KEY"] = original_alpha_key
-                elif alpha_vantage_api_key and "ALPHA_VANTAGE_API_KEY" in os.environ:
-                    del os.environ["ALPHA_VANTAGE_API_KEY"]
-                
-                if original_finmind_key is not None:
-                    os.environ["FINMIND_API_TOKEN"] = original_finmind_key
-                elif finmind_api_key and "FINMIND_API_TOKEN" in os.environ:
-                    del os.environ["FINMIND_API_TOKEN"]
+                _restore_env(original_env)
             
         except Exception as e:
             logger.error(f"Analysis failed for {ticker}: {str(e)}", exc_info=True)

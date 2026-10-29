@@ -63,6 +63,13 @@ class AnalysisRequest(BaseModel):
         description="FinMind API Token (optional, for Taiwan stock data)",
         min_length=0
     )
+    # 新聞 / 社群資料來源（皆選用；未提供時使用伺服器端環境變數）
+    finnhub_api_key: Optional[str] = Field(None, description="Finnhub API Key (news)", min_length=0)
+    marketaux_api_key: Optional[str] = Field(None, description="Marketaux API Token (news + entity sentiment)", min_length=0)
+    newsapi_api_key: Optional[str] = Field(None, description="NewsAPI.org API Key (news)", min_length=0)
+    jina_api_key: Optional[str] = Field(None, description="Jina AI API Key (article reader / social search)", min_length=0)
+    apify_api_token: Optional[str] = Field(None, description="Apify API Token (StockTwits / X scrapers)", min_length=0)
+    lunarcrush_api_key: Optional[str] = Field(None, description="LunarCrush API Key (social metrics)", min_length=0)
     language: Optional[Literal["en", "zh-TW"]] = Field(
         default="zh-TW",
         description="Language for agent reports: 'en' for English, 'zh-TW' for Traditional Chinese"

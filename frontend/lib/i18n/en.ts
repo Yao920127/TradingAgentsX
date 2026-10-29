@@ -59,6 +59,27 @@ export const en = {
     alphaVantagePlaceholder: "Enter Alpha Vantage API Key",
     alphaVantageDesc:
       "For US stock fundamental data (recommended for US stocks)",
+
+    // API key sources
+    getKeyAt: "Get your key: ",
+    keyPlaceholder: "Enter API Key",
+
+    // News & social data APIs
+    dataSourceApis: "News & Social Data APIs (all optional)",
+    dataSourceApisHint:
+      "Sources without a key are skipped. Free sources (GDELT news, Hacker News, PTT, Reddit rankings) work without any key, but each key you add gives more complete news and social data, especially for stocks outside the US and Taiwan.",
+    finnhubKey: "Finnhub API Key (News)",
+    finnhubDesc: "News for US and North American listed companies; the free plan is enough",
+    marketauxKey: "Marketaux API Token (News)",
+    marketauxDesc: "Global financial news with a sentiment score per article; free plan allows 100 requests/day",
+    newsapiKey: "NewsAPI.org API Key (News)",
+    newsapiDesc: "Searches global media coverage by company name. Note: the free plan is for development only and articles are delayed 24 hours",
+    jinaKey: "Jina AI API Key (Article Text / Social Search)",
+    jinaDesc: "Fetches full article text for the AI (works without a key, but slower); with a key it can also search Reddit and X posts",
+    apifyKey: "Apify API Token (StockTwits & X Posts)",
+    apifyDesc: "Scrapes StockTwits bullish/bearish posts and X (Twitter) posts. Pay per use; X requires a paid Apify plan for API access",
+    lunarcrushKey: "LunarCrush API Key (Social Metrics)",
+    lunarcrushDesc: "Social sentiment and discussion volume across X, Reddit, YouTube and TikTok. Social endpoints need a paid plan",
     openaiDesc:
       "For OpenAI models and OpenAI embeddings",
     anthropicDesc: "For Claude models",

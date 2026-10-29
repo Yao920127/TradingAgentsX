@@ -596,6 +596,27 @@ export const zhTW = {
     alphaVantageKey: "Alpha Vantage API Key（美股）",
     alphaVantagePlaceholder: "輸入 Alpha Vantage API Key",
     alphaVantageDesc: "用於獲取美股基本面數據（分析美股時建議填寫）",
+
+    // API key sources
+    getKeyAt: "取得金鑰：",
+    keyPlaceholder: "輸入 API Key",
+
+    // News & social data APIs
+    dataSourceApis: "新聞與社群資料 API（皆為選填）",
+    dataSourceApisHint:
+      "沒填的來源會自動略過。不填也能用免費來源（GDELT 新聞、Hacker News、PTT、Reddit 熱度），但填越多，新聞面和社群面的資料越完整，非美股、台股的股票也比較找得到資料。",
+    finnhubKey: "Finnhub API Key（新聞）",
+    finnhubDesc: "美股與北美上市公司新聞，免費方案即可使用",
+    marketauxKey: "Marketaux API Token（新聞）",
+    marketauxDesc: "全球財經新聞並附每則新聞的情緒分數，免費方案每日 100 次",
+    newsapiKey: "NewsAPI.org API Key（新聞）",
+    newsapiDesc: "依公司名稱搜尋全球媒體報導。注意：免費方案僅限開發用途，且文章延遲 24 小時",
+    jinaKey: "Jina AI API Key（新聞全文／社群搜尋）",
+    jinaDesc: "擷取新聞全文讓 AI 讀到內文（不填也能用，但速度較慢）；填寫後可搜尋 Reddit、X 上的社群貼文",
+    apifyKey: "Apify API Token（StockTwits、X 社群貼文）",
+    apifyDesc: "抓取 StockTwits 散戶多空貼文與 X（Twitter）貼文。按用量計費；X 需要 Apify 付費方案才能透過 API 使用",
+    lunarcrushKey: "LunarCrush API Key（社群指標）",
+    lunarcrushDesc: "X、Reddit、YouTube、TikTok 的社群情緒與討論量。社群端點需要付費方案",
     openaiDesc: "用於 OpenAI 模型及 OpenAI 嵌入式模型",
     anthropicDesc: "用於 Claude 模型",
     googleDesc: "用於 Gemini 模型",

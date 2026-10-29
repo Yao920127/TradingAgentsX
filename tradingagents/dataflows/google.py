@@ -54,3 +54,14 @@ def get_global_news_google(
     讓任何人都有一個免金鑰的全球新聞來源。
     """
     return get_google_news("stock market economy finance macro", curr_date, look_back_days)
+
+def get_google_company_news(
+    ticker: Annotated[str, "股票代碼"],
+    start_date: Annotated[str, "開始日期，格式為 yyyy-mm-dd"],
+    end_date: Annotated[str, "結束日期，格式為 yyyy-mm-dd"],
+) -> str:
+    """get_news 介面（代碼、起訖日期）的轉接：改以回溯天數呼叫 get_google_news。"""
+    look_back_days = (
+        datetime.strptime(end_date, "%Y-%m-%d") - datetime.strptime(start_date, "%Y-%m-%d")
+    ).days
+    return get_google_news(ticker, end_date, max(look_back_days, 1))

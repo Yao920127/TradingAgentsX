@@ -39,6 +39,11 @@ class AlphaVantageRateLimitError(Exception):
     """當超過 Alpha Vantage API 速率限制時引發的例外。"""
     pass
 
+
+class AlphaVantageAPIError(Exception):
+    """Alpha Vantage 回傳錯誤訊息（例如付費端點、無效參數）時引發的例外。"""
+    pass
+
 def _make_api_request(function_name: str, params: dict) -> dict | str:
     """
     發送 API 請求並處理回應的輔助函式。
@@ -73,10 +78,19 @@ def _make_api_request(function_name: str, params: dict) -> dict | str:
     try:
         response_json = json.loads(response_text)
         # 檢查速率限制錯誤
-        if "Information" in response_json:
-            info_message = response_json["Information"]
-            if "rate limit" in info_message.lower() or "api key" in info_message.lower():
+        # Alpha Vantage 以 HTTP 200 + {"Information"/"Note"/"Error Message": ...} 回報錯誤，
+        # 若當成正常結果回傳，agent 會把錯誤訊息當資料、route_to_vendor 也不會備援
+        info_message = ""
+        if isinstance(response_json, dict):
+            info_message = next(
+                (str(response_json[k]) for k in ("Information", "Note", "Error Message") if k in response_json),
+                "",
+            )
+        if info_message:
+            lowered = info_message.lower()
+            if "rate limit" in lowered or "api key" in lowered or "frequency" in lowered:
                 raise AlphaVantageRateLimitError(f"超過 Alpha Vantage 速率限制：{info_message}")
+            raise AlphaVantageAPIError(f"Alpha Vantage 回應錯誤（可能為付費端點）：{info_message}")
     except json.JSONDecodeError:
         # 回應不是 JSON (可能是 CSV 數據)，這是正常的
         pass

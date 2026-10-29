@@ -38,7 +38,8 @@ from tradingagents.agents.utils.agent_utils import (
     get_news,
     get_insider_sentiment,
     get_insider_transactions,
-    get_global_news
+    get_global_news,
+    get_social_sentiment,
 )
 
 # 匯入圖的其他組件
@@ -215,7 +216,8 @@ class TradingAgentsXGraph:
             ),
             "social": ToolNode(
                 [
-                    # 用於社群媒體分析的新聞工具
+                    # 社群情緒（StockTwits / X / LunarCrush / Reddit / Hacker News / PTT）與新聞
+                    get_social_sentiment,
                     get_news,
                 ]
             ),

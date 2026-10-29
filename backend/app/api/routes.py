@@ -22,11 +22,12 @@ from backend.app.models.schemas import (
     ValidateKeysRequest,
     ValidateKeysResponse,
 )
-from backend.app.services.trading_service import TradingService
+from backend.app.services.trading_service import TradingService, DATA_API_KEY_ENV_VARS
 from backend.app.services.task_manager import task_manager
 from backend.app.api.dependencies import get_trading_service, get_current_user_optional
 from backend.app.core.config import settings
 from tradingagents.agents.utils.output_filter import _normalize_content
+from tradingagents.utils.zh_convert import localize_for
 
 logger = logging.getLogger(__name__)
 
@@ -167,6 +168,10 @@ async def run_analysis(
                 embedding_model=request.embedding_model or "all-mpnet-base-v2",
                 alpha_vantage_api_key=request.alpha_vantage_api_key or "",
                 finmind_api_key=request.finmind_api_key or "",
+                data_api_keys={
+                    field: getattr(request, field) or ""
+                    for field in DATA_API_KEY_ENV_VARS
+                },
                 language=request.language or "zh-TW",  # Pass language for agent reports
                 progress_callback=report_progress,
             ))
@@ -384,7 +389,7 @@ async def download_reports(request: DownloadRequest):
             continue
         
         analyst_name, report_key = ANALYST_MAPPING[analyst_key]
-        report_content = _normalize_content(get_nested_value(reports_data, report_key))
+        report_content = localize_for(language, _normalize_content(get_nested_value(reports_data, report_key)))
         
         if report_content:
             reports_to_download.append({
@@ -493,7 +498,7 @@ async def generate_pdf_temp(request: DownloadRequest):
         if analyst_key not in ANALYST_MAPPING:
             continue
         analyst_name, report_key = ANALYST_MAPPING[analyst_key]
-        report_content = _normalize_content(get_nested_value(reports_data, report_key))
+        report_content = localize_for(language, _normalize_content(get_nested_value(reports_data, report_key)))
         if report_content:
             reports_to_download.append({
                 "analyst_name": analyst_name,

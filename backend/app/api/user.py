@@ -92,6 +92,12 @@ class SettingsUpdate(BaseModel):
     deepseek_api_key: str = ""
     qwen_api_key: str = ""
     finmind_api_key: str = ""
+    finnhub_api_key: str = ""
+    marketaux_api_key: str = ""
+    newsapi_api_key: str = ""
+    jina_api_key: str = ""
+    apify_api_token: str = ""
+    lunarcrush_api_key: str = ""
     custom_base_url: str = ""
     custom_api_key: str = ""
 

@@ -46,6 +46,8 @@ backtrader
 akshare
 tushare
 finnhub-python
+# 簡體 → 繁體（台灣用語）轉換，純 Python 無需編譯
+opencc-python-reimplemented>=0.1.7
 parsel
 requests
 tqdm

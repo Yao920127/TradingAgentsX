@@ -1,6 +1,6 @@
 import time
 import json
-from tradingagents.agents.utils.agent_utils import get_news, make_cached_system_message
+from tradingagents.agents.utils.agent_utils import get_news, get_social_sentiment, make_cached_system_message
 from tradingagents.agents.utils.prompts import get_social_analyst_prompt, get_agent_role_instruction, get_context_message
 from tradingagents.dataflows.config import get_config
 from tradingagents.agents.utils.output_filter import _normalize_content
@@ -32,6 +32,7 @@ def create_social_media_analyst(llm, language: str = "zh-TW"):
         company_name = state.get("company_name", ticker)
 
         tools = [
+            get_social_sentiment,
             get_news,
         ]
 

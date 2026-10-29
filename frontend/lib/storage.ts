@@ -22,6 +22,14 @@ export interface ApiSettings {
   deepseek_api_key: string;
   qwen_api_key: string;
   finmind_api_key: string;  // 台灣股市資料 API
+
+  // News & social data sources (optional)
+  finnhub_api_key: string;
+  marketaux_api_key: string;
+  newsapi_api_key: string;
+  jina_api_key: string;
+  apify_api_token: string;
+  lunarcrush_api_key: string;
   
   // Custom endpoint
   custom_base_url: string;
@@ -45,6 +53,12 @@ export const DEFAULT_API_SETTINGS: ApiSettings = {
   deepseek_api_key: "",
   qwen_api_key: "",
   finmind_api_key: "",
+  finnhub_api_key: "",
+  marketaux_api_key: "",
+  newsapi_api_key: "",
+  jina_api_key: "",
+  apify_api_token: "",
+  lunarcrush_api_key: "",
   custom_base_url: "",
   custom_api_key: "",
 };
