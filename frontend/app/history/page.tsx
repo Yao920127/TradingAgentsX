@@ -826,7 +826,12 @@ export default function HistoryPage() {
 
     const availableAnalystKeys = ANALYSTS.filter((analyst) => {
       const content = getNestedValue(report.result.reports, analyst.reportKey);
-      return content && content.trim().length > 0;
+      // Claude extended-thinking / Gemini reports may be saved as content-block
+      // arrays ([{type:"thinking"}, {type:"text", text}]) instead of strings
+      const text = Array.isArray(content)
+        ? content.map((block: any) => (typeof block === "string" ? block : block?.text || "")).join("")
+        : typeof content === "string" ? content : "";
+      return text.trim().length > 0;
     }).map((a) => a.key);
 
     if (availableAnalystKeys.length === 0) return null;

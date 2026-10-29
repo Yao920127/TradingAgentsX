@@ -17,6 +17,8 @@ def _normalize_content(text) -> str:
     This helper extracts and joins the text so downstream functions always
     receive a str.
     """
+    if text is None:
+        return ""
     if isinstance(text, str):
         return text
     if isinstance(text, list):

@@ -26,6 +26,7 @@ from backend.app.services.trading_service import TradingService
 from backend.app.services.task_manager import task_manager
 from backend.app.api.dependencies import get_trading_service, get_current_user_optional
 from backend.app.core.config import settings
+from tradingagents.agents.utils.output_filter import _normalize_content
 
 logger = logging.getLogger(__name__)
 
@@ -383,7 +384,7 @@ async def download_reports(request: DownloadRequest):
             continue
         
         analyst_name, report_key = ANALYST_MAPPING[analyst_key]
-        report_content = get_nested_value(reports_data, report_key)
+        report_content = _normalize_content(get_nested_value(reports_data, report_key))
         
         if report_content:
             reports_to_download.append({
@@ -492,7 +493,7 @@ async def generate_pdf_temp(request: DownloadRequest):
         if analyst_key not in ANALYST_MAPPING:
             continue
         analyst_name, report_key = ANALYST_MAPPING[analyst_key]
-        report_content = get_nested_value(reports_data, report_key)
+        report_content = _normalize_content(get_nested_value(reports_data, report_key))
         if report_content:
             reports_to_download.append({
                 "analyst_name": analyst_name,

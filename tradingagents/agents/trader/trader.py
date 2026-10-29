@@ -3,6 +3,7 @@ import functools
 import time
 import json
 from tradingagents.agents.utils.prompts import get_trader_prompt, get_language_closing_instruction
+from tradingagents.agents.utils.output_filter import _normalize_content
 
 
 def create_trader(llm, memory, language: str = "zh-TW"):
@@ -80,7 +81,7 @@ def create_trader(llm, memory, language: str = "zh-TW"):
 
         return {
             "messages": [result],
-            "trader_investment_plan": result.content,
+            "trader_investment_plan": _normalize_content(result.content),
             "sender": name,
         }
 
