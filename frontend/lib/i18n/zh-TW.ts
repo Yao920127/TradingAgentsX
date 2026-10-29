@@ -66,7 +66,7 @@ export const zhTW = {
       customEndpoint: "自訂端點配置",
       customEndpointDesc: "完整支援自訂 API 端點，可連接任何 OpenAI 兼容的服務",
       fullAnalysis: "全方位市場分析",
-      fullAnalysisDesc: "整合技術面、基本面、情緒面、新聞面四大維度分析",
+      fullAnalysisDesc: "整合技術面、基本面、情緒面、新聞面四大維度分析，新聞與社群貼文由 Jina AI 擷取全文",
       structuredDecision: "結構化決策流程",
       structuredDecisionDesc: "透過看漲/看跌辯論機制減少偏見，做出更理性的決策",
       longTermMemory: "長期記憶系統",
@@ -93,7 +93,7 @@ export const zhTW = {
     
     // 流程步驟
     processSteps: {
-      dataCollection: { title: "資料收集階段", description: "從 yfinance、Reddit、RSS 等多源獲取股價、新聞、社群情緒數據" },
+      dataCollection: { title: "資料收集階段", description: "從 yfinance、FinMind 取得股價與財報，同時查詢 Finnhub、Marketaux、NewsAPI、GDELT 等新聞來源與 StockTwits、Reddit、PTT 等社群，並以 Jina AI 讀取全文" },
       analysts: { title: "分析師團隊分析", description: "市場、情緒、新聞、基本面四大分析師依序評估並產出專業報告，再由報告總結分析師整合為精簡摘要" },
       researchers: { title: "研究團隊辯論", description: "看漲與看跌研究員進行結構化辯論，研究經理綜合雙方觀點" },
       trader: { title: "交易員整合分析", description: "審查所有分析師與研究團隊報告，制定具體交易執行計劃" },
@@ -112,8 +112,13 @@ export const zhTW = {
     dynamicResearchFeatures: ["淺層 (Shallow): 1 輪快速分析", "中等 (Medium): 2 輪平衡分析", "深層 (Deep): 3+ 輪全面分析"],
     memorySystem: "長期記憶系統",
     memorySystemFeatures: ["ChromaDB 向量資料庫", "歷史決策持久化", "持續學習與改進"],
-    realTimeData: "實時資料整合",
-    realTimeDataFeatures: ["yfinance: 即時股價數據", "Reddit API: 社群情緒", "Alpha Vantage: 財務資料"],
+    realTimeData: "多來源資料整合",
+    realTimeDataFeatures: [
+      "yfinance、FinMind：美股與台股股價、財報",
+      "Finnhub、Marketaux、NewsAPI、GDELT：多來源新聞，跨國股票也找得到",
+      "StockTwits、X、LunarCrush、Reddit、Hacker News、PTT：社群情緒",
+      "Jina AI：擷取新聞與社群貼文全文，AI 讀內文而不只看標題",
+    ],
     fullApiSupport: "完整 API 支援",
     fullApiSupportFeatures: ["RESTful API 架構", "異步任務處理", "Swagger 互動文檔"],
     
@@ -131,11 +136,11 @@ export const zhTW = {
     
     social_analyst: "社群媒體分析師",
     social_analyst_role: "情緒分析",
-    social_analyst_desc: "社群情緒監測、市場氛圍評估、熱門話題追蹤",
+    social_analyst_desc: "彙整 StockTwits 多空比、Reddit 討論熱度、Hacker News、PTT 等社群討論，評估市場氛圍",
     
     news_analyst: "新聞分析師",
     news_analyst_role: "新聞分析",
-    news_analyst_desc: "新聞事件追蹤、影響評估、資訊篩選與優先排序",
+    news_analyst_desc: "整合多家新聞來源並去除重複報導，閱讀重點新聞全文後評估事件影響",
     
     fundamentals_analyst: "基本面分析師",
     fundamentals_analyst_role: "基本面分析",

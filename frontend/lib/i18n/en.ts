@@ -144,7 +144,7 @@ export const en = {
         "Full support for custom API endpoints, connect to any OpenAI-compatible service",
       fullAnalysis: "Comprehensive Market Analysis",
       fullAnalysisDesc:
-        "Integrated technical, fundamental, sentiment, and news analysis across four dimensions",
+        "Integrated technical, fundamental, sentiment, and news analysis across four dimensions, with full article and post text extracted by Jina AI",
       structuredDecision: "Structured Decision Process",
       structuredDecisionDesc:
         "Bull/Bear debate mechanism reduces bias for more rational decisions",
@@ -180,7 +180,7 @@ export const en = {
       dataCollection: {
         title: "Data Collection Phase",
         description:
-          "Gather stock prices, news, social sentiment from yfinance, Reddit, RSS and more",
+          "Prices and financials from yfinance and FinMind, news from Finnhub, Marketaux, NewsAPI and GDELT, social posts from StockTwits, Reddit, PTT and more, with full text read by Jina AI",
       },
       analysts: {
         title: "Analysis by Analysts Team",
@@ -230,11 +230,12 @@ export const en = {
       "Historical decision persistence",
       "Continuous learning and improvement",
     ],
-    realTimeData: "Real-Time Data Integration",
+    realTimeData: "Multi-Source Data Integration",
     realTimeDataFeatures: [
-      "yfinance: Real-time stock data",
-      "Reddit API: Social sentiment",
-      "Alpha Vantage: Financial data",
+      "yfinance, FinMind: US and Taiwan prices and financials",
+      "Finnhub, Marketaux, NewsAPI, GDELT: multi-source news, including stocks outside the US",
+      "StockTwits, X, LunarCrush, Reddit, Hacker News, PTT: social sentiment",
+      "Jina AI: reads full news and post text, not just headlines",
     ],
     fullApiSupport: "Full API Support",
     fullApiSupportFeatures: [
@@ -260,12 +261,12 @@ export const en = {
     social_analyst: "Social Media Analyst",
     social_analyst_role: "Sentiment Analysis",
     social_analyst_desc:
-      "Social sentiment monitoring, market atmosphere assessment, trending topic analysis",
+      "Combines StockTwits bullish/bearish ratios, Reddit discussion rankings, Hacker News and PTT threads to gauge market mood",
 
     news_analyst: "News Analyst",
     news_analyst_role: "News Analysis",
     news_analyst_desc:
-      "News event tracking, impact assessment, information filtering and prioritization",
+      "Merges multiple news sources, removes duplicates and reads key articles in full to assess event impact",
 
     fundamentals_analyst: "Fundamentals Analyst",
     fundamentals_analyst_role: "Fundamental Analysis",

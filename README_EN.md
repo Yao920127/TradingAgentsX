@@ -32,6 +32,9 @@
 | 🌐 **Multi-Model Support**   | LLM providers including OpenAI, Anthropic, Gemini, Grok, DeepSeek, Qwen, etc. |
 | 🔒 **Google OAuth Login**    | Cloud-synced API settings and history reports, supporting multi-device sync  |
 | 📊 **US & Taiwan Stock Support** | Full support for US stocks (Yahoo Finance) and Taiwan stocks (FinMind) data |
+| 📰 **Multi-Source News** | Queries Finnhub, Marketaux, NewsAPI and GDELT together, removes duplicates and sorts by date; works for stocks outside the US and Taiwan too |
+| 💬 **Social Sentiment** | StockTwits bullish/bearish ratios, X, LunarCrush, Reddit rankings, Hacker News, PTT Stock board |
+| 📖 **Jina AI Full Text** | Jina Reader extracts the full text of news articles and social posts, so the AI reads the content, not just headlines |
 | 🔑 **BYOK Mode**             | Users bring their own API keys; encrypted storage on the frontend for privacy |
 | 🛡️ **Security**              | Rate Limiting, Security Headers, API Key masking                             |
 | 📱 **Responsive Design**     | Supports desktop and mobile browsers                                         |
@@ -82,7 +85,9 @@ flowchart TB
         YF["Yahoo Finance<br/>US Quotes"]
         AV["Alpha Vantage<br/>US Fundamentals"]
         FM["FinMind<br/>Taiwan Stocks"]
-        NEWS["Google News<br/>Reddit"]
+        NEWS["News Aggregator<br/>Finnhub · Marketaux · NewsAPI · GDELT"]
+        SOCIAL["Social Sentiment<br/>StockTwits · X · LunarCrush<br/>Reddit · Hacker News · PTT"]
+        JINA["Jina AI<br/>Full article & post text"]
     end
 
     subgraph LLM["🧠 LLM Providers (BYOK)"]
@@ -199,6 +204,12 @@ TradingAgentsX/
     │   ├── yfin_utils.py       # Yahoo Finance utilities
     │   ├── alpha_vantage*.py   # Alpha Vantage series (5 files)
     │   ├── finmind*.py         # FinMind Taiwan stock data (6 files)
+    │   ├── news_aggregator.py  # Multi-source news (dedupe, sort, Jina full text)
+    │   ├── news_providers.py   # Finnhub / Marketaux / NewsAPI / GDELT clients
+    │   ├── news_models.py      # News data model and shared helpers
+    │   ├── jina_reader.py      # Jina AI Reader full-text extraction
+    │   ├── social_sentiment.py # Social sentiment (ApeWisdom, Hacker News, PTT, Reddit)
+    │   ├── social_paid_sources.py # Paid social sources (StockTwits / X via Apify, LunarCrush)
     │   ├── google.py           # Google Search
     │   ├── googlenews_utils.py # Google News utilities
     │   ├── reddit_utils.py     # Reddit data
@@ -224,8 +235,8 @@ TradingAgentsX/
 | Agent                  | Role                  | Output                                              |
 | ---------------------- | --------------------- | --------------------------------------------------- |
 | Market Analyst         | Technical Analysis    | RSI, MACD, Bollinger Bands, Support/Resistance Levels |
-| Social Media Analyst   | Sentiment Assessment  | Reddit/Twitter sentiment indicators, investor confidence |
-| News Analyst           | News Analysis         | Latest news summaries, event impact assessment     |
+| Social Media Analyst   | Sentiment Assessment  | StockTwits bullish/bearish ratio, Reddit rankings, Hacker News and PTT discussions |
+| News Analyst           | News Analysis         | Multi-source news summary (with full text of key articles), event impact assessment |
 | Fundamentals Analyst   | Financial Analysis    | Financial report data, P/E, P/B, profitability     |
 
 ### Report Synthesis (1 Agent)
@@ -256,6 +267,44 @@ The Report Summarizer runs after the four analysts. It uses the quick-thinking m
 
 ---
 
+## 📰 News & Social Data Sources
+
+The News Analyst and Social Media Analyst query several sources at once; one source failing does not affect the others. Each report ends with a "source status" list showing which sources returned data, so the AI never invents conclusions when there is no data.
+
+### News
+
+| Source | Coverage | Key required | Cost |
+| ------ | -------- | ------------ | ---- |
+| [Finnhub](https://finnhub.io/register) | News for US and North American listed companies | Yes | Free plan is enough |
+| [Marketaux](https://www.marketaux.com/register) | Global financial news with a sentiment score per article | Yes | Free plan: 100 requests/day |
+| [NewsAPI.org](https://newsapi.org/register) | Global media search by company name | Yes | Free plan is for development only; articles delayed 24 hours |
+| GDELT | Global news index, especially useful outside the US and Taiwan | No | Free (1 request every 5 seconds) |
+| FinMind | Taiwan stock news, announcements, institutional flows | Yes | Free plan is enough |
+
+### Social
+
+| Source | Coverage | Key required | Cost |
+| ------ | -------- | ------------ | ---- |
+| ApeWisdom | Reddit discussion rankings (US stocks) | No | Free |
+| Hacker News | Tech community threads and comments; good for tech and semiconductor stocks | No | Free |
+| PTT Stock board | Taiwan retail investor discussion | No | Free |
+| [Reddit API](https://www.reddit.com/prefs/apps) | Reddit posts | Yes (server env vars) | Free |
+| StockTwits (via [Apify](https://console.apify.com/settings/integrations)) | US retail posts with user-tagged bullish/bearish labels | Yes | Pay per use, about $0.03 per 1,000 messages |
+| X (via [Apify](https://console.apify.com/settings/integrations)) | X (Twitter) posts | Yes | Needs a paid Apify plan, about $0.40 per 1,000 posts |
+| [LunarCrush](https://lunarcrush.com/developers/api/authentication) | Social metrics across X, Reddit, YouTube, TikTok | Yes | Social endpoints need a paid plan |
+
+### Jina AI Full-Text Extraction
+
+[Jina AI Reader](https://jina.ai/reader/) turns article URLs into clean text so the AI reads the full content, not just the headline. Every source that has URLs uses it: the top 3 news articles, the top 2 PTT posts, the original articles behind Hacker News threads, external links shared in Reddit / StockTwits / X posts, and articles cited by OpenAI web search. It works without a key (about 20 requests per minute); a Jina key makes it faster and enables Jina search for Reddit and X posts.
+
+### Query Order
+
+- **News:** aggregator (GDELT + the free plans of Finnhub, Marketaux, NewsAPI) → Google News → FinMind → Alpha Vantage → OpenAI web search. A later step runs only if the earlier ones return nothing.
+- **Social:** free sources run together first (ApeWisdom, Hacker News, PTT, Reddit); if any of them returns real data, paid sources (StockTwits, X, LunarCrush, Jina search) are not called.
+- If no source has any data, the Social Media Analyst writes only a short note and treats sentiment as neutral.
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -270,6 +319,14 @@ The Report Summarizer runs after the four analysts. It uses the quick-thinking m
 | OpenAI                   | GPT models                 | https://platform.openai.com/api-keys                 |
 | Alpha Vantage (optional) | US stock fundamental data  | https://www.alphavantage.co/support/#api-key         |
 | FinMind (optional)       | Taiwan stock data          | https://finmindtrade.com/                            |
+| Finnhub (optional)       | News                       | https://finnhub.io/register                          |
+| Marketaux (optional)     | News and sentiment scores  | https://www.marketaux.com/register                   |
+| NewsAPI.org (optional)   | News                       | https://newsapi.org/register                         |
+| Jina AI (optional)       | Full-text extraction, social search | https://jina.ai/reader/                     |
+| Apify (optional)         | StockTwits and X posts     | https://console.apify.com/settings/integrations      |
+| LunarCrush (optional)    | Social metrics             | https://lunarcrush.com/developers/api/authentication |
+
+All news and social keys are optional. Enter them under "Settings" in the top-right corner of the web app (every field links to its signup page), or set them as server environment variables so every user shares them: `FINNHUB_API_KEY`, `MARKETAUX_API_KEY`, `NEWSAPI_API_KEY`, `JINA_API_KEY`, `APIFY_API_TOKEN`, `LUNARCRUSH_API_KEY`, `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET`. Keys entered in the web app take precedence over server settings. See `.env.example` for the full list.
 
 ### Installation Steps
 
@@ -394,7 +451,7 @@ Service ports:
 
 ### 1. Configure API Keys
 
-Click the "Settings" button in the top-right corner and enter your API keys.
+Click the "Settings" button in the top-right corner and enter your API keys. Each field links to its signup page; news and social data keys are optional, and free sources work without them.
 
 ### 2. Select Analysis Parameters
 

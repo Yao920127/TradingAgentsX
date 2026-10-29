@@ -32,6 +32,9 @@
 | 🌐 **多模型支援**        | OpenAI、Anthropic、Gemini、Grok、DeepSeek、Qwen 等 LLM 提供商   |
 | 🔒 **Google OAuth 登入** | 雲端同步 API 設定與歷史報告，支援多裝置同步                     |
 | 📊 **美股與台股支援**    | 完整支援美股（Yahoo Finance）與台股（FinMind）資料              |
+| 📰 **多來源新聞**        | 同時查詢 Finnhub、Marketaux、NewsAPI、GDELT，去除重複後依時間排序，美股、台股以外的股票也找得到新聞 |
+| 💬 **社群情緒**          | StockTwits 多空比、X、LunarCrush、Reddit 討論熱度、Hacker News、PTT 股票板 |
+| 📖 **Jina AI 全文解析**  | 以 Jina Reader 擷取新聞與社群貼文的全文，AI 讀到內文而不只是標題   |
 | 🔑 **BYOK 模式**         | 使用者自帶 API 金鑰，前端加密儲存，保障隱私                     |
 | 🛡️ **安全防護**          | Rate Limiting、Security Headers、API Key 遮罩                   |
 | 📱 **響應式設計**        | 支援桌面與手機瀏覽器                                            |
@@ -82,7 +85,9 @@ flowchart TB
         YF["Yahoo Finance<br/>美股行情"]
         AV["Alpha Vantage<br/>美股基本面"]
         FM["FinMind<br/>台股資料"]
-        NEWS["Google News<br/>Reddit"]
+        NEWS["新聞聚合<br/>Finnhub · Marketaux · NewsAPI · GDELT"]
+        SOCIAL["社群情緒<br/>StockTwits · X · LunarCrush<br/>Reddit · Hacker News · PTT"]
+        JINA["Jina AI<br/>新聞與貼文全文"]
     end
 
     subgraph LLM["🧠 LLM 提供商（BYOK）"]
@@ -199,6 +204,12 @@ TradingAgentsX/
     │   ├── yfin_utils.py       # Yahoo Finance 工具
     │   ├── alpha_vantage*.py   # Alpha Vantage 系列（5 個）
     │   ├── finmind*.py         # FinMind 台股資料（6 個）
+    │   ├── news_aggregator.py  # 多來源新聞聚合（去重、排序、Jina 全文）
+    │   ├── news_providers.py   # Finnhub / Marketaux / NewsAPI / GDELT 客戶端
+    │   ├── news_models.py      # 新聞資料模型與共用工具
+    │   ├── jina_reader.py      # Jina AI Reader 全文擷取
+    │   ├── social_sentiment.py # 社群情緒（ApeWisdom、Hacker News、PTT、Reddit）
+    │   ├── social_paid_sources.py # 付費社群來源（StockTwits / X 經 Apify、LunarCrush）
     │   ├── google.py           # Google 搜尋
     │   ├── googlenews_utils.py # Google 新聞工具
     │   ├── reddit_utils.py     # Reddit 資料
@@ -224,8 +235,8 @@ TradingAgentsX/
 | 代理           | 職責     | 輸出                                |
 | -------------- | -------- | ----------------------------------- |
 | 市場分析師     | 技術分析 | RSI、MACD、布林通道、支撐阻力位     |
-| 社群媒體分析師 | 情緒評估 | Reddit/Twitter 情緒指標、投資者信心 |
-| 新聞分析師     | 新聞分析 | 最新新聞摘要、事件影響評估          |
+| 社群媒體分析師 | 情緒評估 | StockTwits 多空比、Reddit 討論熱度、Hacker News 與 PTT 討論 |
+| 新聞分析師     | 新聞分析 | 多來源新聞摘要（附重點新聞全文）、事件影響評估 |
 | 基本面分析師   | 財務分析 | 財報數據、P/E、P/B、盈利能力        |
 
 ### 報告整合 (1 位)
@@ -256,6 +267,44 @@ TradingAgentsX/
 
 ---
 
+## 📰 新聞與社群資料來源
+
+新聞分析師與社群媒體分析師會同時查詢多個來源，單一來源失敗不影響其他來源。報告最後附「資料來源狀態」，列出每個來源是否取得資料，AI 不會在沒有資料時編造結論。
+
+### 新聞
+
+| 來源 | 涵蓋範圍 | 需要金鑰 | 費用 |
+| ---- | -------- | -------- | ---- |
+| [Finnhub](https://finnhub.io/register) | 美股與北美上市公司新聞 | 要 | 免費方案即可 |
+| [Marketaux](https://www.marketaux.com/register) | 全球財經新聞，附每則新聞的情緒分數 | 要 | 免費方案每日 100 次 |
+| [NewsAPI.org](https://newsapi.org/register) | 依公司名稱搜尋全球媒體 | 要 | 免費方案僅限開發用途、文章延遲 24 小時 |
+| GDELT | 全球新聞索引，對美股、台股以外的市場特別有用 | 不用 | 免費（每 5 秒限 1 次） |
+| FinMind | 台股新聞、公告、法人動態 | 要 | 免費方案即可 |
+
+### 社群
+
+| 來源 | 涵蓋範圍 | 需要金鑰 | 費用 |
+| ---- | -------- | -------- | ---- |
+| ApeWisdom | Reddit 各股討論熱度排名（美股） | 不用 | 免費 |
+| Hacker News | 科技社群討論與留言，適合科技、半導體股 | 不用 | 免費 |
+| PTT 股票板 | 台股散戶討論 | 不用 | 免費 |
+| [Reddit API](https://www.reddit.com/prefs/apps) | Reddit 貼文 | 要（伺服器環境變數） | 免費 |
+| StockTwits（經 [Apify](https://console.apify.com/settings/integrations)） | 美股散戶貼文，附使用者自標的看多／看空 | 要 | 按用量計費，約每 1,000 則 $0.03 美元 |
+| X（經 [Apify](https://console.apify.com/settings/integrations)） | X（Twitter）貼文 | 要 | 需 Apify 付費方案，約每 1,000 則 $0.40 美元 |
+| [LunarCrush](https://lunarcrush.com/developers/api/authentication) | X、Reddit、YouTube、TikTok 社群指標 | 要 | 社群端點需付費方案 |
+
+### Jina AI 全文解析
+
+[Jina AI Reader](https://jina.ai/reader/) 會把新聞網址轉成乾淨的內文，讓 AI 讀到全文而不只是標題。每個有網址的來源都會用到：新聞前 3 則、PTT 前 2 篇、Hacker News 討論的原始文章、Reddit／StockTwits／X 貼文分享的外部連結，以及 OpenAI 網路搜尋引用的文章。不填金鑰也能用（每分鐘約 20 次）；填寫 Jina 金鑰後速度較快，並可使用 Jina 搜尋找 Reddit、X 上的貼文。
+
+### 查詢順序
+
+- **新聞：** 聚合來源（GDELT + Finnhub、Marketaux、NewsAPI 的免費方案）→ Google 新聞 → FinMind → Alpha Vantage → OpenAI 網路搜尋。前一層有資料就不會呼叫下一層。
+- **社群：** 先同時查詢免費來源（ApeWisdom、Hacker News、PTT、Reddit）；只要其中任一個有實質資料，就不呼叫付費來源（StockTwits、X、LunarCrush、Jina 搜尋）。
+- 所有來源都沒有資料時，社群分析師只寫一段簡短說明，情緒面視為中性。
+
+---
+
 ## 🚀 快速開始
 
 ### 前置要求
@@ -270,6 +319,14 @@ TradingAgentsX/
 | OpenAI                | GPT 模型       | https://platform.openai.com/api-keys         |
 | Alpha Vantage（選填） | 美股基本面資料 | https://www.alphavantage.co/support/#api-key |
 | FinMind（選填）       | 台股資料       | https://finmindtrade.com/                    |
+| Finnhub（選填）       | 新聞           | https://finnhub.io/register                  |
+| Marketaux（選填）     | 新聞與情緒分數 | https://www.marketaux.com/register           |
+| NewsAPI.org（選填）   | 新聞           | https://newsapi.org/register                 |
+| Jina AI（選填）       | 全文擷取、社群搜尋 | https://jina.ai/reader/                  |
+| Apify（選填）         | StockTwits、X 貼文 | https://console.apify.com/settings/integrations |
+| LunarCrush（選填）    | 社群指標       | https://lunarcrush.com/developers/api/authentication |
+
+新聞與社群金鑰都是選填，可以在網頁右上角「設定」填寫（設定頁每個欄位都附申請連結），也可以由部署者設成伺服器環境變數（`FINNHUB_API_KEY`、`MARKETAUX_API_KEY`、`NEWSAPI_API_KEY`、`JINA_API_KEY`、`APIFY_API_TOKEN`、`LUNARCRUSH_API_KEY`、`REDDIT_CLIENT_ID`／`REDDIT_CLIENT_SECRET`），讓所有使用者共用。網頁上填寫的金鑰優先於伺服器設定。完整清單見 `.env.example`。
 
 ### 安裝步驟
 
@@ -394,7 +451,7 @@ docker compose down -v
 
 ### 1. 配置 API 金鑰
 
-點擊右上角「設定」按鈕，輸入您的 API 金鑰。
+點擊右上角「設定」按鈕，輸入您的 API 金鑰。每個欄位下方都有申請網址；新聞與社群資料的金鑰皆為選填，不填也能用免費來源。
 
 ### 2. 選擇分析參數
 
