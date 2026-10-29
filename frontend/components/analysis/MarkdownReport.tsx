@@ -7,6 +7,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import { normalizeReportMarkdown } from "@/lib/report-format";
 
 interface MarkdownReportProps {
   children: string;
@@ -21,6 +22,13 @@ export function MarkdownReport({ children, className, compact = false }: Markdow
       className={cn(
         "prose max-w-none dark:prose-invert",
         compact ? "prose-sm" : "prose-sm xl:prose-base",
+        // One size per heading level across every report: only headings are
+        // enlarged and bold; body text stays regular (key terms use **bold**).
+        compact
+          ? "prose-h2:text-base prose-h3:text-sm"
+          : "prose-h2:text-lg xl:prose-h2:text-xl prose-h3:text-base xl:prose-h3:text-lg",
+        "prose-h2:font-bold prose-h2:mt-6 prose-h2:mb-3 prose-h3:font-semibold prose-h3:mt-4 prose-h3:mb-2",
+        "[&>*:first-child]:mt-0",
         // Tables can't wrap, so make each one its own horizontal scroller.
         // `block` is what allows the overflow; the page itself never scrolls sideways.
         "prose-table:block prose-table:overflow-x-auto prose-table:max-w-full",
@@ -32,7 +40,7 @@ export function MarkdownReport({ children, className, compact = false }: Markdow
         className,
       )}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{normalizeReportMarkdown(children)}</ReactMarkdown>
     </div>
   );
 }

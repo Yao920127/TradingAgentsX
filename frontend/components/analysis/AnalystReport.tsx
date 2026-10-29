@@ -3,8 +3,7 @@
  */
 "use client";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { MarkdownReport } from "@/components/analysis/MarkdownReport";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Reports } from "@/lib/types";
@@ -169,11 +168,7 @@ function ReportSection({ title, content, isDebateHistory = false }: { title: str
   return (
     <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 dark:from-blue-900/10 dark:to-cyan-900/10 hover:shadow-md transition-shadow">
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
-      <div className="prose prose-sm xl:prose-base dark:prose-invert max-w-none overflow-x-auto prose-table:border-collapse prose-table:w-full prose-td:border prose-td:border-gray-300 dark:prose-td:border-gray-600 prose-td:p-2 prose-th:border prose-th:border-gray-300 dark:prose-th:border-gray-600 prose-th:p-2 prose-th:bg-gray-100 dark:prose-th:bg-gray-800">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {displayContent}
-        </ReactMarkdown>
-      </div>
+      <MarkdownReport>{displayContent}</MarkdownReport>
     </div>
   );
 }

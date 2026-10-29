@@ -396,3 +396,34 @@ def test_report_text_leaves_complete_output_untouched():
 def test_to_traditional_keeps_traditional_vocabulary():
     # s2twp 會把「項目」改成「專案」、「數據」改成「資料」；s2tw 只轉字形
     assert to_traditional("项目 数据 項目 數據") == "項目 數據 項目 數據"
+
+
+@pytest.mark.parametrize("opener", [
+    "數據已全數取得，現在進行深度整合分析並撰寫完整技術報告。",
+    "資料已獲取,現在進行全面的市場情緒分析。",
+    "I have gathered all the data. Now let me write the report.",
+])
+def test_report_preamble_and_rules_are_removed(opener):
+    from tradingagents.utils.report_format import normalize_report_markdown
+
+    result = normalize_report_markdown(f"{opener}\n\n---\n\n## 一、市場概況\n內文\n\n—-\n\n## 二、技術分析")
+
+    assert result == "## 一、市場概況\n\n內文\n\n## 二、技術分析"
+
+
+def test_body_sentence_with_action_word_is_not_treated_as_preamble():
+    from tradingagents.utils.report_format import normalize_report_markdown
+
+    body = "股價自 9 月高點回檔，現在進行整理。"
+
+    assert normalize_report_markdown(body) == body
+
+
+def test_label_lines_and_tables_get_separated_and_bullets_unified():
+    from tradingagents.utils.report_format import normalize_report_markdown
+
+    text = "**分析日期:** 2026年5月10日\n**分析標的:** 輝達\n▸ **50日均線**：330.42\n| 項目 | 數值 |\n|---|---|"
+
+    assert normalize_report_markdown(text) == (
+        "**分析日期:** 2026年5月10日\n\n**分析標的:** 輝達\n- **50日均線**：330.42\n\n| 項目 | 數值 |\n|---|---|"
+    )

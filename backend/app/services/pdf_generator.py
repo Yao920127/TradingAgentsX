@@ -545,6 +545,9 @@ class PDFGenerator:
         w = pdf.epw  # safe explicit width
 
         text = self._replace_emojis(line_stripped)
+        # Horizontal rules (---, ***, —-) are dropped: sections are separated by headings
+        if re.match(r'^[-\u2014\u2013*_=]{2,}$', text):
+            return
         # Markdown blockquote: render the quoted text as regular body text
         if text.startswith('>'):
             text = text.lstrip('> ').strip() or text
