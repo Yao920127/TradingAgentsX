@@ -29,6 +29,7 @@ MAX_ARTICLES = 15
 PER_PROVIDER_LIMIT = 10
 JINA_TOP_N = 3
 GDELT_MIN_INTERVAL = 5.0
+GDELT_ATTEMPTS = 2  # 被限流時等待間隔後重試一次
 
 _gdelt_lock = threading.Lock()
 _gdelt_last_call = 0.0
@@ -37,16 +38,21 @@ ProviderCall = tuple[str, Callable[[], list[Article]]]
 
 
 def _throttled_gdelt(*args) -> list[Article]:
-    """GDELT 限制每 5 秒 1 次，新聞與社群分析師並行時需排隊。"""
+    """GDELT 限制每 5 秒 1 次，並行查詢時需排隊；被限流時等待後重試一次。"""
     global _gdelt_last_call
     with _gdelt_lock:
-        wait = GDELT_MIN_INTERVAL - (time.monotonic() - _gdelt_last_call)
-        if wait > 0:
-            time.sleep(wait)
-        try:
-            return providers.gdelt_news(*args)
-        finally:
-            _gdelt_last_call = time.monotonic()
+        for attempt in range(GDELT_ATTEMPTS):
+            wait = GDELT_MIN_INTERVAL - (time.monotonic() - _gdelt_last_call)
+            if wait > 0:
+                time.sleep(wait)
+            try:
+                return providers.gdelt_news(*args)
+            except NewsProviderError as e:
+                if "速率限制" not in str(e) or attempt == GDELT_ATTEMPTS - 1:
+                    raise
+            finally:
+                _gdelt_last_call = time.monotonic()
+        return []
 
 
 def _yf_symbol(ticker: str) -> str:

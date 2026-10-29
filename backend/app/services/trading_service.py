@@ -219,7 +219,7 @@ class TradingService:
                 else:
                     # 美股與其他市場：新聞 / 社群沿用 default_config 的 aggregator
                     # （Finnhub / Marketaux / NewsAPI / GDELT + Jina）。聚合來源全部無結果時，
-                    # route_to_vendor 依序備援到 google → alpha_vantage → openai。
+                    # route_to_vendor 先備援到免費來源（google → local），最後才用付費來源（alpha_vantage → openai）。
                     logger.info("Market type: US/international stocks - using aggregated news and social providers")
 
                 # Set language for agent reports

@@ -26,6 +26,10 @@ from .finmind_common import (
     FinMindDataNotFoundError,
     format_output,
 )
+from .jina_reader import attach_content
+
+# 台股新聞前幾則以 Jina Reader 補上全文（FinMind 新聞沒有內文欄位）
+JINA_TOP_N = 3
 
 
 def get_news(
@@ -155,6 +159,11 @@ def get_news(
         except FinMindError:
             pass
     
+    # 完全沒有資料（例如美股代碼）時回報錯誤，讓 route_to_vendor 繼續備援，
+    # 而不是把「0 則」當成成功而提早停止
+    if not news_items:
+        raise FinMindDataNotFoundError(f"FinMind 查無 {ticker} 在 {start_date} ~ {end_date} 的新聞或公告")
+
     # 按日期排序（最新的在前）
     news_items.sort(key=lambda x: x.get("date", ""), reverse=True)
     
@@ -167,7 +176,8 @@ def get_news(
         "items": len(news_items),
         "news_count": news_count,
         "note": f"包含 {news_count} 則新聞" + (f"和 {other_count} 則公司公告" if other_count > 0 else ""),
-        "feed": news_items[:15]  # 限制最多 15 筆
+        # 限制最多 15 筆；前 3 則有連結的新聞以 Jina Reader 補上全文
+        "feed": attach_content(news_items[:15], "link", JINA_TOP_N),
     }
     
     return format_output(result, use_toon)

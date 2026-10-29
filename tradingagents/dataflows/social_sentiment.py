@@ -1,16 +1,20 @@
 """
 社群情緒資料聚合（get_social_sentiment）。
 
-來源（皆為盡力而為，單一來源失敗不影響其他來源）：
+分兩階段查詢，先免費、後付費（單一來源失敗不影響其他來源）：
+
+第一階段：免費來源（同時查詢）
 - ApeWisdom    Reddit 各股討論熱度排名（免金鑰，美股）
-- Hacker News  科技社群討論與留言（免金鑰，適合科技 / 半導體股）
+- Hacker News  科技社群討論與留言（免金鑰，適合科技 / 半導體股；以 Jina Reader 擷取討論連結的原始文章）
 - PTT 股票板   台股散戶討論（免金鑰，台股；以 Jina Reader 擷取內文）
-- Reddit       官方 API（選用，需 REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET）
-- Jina 搜尋    以 s.jina.ai 搜尋 Reddit / X 貼文（選用，需 JINA_API_KEY；Reddit API 無結果時備援）
-- StockTwits / X / LunarCrush  見 social_paid_sources.py（選用，需金鑰）
+- Reddit       官方 API（免費，需 REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET）
+
+第二階段：付費來源（只有第一階段完全沒有實質資料時才啟用）
+- StockTwits / X  經 Apify 擷取，按用量計費（APIFY_API_TOKEN）
+- LunarCrush      社群端點需付費方案（LUNARCRUSH_API_KEY）
+- Jina 搜尋       以 s.jina.ai 搜尋 Reddit / X 貼文，消耗 Jina 額度（JINA_API_KEY）
 
 新聞情緒分數（Marketaux）屬於新聞面，由新聞分析師使用，這裡不重複計入。
-
 Reddit 與 StockTwits 的公開端點會對伺服器回傳 403，因此不採用免金鑰爬取。
 """
 from __future__ import annotations
@@ -23,7 +27,7 @@ from typing import Callable
 
 import requests
 
-from .jina_reader import read_article
+from .jina_reader import read_article, read_urls
 from .social_paid_sources import lunarcrush_topic, stocktwits_messages, x_posts
 from .news_models import (
     REQUEST_TIMEOUT,
@@ -42,6 +46,8 @@ APEWISDOM_PAGES = 3
 HN_COMMENT_STORIES = 2
 HN_COMMENTS_PER_STORY = 3
 PTT_JINA_POSTS = 2
+REDDIT_JINA_LINKS = 2  # 連到外部文章的 Reddit 貼文，讀取前幾篇原始文章
+REDDIT_OWN_DOMAINS = ("reddit.com", "redd.it")  # 圖片、相簿、站內連結不是外部文章
 REDDIT_SUBREDDITS = "stocks+investing+wallstreetbets+StockMarket+ValueInvesting"
 
 APEWISDOM_UNRANKED = "ApeWisdom：未上榜"
@@ -111,15 +117,22 @@ def hacker_news(keyword: str, start: str, end: str) -> SourceResult:
     hits = sorted(data.get("hits") or [], key=lambda h: h.get("num_comments") or 0, reverse=True)
     if not hits:
         return "Hacker News：0 則", ""
-    with ThreadPoolExecutor(max_workers=HN_COMMENT_STORIES) as pool:
-        comments = list(pool.map(lambda h: _hn_comments(h["objectID"]), hits[:HN_COMMENT_STORIES]))
+    top = hits[:HN_COMMENT_STORIES]
+    # 討論最熱的幾則：同時抓留言（Algolia API）與討論所連結的原始文章（Jina Reader）
+    with ThreadPoolExecutor(max_workers=HN_COMMENT_STORIES * 2) as pool:
+        comment_jobs = [pool.submit(_hn_comments, h["objectID"]) for h in top]
+        article_jobs = [pool.submit(read_article, h["url"]) if h.get("url") else None for h in top]
+        comments = [job.result() for job in comment_jobs]
+        articles = [job.result() if job else "" for job in article_jobs]
     lines = ["## Hacker News 科技社群討論"]
     for i, hit in enumerate(hits):
         lines.append(
             f"- {hit.get('created_at', '')[:10]}｜{hit.get('title')}｜"
             f"{hit.get('points') or 0} 分、{hit.get('num_comments') or 0} 則留言"
         )
-        if i < len(comments):
+        if i < len(top):
+            if articles[i]:
+                lines.append(f"  > 原始文章摘錄：{truncate(articles[i], SNIPPET_LIMIT * 2)}")
             lines.extend(f"  > 留言：{c}" for c in comments[i])
     return f"Hacker News：{len(hits)} 則", "\n".join(lines)
 
@@ -191,11 +204,19 @@ def reddit_posts(ticker: str, keyword: str) -> SourceResult:
     )
     if not submissions:
         return "Reddit：0 則", ""
+    # 連結型貼文（非純文字貼文）以 Jina Reader 讀取它分享的原始文章
+    link_posts = [
+        s for s in submissions
+        if not s.is_self and s.url and not any(d in s.url for d in REDDIT_OWN_DOMAINS)
+    ][:REDDIT_JINA_LINKS]
+    linked = dict(zip((s.id for s in link_posts), read_urls([s.url for s in link_posts])))
     lines = ["## Reddit 貼文（分數｜留言數｜看板｜標題）"]
     for s in submissions:
         lines.append(f"- {s.score}｜{s.num_comments}｜r/{s.subreddit.display_name}｜{s.title}")
         if s.selftext:
             lines.append(f"  > {truncate(s.selftext, SNIPPET_LIMIT)}")
+        if linked.get(s.id):
+            lines.append(f"  > 分享文章摘錄：{truncate(linked[s.id], SNIPPET_LIMIT * 2)}")
     return f"Reddit：{len(submissions)} 則", "\n".join(lines)
 
 
@@ -209,7 +230,8 @@ def jina_social_search(keyword: str) -> SourceResult:
         "https://s.jina.ai/",
         "Jina 搜尋",
         params={"q": f'"{keyword}" stock (site:reddit.com OR site:x.com)'},
-        headers={"Authorization": f"Bearer {api_key}", "Accept": "application/json", "X-Respond-With": "no-content"},
+        # 不加 X-Respond-With: no-content，讓 Jina 一併回傳搜尋結果頁面的內文
+        headers={"Authorization": f"Bearer {api_key}", "Accept": "application/json"},
     )
     results = (response.json().get("data") or [])[:ITEM_LIMIT]
     if not results:
@@ -217,8 +239,9 @@ def jina_social_search(keyword: str) -> SourceResult:
     lines = ["## Jina 搜尋：Reddit / X 社群貼文"]
     for r in results:
         lines.append(f"- {r.get('title', '')}（{r.get('url', '')}）")
-        if r.get("description"):
-            lines.append(f"  > {truncate(r['description'], SNIPPET_LIMIT)}")
+        text = r.get("content") or r.get("description")
+        if text:
+            lines.append(f"  > {truncate(text, SNIPPET_LIMIT * 2)}")
     return f"Jina 搜尋：{len(results)} 則", "\n".join(lines)
 
 
@@ -231,6 +254,16 @@ def _safe(label: str, fn: Callable[[], SourceResult]) -> SourceResult:
         return f"{label}：無法使用（{e}）", ""
     except Exception as e:
         return f"{label}：失敗（{type(e).__name__}: {e}）", ""
+
+
+def _run_sources(sources: list[tuple[str, Callable[[], SourceResult]]]) -> list[SourceResult]:
+    with ThreadPoolExecutor(max_workers=len(sources)) as pool:
+        return list(pool.map(lambda c: _safe(*c), sources))
+
+
+def _has_substance(outcomes: list[SourceResult]) -> bool:
+    """「未進入熱度排行」只是弱訊號，不算真正的社群資料。"""
+    return any(block and not status.startswith(APEWISDOM_UNRANKED) for status, block in outcomes)
 
 
 NO_DATA_NOTICE = (
@@ -246,26 +279,27 @@ def get_social_sentiment(ticker: str, curr_date: str, look_back_days: int = 14) 
     name = resolve_company_name(yf_symbol)
     keyword = search_name(name) if name != yf_symbol else ticker
 
-    primary = [
-        ("StockTwits", lambda: stocktwits_messages(ticker)),
-        ("X", lambda: x_posts(ticker, keyword, start, end)),
-        ("LunarCrush", lambda: lunarcrush_topic(ticker, keyword)),
+    free_sources = [
         ("ApeWisdom", lambda: apewisdom_rank(ticker)),
         ("Hacker News", lambda: hacker_news(keyword, start, end)),
         ("PTT", lambda: ptt_stock(ticker, start, end)),
         ("Reddit", lambda: reddit_posts(ticker, keyword)),
     ]
-    with ThreadPoolExecutor(max_workers=len(primary)) as pool:
-        outcomes = list(pool.map(lambda c: _safe(*c), primary))
+    paid_sources = [
+        ("StockTwits", lambda: stocktwits_messages(ticker)),
+        ("X", lambda: x_posts(ticker, keyword, start, end)),
+        ("LunarCrush", lambda: lunarcrush_topic(ticker, keyword)),
+        ("Jina 搜尋", lambda: jina_social_search(keyword)),
+    ]
 
-    reddit_found = bool(outcomes[-1][1])
-    if not reddit_found:
-        outcomes.append(_safe("Jina 搜尋", lambda: jina_social_search(keyword)))
+    outcomes = _run_sources(free_sources)
+    if _has_substance(outcomes):
+        outcomes += [(f"{label}：未啟用（免費來源已有資料，不使用付費來源）", "") for label, _ in paid_sources]
+    else:
+        outcomes += _run_sources(paid_sources)
 
     blocks = [block for _, block in outcomes if block]
-    # 「未進入熱度排行」只是弱訊號，不算真正的社群資料
-    has_substance = any(block and not status.startswith(APEWISDOM_UNRANKED) for status, block in outcomes)
     statuses = "\n".join(f"- {status}" for status, _ in outcomes)
     header = f"# {name}（{ticker}）社群情緒資料 {start} ~ {end}"
-    body = "\n\n".join(blocks if has_substance else [NO_DATA_NOTICE, *blocks])
+    body = "\n\n".join(blocks if _has_substance(outcomes) else [NO_DATA_NOTICE, *blocks])
     return f"{header}\n\n{body}\n\n## 資料來源狀態\n{statuses}"

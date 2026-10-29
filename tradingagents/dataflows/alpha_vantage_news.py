@@ -1,4 +1,8 @@
 from .alpha_vantage_common import _make_api_request, format_datetime_for_api
+from .jina_reader import attach_content
+
+# 前幾則新聞用 Jina Reader 補上全文（Alpha Vantage 只提供 200 字摘要）
+JINA_TOP_N = 3
 import json
 
 import os
@@ -66,6 +70,8 @@ def get_news(ticker, start_date, end_date, use_toon: bool = True) -> dict[str, s
                 
                 summarized_feed.append(summarized_item)
             
+            summarized_feed = attach_content(summarized_feed, "url", JINA_TOP_N)
+
             # 建立總結的回應
             summarized_data = {
                 "items": data.get("items", "0"),
@@ -137,7 +143,7 @@ def get_global_news(curr_date, look_back_days: int = 7, limit: int = 5, use_toon
                 }
                 for item in data.get("feed", [])
             ]
-            summarized = {"items": str(len(feed)), "feed": feed}
+            summarized = {"items": str(len(feed)), "feed": attach_content(feed, "url", JINA_TOP_N)}
             if use_toon:
                 try:
                     from tradingagents.utils.toon_converter import convert_json_to_toon

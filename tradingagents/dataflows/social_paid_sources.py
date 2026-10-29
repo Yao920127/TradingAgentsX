@@ -15,6 +15,7 @@ from typing import Any
 
 import requests
 
+from .jina_reader import extract_urls, read_urls
 from .news_models import NewsProviderError, require_env_key, truncate
 
 APIFY_SYNC_URL = "https://api.apify.com/v2/acts/{actor}/run-sync-get-dataset-items"
@@ -25,10 +26,23 @@ STOCKTWITS_MESSAGES = 50
 X_TWEETS = 50  # Tweet Scraper V2 每次查詢最少 50 則
 SHOWN_POSTS = 8
 SNIPPET_LIMIT = 240
+JINA_LINKS = 2  # 貼文中分享的外部連結，以 Jina Reader 讀取前幾個
+# 平台自己的連結（引用貼文、個人頁）不是外部文章，不讀取
+PLATFORM_DOMAINS = ("stocktwits.com", "x.com/", "twitter.com/")
 
 LUNARCRUSH_BASE = "https://lunarcrush.com/api4/public"
 
 SourceResult = tuple[str, str]
+
+
+def _linked_articles(texts: list[str]) -> list[str]:
+    """讀取貼文中分享的前幾個外部連結，回傳 Markdown 條列（無內容則為空清單）。"""
+    urls = extract_urls("\n".join(texts), JINA_LINKS, exclude_domains=PLATFORM_DOMAINS)
+    return [
+        f"- 分享連結 {url}\n  > {truncate(content, SNIPPET_LIMIT * 2)}"
+        for url, content in zip(urls, read_urls(urls))
+        if content
+    ]
 
 
 def _run_apify_actor(actor: str, payload: dict, provider: str) -> list[dict]:
@@ -77,6 +91,7 @@ def stocktwits_messages(ticker: str) -> SourceResult:
             f"{m.get('likes') or 0} 讚｜{truncate(m['body'], SNIPPET_LIMIT)}"
             for m in top
         ),
+        *_linked_articles([m["body"] for m in top]),
     ]
     return f"StockTwits：{len(messages)} 則", "\n".join(lines)
 
@@ -110,6 +125,7 @@ def x_posts(ticker: str, keyword: str, start: str, end: str) -> SourceResult:
             f"{truncate(t['text'], SNIPPET_LIMIT)}"
             for t in top
         ),
+        *_linked_articles([t["text"] for t in top]),
     ]
     return f"X：{len(tweets)} 則", "\n".join(lines)
 

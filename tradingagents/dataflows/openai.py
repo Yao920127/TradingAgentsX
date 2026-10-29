@@ -1,6 +1,10 @@
 import os
 from openai import OpenAI
 from .config import get_config
+from .jina_reader import append_linked_content
+
+# 網路搜尋回覆中引用的前幾個新聞網址，以 Jina Reader 補上全文
+JINA_TOP_N = 3
 
 
 def get_stock_news_openai(query, start_date, end_date):
@@ -48,7 +52,8 @@ def get_stock_news_openai(query, start_date, end_date):
         store=True,
     )
 
-    return response.output[1].content[0].text # type: ignore
+    # 讀取回覆中引用的新聞網址，附上 Jina 全文摘錄
+    return append_linked_content(response.output[1].content[0].text, JINA_TOP_N) # type: ignore
 
 
 def get_global_news_openai(curr_date, look_back_days=7, limit=5):
@@ -96,7 +101,7 @@ def get_global_news_openai(curr_date, look_back_days=7, limit=5):
         store=True,
     )
 
-    return response.output[1].content[0].text # type: ignore
+    return append_linked_content(response.output[1].content[0].text, JINA_TOP_N) # type: ignore
 
 
 def get_fundamentals_openai(ticker, curr_date):

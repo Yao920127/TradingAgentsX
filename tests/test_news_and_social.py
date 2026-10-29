@@ -200,3 +200,136 @@ def test_empty_vendor_result_falls_back_to_next_vendor(monkeypatch):
     monkeypatch.setattr(interface, "get_config", lambda: {"tool_vendors": {"get_news": "local"}})
 
     assert interface.route_to_vendor("get_news", "SKHY", "2026-10-16", "2026-10-30") == "google news"
+
+
+def _recording_paid_sources(calls):
+    def paid(label):
+        def impl(*args):
+            calls.append(label)
+            return f"{label}：1 則", f"## {label} 資料"
+        return impl
+    return {
+        "stocktwits_messages": paid("StockTwits"),
+        "x_posts": paid("X"),
+        "lunarcrush_topic": paid("LunarCrush"),
+        "jina_social_search": paid("Jina 搜尋"),
+    }
+
+
+def test_paid_social_sources_skipped_when_free_sources_have_data(monkeypatch):
+    calls = []
+    _stub_social(monkeypatch, hacker_news=lambda *a: ("Hacker News：2 則", "## HN 討論"),
+                 **_recording_paid_sources(calls))
+
+    report = social_sentiment.get_social_sentiment("SKHY", "2026-10-30")
+
+    assert calls == []
+    assert "StockTwits：未啟用（免費來源已有資料" in report
+
+
+def test_paid_social_sources_used_when_free_sources_are_empty(monkeypatch):
+    calls = []
+    _stub_social(monkeypatch, **_recording_paid_sources(calls))
+
+    report = social_sentiment.get_social_sentiment("SKHY", "2026-10-30")
+
+    assert sorted(calls) == sorted(["StockTwits", "X", "LunarCrush", "Jina 搜尋"])
+    assert "## StockTwits 資料" in report
+    assert "【社群資料不足】" not in report
+
+
+def test_google_news_fallback_adds_jina_content_to_top_three(monkeypatch):
+    from tradingagents.dataflows import google
+
+    items = [
+        {"link": f"https://news.example/{i}", "title": f"Story {i}", "snippet": "s", "date": "", "source": "src"}
+        for i in range(4)
+    ]
+    monkeypatch.setattr(google, "getNewsData", lambda *a: items)
+    monkeypatch.setattr(google, "read_article", lambda url: f"BODY {url[-1]}")
+
+    report = google.get_google_company_news("SKHY", "2026-10-16", "2026-10-30")
+
+    assert "全文摘錄：BODY 0" in report and "全文摘錄：BODY 2" in report
+    assert "BODY 3" not in report
+
+
+# ---------------------------------------------------------------- Jina 共用工具與各來源
+
+def test_extract_urls_dedupes_strips_punctuation_and_excludes_domains():
+    from tradingagents.dataflows.jina_reader import extract_urls
+
+    text = "見 https://a.com/x。另見 (https://b.com/y), 重複 https://a.com/x 與 https://x.com/user/status/1"
+
+    assert extract_urls(text, 5, exclude_domains=("x.com/",)) == ["https://a.com/x", "https://b.com/y"]
+
+
+def test_attach_content_reads_top_n_with_urls_without_mutating(monkeypatch):
+    from tradingagents.dataflows import jina_reader
+
+    monkeypatch.setattr(jina_reader, "read_article", lambda url: f"BODY {url}")
+    items = [{"url": ""}, {"url": "u1"}, {"url": "u2"}, {"url": "u3"}]
+
+    result = jina_reader.attach_content(items, "url", 2)
+
+    assert [r.get("content") for r in result] == [None, "BODY u1", "BODY u2", None]
+    assert "content" not in items[1]
+
+
+def test_append_linked_content_adds_excerpt_section(monkeypatch):
+    from tradingagents.dataflows import jina_reader
+
+    monkeypatch.setattr(jina_reader, "read_article", lambda url: "full text")
+
+    result = jina_reader.append_linked_content("Summary citing https://news.example/a", 3)
+
+    assert result.startswith("Summary citing")
+    assert "## 引用文章全文摘錄" in result and "full text" in result
+
+
+def test_alpha_vantage_news_feed_gets_jina_content(monkeypatch):
+    from tradingagents.dataflows import alpha_vantage_news
+
+    feed = {"feed": [{"title": f"t{i}", "url": f"https://av.example/{i}", "summary": "s"} for i in range(4)]}
+    monkeypatch.setattr(alpha_vantage_news, "_make_api_request", lambda *a: json.dumps(feed))
+    monkeypatch.setattr(alpha_vantage_news, "attach_content",
+                        lambda items, key, n: [{**it, "content": "BODY"} if i < n else it for i, it in enumerate(items)])
+
+    result = alpha_vantage_news.get_news("SKHY", "2026-10-16", "2026-10-30", use_toon=False)
+
+    contents = [item.get("content") for item in json.loads(result)["feed"]]
+    assert contents == ["BODY", "BODY", "BODY", None]
+
+
+def test_stocktwits_reads_external_links_but_not_platform_links(monkeypatch):
+    from tradingagents.dataflows import social_paid_sources
+
+    messages = [
+        {"body": "Earnings beat https://news.example/q3 $SKHY", "sentiment": "bullish", "likes": 5},
+        {"body": "lol https://stocktwits.com/message/1", "sentiment": "bearish", "likes": 1},
+    ]
+    monkeypatch.setattr(social_paid_sources, "_run_apify_actor", lambda *a: messages)
+    read = []
+    monkeypatch.setattr(social_paid_sources, "read_urls", lambda urls: read.extend(urls) or ["Q3 article"] * len(urls))
+
+    status, block = social_paid_sources.stocktwits_messages("SKHY")
+
+    assert read == ["https://news.example/q3"]
+    assert "看多 1 則、看空 1 則" in block and "Q3 article" in block
+
+
+def test_gdelt_retries_once_after_rate_limit(monkeypatch):
+    attempts = []
+
+    def flaky(*args):
+        attempts.append(1)
+        if len(attempts) == 1:
+            raise NewsProviderError("GDELT 超過速率限制（每 5 秒 1 次）")
+        return [_article("Recovered", "https://g.com/ok")]
+
+    monkeypatch.setattr(news_aggregator.providers, "gdelt_news", flaky)
+    monkeypatch.setattr(news_aggregator, "GDELT_MIN_INTERVAL", 0)
+
+    result = news_aggregator._throttled_gdelt("q", "2026-10-16", "2026-10-30", 10)
+
+    assert len(attempts) == 2 and result[0].title == "Recovered"

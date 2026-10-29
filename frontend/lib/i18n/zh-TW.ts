@@ -604,7 +604,7 @@ export const zhTW = {
     // News & social data APIs
     dataSourceApis: "新聞與社群資料 API（皆為選填）",
     dataSourceApisHint:
-      "沒填的來源會自動略過。不填也能用免費來源（GDELT 新聞、Hacker News、PTT、Reddit 熱度），但填越多，新聞面和社群面的資料越完整，非美股、台股的股票也比較找得到資料。",
+      "沒填的來源會自動略過。系統一律先用免費來源（GDELT 新聞、Hacker News、PTT、Reddit 熱度，以及 Finnhub、Marketaux、NewsAPI 的免費方案）；只有免費來源完全找不到資料時，才會使用付費來源（Apify、LunarCrush、Jina 搜尋）。",
     finnhubKey: "Finnhub API Key（新聞）",
     finnhubDesc: "美股與北美上市公司新聞，免費方案即可使用",
     marketauxKey: "Marketaux API Token（新聞）",

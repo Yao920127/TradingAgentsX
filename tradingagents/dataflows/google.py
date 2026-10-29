@@ -1,7 +1,13 @@
 from typing import Annotated
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from concurrent.futures import ThreadPoolExecutor
+
 from .googlenews_utils import getNewsData
+from .jina_reader import read_article
+
+# 前幾則新聞用 Jina Reader 抓全文（Google 搜尋結果只有標題與一句摘要）
+JINA_TOP_N = 3
 
 
 def get_google_news(
@@ -28,15 +34,21 @@ def get_google_news(
 
     news_results = getNewsData(query, before, curr_date)
 
+    if len(news_results) == 0:
+        return ""
+
+    top = news_results[:JINA_TOP_N]
+    with ThreadPoolExecutor(max_workers=len(top)) as pool:
+        contents = list(pool.map(lambda n: read_article(n["link"]) if n.get("link") else "", top))
+
     news_str = ""
 
-    for news in news_results:
+    for i, news in enumerate(news_results):
         news_str += (
             f"### {news['title']} (來源: {news['source']}) \n\n{news['snippet']}\n\n"
         )
-
-    if len(news_results) == 0:
-        return ""
+        if i < len(contents) and contents[i]:
+            news_str += f"> 全文摘錄：{contents[i]}\n\n"
 
     return f"## {query} Google 新聞，從 {before} 到 {curr_date}：\n\n{news_str}"
 

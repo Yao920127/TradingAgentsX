@@ -132,24 +132,27 @@ VENDOR_METHODS = {
         "finmind": get_finmind_income_statement,  # 台股損益表
     },
     # 新聞數據
-    # 備援順序即此 dict 的順序（主要供應商之後）：免金鑰的 google 排在付費來源之前
+    # 備援順序即此 dict 的順序（主要供應商之後）：先免費、後付費
+    #   免費：aggregator（GDELT + 各家免費方案）→ google → local
+    #   付費：alpha_vantage（新聞為付費端點）→ openai（網路搜尋扣 OpenAI 額度）
     "get_news": {
         "aggregator": get_aggregated_news,
         "google": get_google_company_news,
-        "alpha_vantage": get_alpha_vantage_news,
-        "openai": get_stock_news_openai,
         "local": [get_finnhub_news, get_reddit_company_news, get_google_company_news],
         "finmind": get_finmind_news,  # 台股公告/法人動態
+        "alpha_vantage": get_alpha_vantage_news,
+        "openai": get_stock_news_openai,
     },
     "get_global_news": {
-        "aggregator": get_aggregated_global_news,
-        "google": get_global_news_google,  # 免金鑰的全球新聞備援（適用非 OpenAI 供應商）
-        "openai": get_global_news_openai,
-        "alpha_vantage": get_alpha_vantage_global_news,  # 依 topics 的全球新聞（用既有 AV 金鑰）
+        # 先免費、後付費：aggregator → google → finmind → alpha_vantage → openai
         # 已移除 "local": get_reddit_global_news —
         # 它依賴本地 Reddit 資料目錄（部署環境不存在），每次都回空結果卻仍「成功」，
-        # 導致備援鏈提早停止、全球新聞實質關閉。移除後改由 openai / google / finmind 提供。
+        # 導致備援鏈提早停止、全球新聞實質關閉。
+        "aggregator": get_aggregated_global_news,
+        "google": get_global_news_google,  # 免金鑰的全球新聞備援
         "finmind": get_finmind_global_news,  # 台股市場動態
+        "alpha_vantage": get_alpha_vantage_global_news,  # 依 topics 的全球新聞（新聞為付費端點）
+        "openai": get_global_news_openai,  # 網路搜尋，扣 OpenAI 額度
     },
     "get_social_sentiment": {
         "aggregator": get_aggregated_social_sentiment,

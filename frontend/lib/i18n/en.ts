@@ -67,7 +67,7 @@ export const en = {
     // News & social data APIs
     dataSourceApis: "News & Social Data APIs (all optional)",
     dataSourceApisHint:
-      "Sources without a key are skipped. Free sources (GDELT news, Hacker News, PTT, Reddit rankings) work without any key, but each key you add gives more complete news and social data, especially for stocks outside the US and Taiwan.",
+      "Sources without a key are skipped. Free sources always run first (GDELT news, Hacker News, PTT, Reddit rankings, and the free plans of Finnhub, Marketaux and NewsAPI); paid sources (Apify, LunarCrush, Jina search) are used only when free sources find nothing.",
     finnhubKey: "Finnhub API Key (News)",
     finnhubDesc: "News for US and North American listed companies; the free plan is enough",
     marketauxKey: "Marketaux API Token (News)",
