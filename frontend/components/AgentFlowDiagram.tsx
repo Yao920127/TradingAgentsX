@@ -19,7 +19,8 @@ import {
   Users,
   Target,
   BarChart3,
-  FileText
+  FileText,
+  BookOpen
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -36,26 +37,26 @@ export function AgentFlowDiagram() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <DataSourceCard
             icon={<Database className="w-5 h-5" />}
-            name="yfinance"
-            description={t.flowDiagram.stockData}
+            name="yfinance / FinMind / Alpha Vantage"
+            description={t.flowDiagram.priceAndFinancials}
             color="blue"
           />
           <DataSourceCard
+            icon={<Newspaper className="w-5 h-5" />}
+            name="Finnhub · Marketaux · NewsAPI · GDELT"
+            description={t.flowDiagram.multiSourceNews}
+            color="green"
+          />
+          <DataSourceCard
             icon={<MessageSquare className="w-5 h-5" />}
-            name="Reddit API"
+            name="StockTwits · Reddit · Hacker News · PTT"
             description={t.flowDiagram.socialSentiment}
             color="orange"
           />
           <DataSourceCard
-            icon={<Newspaper className="w-5 h-5" />}
-            name="RSS Feed"
-            description={t.flowDiagram.newsInfo}
-            color="green"
-          />
-          <DataSourceCard
-            icon={<DollarSign className="w-5 h-5" />}
-            name="Alpha Vantage / FinMind"
-            description={t.flowDiagram.financialData}
+            icon={<BookOpen className="w-5 h-5" />}
+            name="Jina AI"
+            description={t.flowDiagram.fullTextExtraction}
             color="amber"
           />
         </div>
@@ -82,14 +83,14 @@ export function AgentFlowDiagram() {
             icon={<MessageSquare className="w-5 h-5" />}
             gradient="from-orange-500 to-red-500"
             description={t.flowDiagram.sentimentAnalysis}
-            tasks={[t.flowDiagram.nlpSentiment, t.flowDiagram.discussionHeat, t.flowDiagram.investorConfidence]}
+            tasks={[t.flowDiagram.bullBearRatio, t.flowDiagram.discussionHeat, t.flowDiagram.investorConfidence]}
           />
           <AgentCard
             name={t.agents.news_analyst}
             icon={<Newspaper className="w-5 h-5" />}
             gradient="from-green-500 to-emerald-500"
             description={t.flowDiagram.newsAnalysis}
-            tasks={[t.flowDiagram.newsSummary, t.flowDiagram.eventAssessment, t.flowDiagram.impactPrediction]}
+            tasks={[t.flowDiagram.multiSourceNews, t.flowDiagram.fullTextReading, t.flowDiagram.eventAssessment]}
           />
           <AgentCard
             name={t.agents.fundamentals_analyst}
@@ -282,8 +283,8 @@ function DataSourceCard({
         <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br ${colorClasses[color].split(' ')[0]} ${colorClasses[color].split(' ')[1]} text-white mb-2 shadow-lg`}>
           {icon}
         </div>
-        <h4 className="font-semibold text-xs mb-0.5">{name}</h4>
-        <p className="text-xs text-gray-600 dark:text-gray-400">{description}</p>
+        <h4 className="font-semibold text-xs mb-0.5 text-center">{name}</h4>
+        <p className="text-xs text-gray-600 dark:text-gray-400 text-center">{description}</p>
       </div>
     </Card>
   );

@@ -236,10 +236,10 @@ export const zhTW = {
     finalOutput: "最終輸出：12 份詳細報告",
     
     // Data sources
-    stockData: "股價數據",
     socialSentiment: "社群情緒",
-    newsInfo: "新聞資訊",
-    financialData: "財務數據",
+    priceAndFinancials: "股價與財報",
+    multiSourceNews: "多來源新聞",
+    fullTextExtraction: "新聞與貼文全文",
     
     // Arrow labels
     dataFetch: "資料擷取與清理",
@@ -272,12 +272,11 @@ export const zhTW = {
     rsiIndicator: "RSI 指標",
     macdMomentum: "MACD 動能",
     priceTrend: "價格走勢",
-    nlpSentiment: "NLP 情緒",
+    bullBearRatio: "多空比例",
+    fullTextReading: "全文解讀",
     discussionHeat: "討論熱度",
     investorConfidence: "投資者信心",
-    newsSummary: "新聞摘要",
     eventAssessment: "事件評估",
-    impactPrediction: "影響預測",
     financialAnalysis: "財報分析",
     valuationMetrics: "估值指標",
     profitEvaluation: "盈利評估",

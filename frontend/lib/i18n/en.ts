@@ -372,10 +372,10 @@ export const en = {
     finalOutput: "Final Output: 12 Detailed Reports",
 
     // Data sources
-    stockData: "Stock Data",
     socialSentiment: "Social Sentiment",
-    newsInfo: "News Info",
-    financialData: "Financial Data",
+    priceAndFinancials: "Prices & Financials",
+    multiSourceNews: "Multi-Source News",
+    fullTextExtraction: "Full Article & Post Text",
 
     // Arrow labels
     dataFetch: "Data Fetching & Cleaning",
@@ -408,12 +408,11 @@ export const en = {
     rsiIndicator: "RSI Indicator",
     macdMomentum: "MACD Momentum",
     priceTrend: "Price Trend",
-    nlpSentiment: "NLP Sentiment",
+    bullBearRatio: "Bullish/Bearish Ratio",
+    fullTextReading: "Full-Text Reading",
     discussionHeat: "Discussion Heat",
     investorConfidence: "Investor Confidence",
-    newsSummary: "News Summary",
     eventAssessment: "Event Assessment",
-    impactPrediction: "Impact Prediction",
     financialAnalysis: "Financial Analysis",
     valuationMetrics: "Valuation Metrics",
     profitEvaluation: "Profit Evaluation",
