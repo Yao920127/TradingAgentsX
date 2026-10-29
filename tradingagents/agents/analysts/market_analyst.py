@@ -3,7 +3,7 @@ import json
 from tradingagents.agents.utils.agent_utils import get_stock_data, get_indicators, make_cached_system_message
 from tradingagents.agents.utils.prompts import get_language_instruction, get_language_closing_instruction, get_agent_role_instruction, get_context_message
 from tradingagents.dataflows.config import get_config
-from tradingagents.agents.utils.output_filter import _normalize_content
+from tradingagents.agents.utils.output_filter import report_text
 
 
 def create_market_analyst(llm, language: str = "zh-TW"):
@@ -138,7 +138,7 @@ Please provide a professional, precise, and actionable technical analysis report
         report = state.get("market_report", "")
         
         if len(result.tool_calls) == 0:
-            report = _normalize_content(result.content)
+            report = report_text(result, "Market_Analyst", language)
        
         return {
             "messages": [result],

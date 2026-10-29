@@ -18,8 +18,25 @@ def get_language_instruction(language: str = "zh-TW") -> str:
 def get_language_closing_instruction(language: str = "zh-TW") -> str:
     """Get the language closing instruction placed at the END of agent prompts for maximum compliance."""
     if language == "en":
-        return "**Language Rule: Your ENTIRE response MUST be written in English only. Do NOT use Chinese or any other language.**"
-    return "【語言規定】\n您的回覆必須完全使用繁體中文，嚴格禁止使用英文或其他語言。"
+        return (
+            "**Language Rule: Your ENTIRE response MUST be written in English only. Do NOT use Chinese or any other language.**\n\n"
+            f"{REPORT_FORMAT_RULES_EN}"
+        )
+    return f"【語言規定】\n您的回覆必須完全使用繁體中文，嚴格禁止使用英文或其他語言。\n\n{REPORT_FORMAT_RULES_ZH}"
+
+
+# 所有報告共用的版面規則：標題才放大加粗，內文只有關鍵字粗體
+REPORT_FORMAT_RULES_ZH = """【格式規定】
+- 大標題一律寫成「## 一、標題」，小標題一律寫成「### 1. 標題」；不要使用「#」一級標題
+- 不要用整行粗體（**...**）當標題，也不要把整句或整段加粗
+- 粗體只用在關鍵字、關鍵數字與結論，例如 **持有**、**131.69**、**營業利益率 76.3%**
+- 條列一律用「- 」開頭；表格使用標準 Markdown 表格"""
+
+REPORT_FORMAT_RULES_EN = """**Formatting Rules:**
+- Write every section heading as "## 1. Heading" and every sub-heading as "### Heading"; do not use "#" level-1 headings
+- Do not use a whole bold line (**...**) as a heading, and never bold whole sentences or paragraphs
+- Use bold only for key terms, key numbers and conclusions, e.g. **HOLD**, **131.69**, **operating margin 76.3%**
+- Start bullet points with "- "; use standard Markdown tables"""
 
 
 def get_agent_role_instruction(language: str = "zh-TW") -> str:

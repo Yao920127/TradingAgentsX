@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from tradingagents.graph.trading_graph import TradingAgentsXGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 from tradingagents.utils.zh_convert import localize_for
+from tradingagents.utils.report_format import normalize_reports
 from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -236,8 +237,8 @@ class TradingService:
                 )
             
                 # Extract reports from final state
-                # 繁體中文報告：把 LLM 混入的簡體字轉為繁體（台灣用語），也避免 PDF 缺字
-                reports = localize_for(language, {
+                # 統一標題層級（## / ###）；繁體中文報告另把 LLM 混入的簡體字轉為繁體，也避免 PDF 缺字
+                reports = localize_for(language, normalize_reports({
                     "market_report": final_state.get("market_report"),
                     "sentiment_report": final_state.get("sentiment_report"),
                     "news_report": final_state.get("news_report"),
@@ -247,7 +248,7 @@ class TradingService:
                     "final_trade_decision": final_state.get("final_trade_decision"),
                     "investment_debate_state": final_state.get("investment_debate_state"),
                     "risk_debate_state": final_state.get("risk_debate_state"),
-                })
+                }))
                 decision = localize_for(language, decision)
 
                 # Log report completeness for debugging

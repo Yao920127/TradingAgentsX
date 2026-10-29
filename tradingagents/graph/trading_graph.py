@@ -139,8 +139,9 @@ class TradingAgentsXGraph:
                 )
 
         # Initialize LLMs independently
-        # deep: 16384 tokens（managers/trader 需要較長輸出）
-        # quick: 8192 tokens（analysts/researchers/debaters）
+        # 兩者皆 16000 tokens：Claude 的 thinking token 也計入 max_tokens，
+        # 原本 quick 8192 會讓表格多的基本面報告被截斷。
+        # 不超過約 16K，避免非串流請求觸發 SDK 的逾時保護（Haiku 5.5 / Sonnet 5.5 上限為 128K）。
         print(f"DEBUG: Initializing Deep Thinking LLM: Model={self.config['deep_think_llm']}, BaseURL={deep_base_url}, Key=**********")
         self.deep_thinking_llm = _create_llm(
             self.config["deep_think_llm"],
@@ -154,7 +155,7 @@ class TradingAgentsXGraph:
             self.config["quick_think_llm"],
             quick_base_url, # type: ignore
             quick_api_key,
-            max_tokens=8192,
+            max_tokens=16000,
         )
 
         # 初始化記憶體

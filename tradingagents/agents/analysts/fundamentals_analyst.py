@@ -3,7 +3,7 @@ import json
 from tradingagents.agents.utils.agent_utils import get_fundamentals, get_balance_sheet, get_cashflow, get_income_statement, get_insider_sentiment, get_insider_transactions, make_cached_system_message
 from tradingagents.agents.utils.prompts import get_fundamentals_analyst_prompt, get_agent_role_instruction, get_context_message
 from tradingagents.dataflows.config import get_config
-from tradingagents.agents.utils.output_filter import _normalize_content
+from tradingagents.agents.utils.output_filter import report_text
 
 
 def create_fundamentals_analyst(llm, language: str = "zh-TW"):
@@ -58,7 +58,7 @@ def create_fundamentals_analyst(llm, language: str = "zh-TW"):
         report = state.get("fundamentals_report", "")
 
         if len(result.tool_calls) == 0:
-            report = _normalize_content(result.content)
+            report = report_text(result, "Fundamentals_Analyst", language)
 
         return {
             "messages": [result],

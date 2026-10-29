@@ -333,3 +333,66 @@ def test_gdelt_retries_once_after_rate_limit(monkeypatch):
     result = news_aggregator._throttled_gdelt("q", "2026-10-16", "2026-10-30", 10)
 
     assert len(attempts) == 2 and result[0].title == "Recovered"
+
+
+# ---------------------------------------------------------------- 報告版面校正與截斷偵測
+
+def test_normalize_report_markdown_unifies_heading_styles():
+    from tradingagents.utils.report_format import normalize_report_markdown
+
+    text = "\n".join([
+        "# SK hynix 基本面分析報告",
+        "**一、市場概況**",
+        "股價自高點 **195.37** 回檔。",
+        "二、技術指標解讀",
+        "**主要風險**",
+        "**競爭地位**：在 DRAM 市場形成三強。",
+        "| **項目** | 數值 |",
+    ])
+
+    lines = [line for line in normalize_report_markdown(text).splitlines() if line]
+
+    assert lines == [
+        "## SK hynix 基本面分析報告",
+        "## 一、市場概況",
+        "股價自高點 **195.37** 回檔。",  # 內文關鍵字粗體保留
+        "## 二、技術指標解讀",
+        "### 主要風險",
+        "**競爭地位**：在 DRAM 市場形成三強。",  # 行內粗體不是標題
+        "| **項目** | 數值 |",  # 表格不處理
+    ]
+
+
+def test_long_bold_sentence_is_not_turned_into_heading():
+    from tradingagents.utils.report_format import normalize_report_markdown
+
+    sentence = "**" + "這是一整句被加粗的長篇強調內文，超過小標題長度上限所以應該維持原樣不轉成標題。" + "**"
+
+    assert normalize_report_markdown(sentence) == sentence
+
+
+class _Response:
+    def __init__(self, content, metadata):
+        self.content = content
+        self.response_metadata = metadata
+
+
+@pytest.mark.parametrize("metadata", [{"stop_reason": "max_tokens"}, {"finish_reason": "length"}, {"finish_reason": "MAX_TOKENS"}])
+def test_report_text_flags_truncated_output(metadata):
+    from tradingagents.agents.utils.output_filter import report_text
+
+    result = report_text(_Response([{"type": "text", "text": "| 項目 | FY2024 | Q1 2"}], metadata), "Fundamentals_Analyst")
+
+    assert result.startswith("| 項目 | FY2024 | Q1 2")
+    assert "被截斷" in result
+
+
+def test_report_text_leaves_complete_output_untouched():
+    from tradingagents.agents.utils.output_filter import report_text
+
+    assert report_text(_Response("完整報告", {"stop_reason": "end_turn"}), "Market_Analyst") == "完整報告"
+
+
+def test_to_traditional_keeps_traditional_vocabulary():
+    # s2twp 會把「項目」改成「專案」、「數據」改成「資料」；s2tw 只轉字形
+    assert to_traditional("项目 数据 項目 數據") == "項目 數據 項目 數據"

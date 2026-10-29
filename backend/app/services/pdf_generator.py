@@ -296,6 +296,26 @@ class PDFGenerator:
         text = re.sub(r'\n{3,}', '\n\n', text)
         return text.strip()
 
+    def _inline_markdown(self, text: str) -> str:
+        """Like _clean_markdown but keeps **bold** for fpdf2's markdown=True rendering.
+
+        Only key terms are bold inside body text; every other markup is removed.
+        fpdf2 treats "__" as italic (no italic font is registered) and "--" as
+        underline, so both are neutralised here.
+        """
+        import unicodedata
+        text = unicodedata.normalize('NFKC', text)
+        text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
+        text = re.sub(r'__([^_]+)__', r'\1', text).replace('__', '')
+        text = re.sub(r'(?<![*])\*([^*]+?)\*(?![*])', r'\1', text)
+        text = re.sub(r'`([^`]+?)`', r'\1', text)
+        text = text.replace('--', '\u2014')
+        text = re.sub(r'\*\*\s*\*\*', '', text)  # empty bold pairs
+        if text.count('**') % 2:
+            text = text.replace('**', '')  # unbalanced markers would bold the rest of the line
+        text = re.sub(r' {2,}', ' ', text)
+        return text.strip()
+
     @staticmethod
     def _is_special_line(stripped: str) -> bool:
         """Return True if a line should NOT be merged with adjacent body text."""
@@ -525,6 +545,9 @@ class PDFGenerator:
         w = pdf.epw  # safe explicit width
 
         text = self._replace_emojis(line_stripped)
+        # Markdown blockquote: render the quoted text as regular body text
+        if text.startswith('>'):
+            text = text.lstrip('> ').strip() or text
 
         # Heading levels
         if text.startswith('### '):
@@ -558,7 +581,7 @@ class PDFGenerator:
                 raw = text[2:]
             else:
                 raw = text[1:].lstrip()
-            content = self._clean_markdown(raw)
+            content = self._inline_markdown(raw)
             pdf.set_font(fn, size=10)
             # Hanging indent: temporarily shift left margin so wrapped lines
             # align with the text after the bullet marker, not the page edge.
@@ -566,41 +589,26 @@ class PDFGenerator:
             orig_left = pdf.l_margin
             pdf.set_left_margin(orig_left + BULLET_INDENT)
             pdf.set_x(orig_left + BULLET_INDENT)
-            pdf.multi_cell(pdf.epw, 5.5, '\u2022 ' + content, align='L', wrapmode='CHAR') # type: ignore
+            pdf.multi_cell(pdf.epw, 5.5, '\u2022 ' + content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
             pdf.set_left_margin(orig_left)
             pdf.set_x(orig_left)
         else:
-            content = self._clean_markdown(text)
-            # Detect short "report title" lines
-            is_section_title = (
-                len(content) < 40 and
-                any(kw in content for kw in ['報告', 'Report', 'Analysis', '分析', '摘要', 'Summary'])
-                and ',' not in content and '，' not in content
-                and not content.endswith('。')
-            )
-            # Detect numbered list items: "1. content", "(1) content", etc.
+            # Body text: normal weight; only key terms marked **bold** are bold.
+            # Headings come exclusively from ## / ### (see report_format.normalize_report_markdown).
+            content = self._inline_markdown(text)
             num_match = re.match(r'^(\d+[\.、]\s*|\(\d+\)\s*)', content)
+            pdf.set_font(fn, size=10)
             if num_match and len(content) > len(num_match.group(1)):
-                # Hanging indent for numbered items — checked first to avoid
-                # false detection by is_section_title (e.g. "4. 分析師...")
-                prefix = num_match.group(1)
+                # Hanging indent for numbered items
                 NUM_INDENT = 5  # mm
                 orig_left = pdf.l_margin
-                pdf.set_font(fn, size=10)
                 pdf.set_left_margin(orig_left + NUM_INDENT)
                 pdf.set_x(orig_left + NUM_INDENT)
-                pdf.multi_cell(pdf.epw, 5.5, content, align='L', wrapmode='CHAR') # type: ignore
+                pdf.multi_cell(pdf.epw, 5.5, content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
                 pdf.set_left_margin(orig_left)
                 pdf.set_x(orig_left)
-            elif is_section_title:
-                pdf.set_font(fn, 'B', size=12)
-                self._set_color(pdf, '#2c3e50')
-                pdf.multi_cell(w, 6, content, align='L', wrapmode='CHAR') # type: ignore
-                pdf.ln(1)
-                self._set_color(pdf, '#333333')
             else:
-                pdf.set_font(fn, size=10)
-                pdf.multi_cell(w, 5.5, content, align='L', wrapmode='CHAR') # type: ignore
+                pdf.multi_cell(w, 5.5, content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
 
     # ------------------------------------------------------------------
     # Price chart (unchanged from original)

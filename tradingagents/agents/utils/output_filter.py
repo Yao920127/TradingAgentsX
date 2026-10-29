@@ -34,6 +34,31 @@ def _normalize_content(text) -> str:
     return str(text)
 
 
+# 各供應商「輸出達到 max_tokens 上限」的停止原因
+# Claude: stop_reason=max_tokens；OpenAI 相容: finish_reason=length；Gemini: finish_reason=MAX_TOKENS
+TRUNCATED_STOP_REASONS = {"max_tokens", "length", "MAX_TOKENS"}
+
+TRUNCATION_NOTICES = {
+    "zh-TW": "\n\n註：本報告因模型輸出長度上限而被截斷，最後一段可能不完整。",
+    "en": "\n\nNote: this report was cut off by the model's output length limit; the last section may be incomplete.",
+}
+
+
+def is_truncated(response) -> bool:
+    metadata = getattr(response, "response_metadata", None) or {}
+    reason = metadata.get("stop_reason") or metadata.get("finish_reason")
+    return reason in TRUNCATED_STOP_REASONS
+
+
+def report_text(response, agent_name: str, language: str = "zh-TW") -> str:
+    """取出 LLM 回應的報告文字；若因長度上限被截斷，記錄警告並在文末加註。"""
+    text = _normalize_content(response.content)
+    if not is_truncated(response):
+        return text
+    print(f"警告：{agent_name} 的輸出達到長度上限被截斷（{len(text)} 字元）")
+    return text + TRUNCATION_NOTICES.get(language, TRUNCATION_NOTICES["en"])
+
+
 def count_chinese_words(text: str) -> int:
     """
     Count Chinese characters in text (excluding markdown and tables)

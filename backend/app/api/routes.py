@@ -28,6 +28,7 @@ from backend.app.api.dependencies import get_trading_service, get_current_user_o
 from backend.app.core.config import settings
 from tradingagents.agents.utils.output_filter import _normalize_content
 from tradingagents.utils.zh_convert import localize_for
+from tradingagents.utils.report_format import normalize_report_markdown
 
 logger = logging.getLogger(__name__)
 
@@ -389,7 +390,9 @@ async def download_reports(request: DownloadRequest):
             continue
         
         analyst_name, report_key = ANALYST_MAPPING[analyst_key]
-        report_content = localize_for(language, _normalize_content(get_nested_value(reports_data, report_key)))
+        report_content = localize_for(
+            language, normalize_report_markdown(_normalize_content(get_nested_value(reports_data, report_key)))
+        )
         
         if report_content:
             reports_to_download.append({
@@ -498,7 +501,9 @@ async def generate_pdf_temp(request: DownloadRequest):
         if analyst_key not in ANALYST_MAPPING:
             continue
         analyst_name, report_key = ANALYST_MAPPING[analyst_key]
-        report_content = localize_for(language, _normalize_content(get_nested_value(reports_data, report_key)))
+        report_content = localize_for(
+            language, normalize_report_markdown(_normalize_content(get_nested_value(reports_data, report_key)))
+        )
         if report_content:
             reports_to_download.append({
                 "analyst_name": analyst_name,

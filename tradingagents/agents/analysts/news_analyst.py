@@ -3,7 +3,7 @@ import json
 from tradingagents.agents.utils.agent_utils import get_news, get_global_news, make_cached_system_message
 from tradingagents.agents.utils.prompts import get_news_analyst_prompt, get_agent_role_instruction, get_context_message
 from tradingagents.dataflows.config import get_config
-from tradingagents.agents.utils.output_filter import _normalize_content
+from tradingagents.agents.utils.output_filter import report_text
 
 
 def create_news_analyst(llm, language: str = "zh-TW"):
@@ -56,7 +56,7 @@ def create_news_analyst(llm, language: str = "zh-TW"):
         report = state.get("news_report", "")
 
         if len(result.tool_calls) == 0:
-            report = _normalize_content(result.content)
+            report = report_text(result, "News_Analyst", language)
 
         return {
             "messages": [result],
