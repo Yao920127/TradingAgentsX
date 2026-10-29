@@ -135,9 +135,10 @@ export function FullReport({ sections }: FullReportProps) {
             ref={(el) => {
               sectionRefs.current[section.id] = el;
             }}
+            // The pill nav above already names each section, so no visible label here
+            aria-label={section.label}
             className="scroll-mt-32 px-4 py-6 sm:px-6 md:scroll-mt-36"
           >
-            <h3 className="mb-3 text-base font-semibold">{section.label}</h3>
             <MarkdownReport>{section.content}</MarkdownReport>
           </article>
         ))}
