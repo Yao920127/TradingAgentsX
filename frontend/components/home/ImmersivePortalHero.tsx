@@ -75,7 +75,16 @@ export function ImmersivePortalHero() {
               alt="TradingAgentsX Logo"
               width={112}
               height={112}
-              className="portal-logo-img"
+              className="portal-logo-img dark:hidden"
+              priority
+            />
+            <Image
+              src="/logo-dark.png"
+              alt=""
+              aria-hidden
+              width={112}
+              height={112}
+              className="portal-logo-img hidden dark:block"
               priority
             />
           </div>

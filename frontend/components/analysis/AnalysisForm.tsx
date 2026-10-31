@@ -565,25 +565,25 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           {/* OpenAI */}
                           <SelectItem value="gpt-6-astra">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>GPT-6 Astra</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="gpt-6.1-sol">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>GPT-6.1 Sol</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="gpt-6.1-terra">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>GPT-6.1 Terra</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="gpt-6-luna">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>GPT-6 Luna</span>
                             </div>
                           </SelectItem>
@@ -637,25 +637,25 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           {/* Grok */}
                           <SelectItem value="grok-4.7">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>Grok 4.7</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="grok-4.6">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>Grok 4.6</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="grok-4.5">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>Grok 4.5</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="grok-4.3">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>Grok 4.3</span>
                             </div>
                           </SelectItem>
@@ -746,25 +746,25 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           {/* OpenAI */}
                           <SelectItem value="gpt-6-astra">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>GPT-6 Astra</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="gpt-6.1-sol">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>GPT-6.1 Sol</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="gpt-6.1-terra">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>GPT-6.1 Terra</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="gpt-6-luna">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>GPT-6 Luna</span>
                             </div>
                           </SelectItem>
@@ -819,25 +819,25 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           {/* Grok */}
                           <SelectItem value="grok-4.7">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>Grok 4.7</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="grok-4.6">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>Grok 4.6</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="grok-4.5">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>Grok 4.5</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="grok-4.3">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/grok.svg" alt="Grok" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>Grok 4.3</span>
                             </div>
                           </SelectItem>
@@ -936,13 +936,13 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           {/* OpenAI API 模型 (需要 API Key) */}
                           <SelectItem value="text-embedding-3-small">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>text-embedding-3-small</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="text-embedding-3-large">
                             <div className="flex items-center gap-2">
-                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0" />
+                              <Image src="/logos/openai.svg" alt="OpenAI" width={16} height={16} className="shrink-0 dark:invert" />
                               <span>text-embedding-3-large</span>
                             </div>
                           </SelectItem>

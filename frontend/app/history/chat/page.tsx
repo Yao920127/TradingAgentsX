@@ -40,6 +40,9 @@ interface ChatMessage {
   content: string;
 }
 
+// Single-colour black glyphs that must be inverted to white on dark backgrounds
+const MONO_LOGOS = new Set(["/logos/openai.svg", "/logos/grok.svg"]);
+
 const AVAILABLE_MODELS = [
   // OpenAI
   { id: "gpt-6-astra", name: "GPT-6 Astra", provider: "openai", logo: "/logos/openai.svg" },
@@ -490,7 +493,7 @@ function HistoryChatContent() {
                 {AVAILABLE_MODELS.map((m) => (
                   <SelectItem key={m.id} value={m.id} className="cursor-pointer text-xs sm:text-sm">
                     <div className="flex items-center gap-2">
-                      {m.logo && <Image src={m.logo} alt={m.provider} width={16} height={16} className="shrink-0" />}
+                      {m.logo && <Image src={m.logo} alt={m.provider} width={16} height={16} className={MONO_LOGOS.has(m.logo) ? "shrink-0 dark:invert" : "shrink-0"} />}
                       <span>{m.name}</span>
                     </div>
                   </SelectItem>

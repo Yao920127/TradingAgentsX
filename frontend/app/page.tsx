@@ -288,6 +288,8 @@ function LLMProviderCard({ name, models }: { name: string; models: string[] }) {
     "Qwen (Alibaba)": "/logos/qwen-color.svg",
   };
   const logoSrc = logoMap[name];
+  // OpenAI / Grok marks are single-colour black glyphs: flip to white on dark backgrounds
+  const logoClass = name === "OpenAI" || name === "Grok (xAI)" ? "object-contain dark:invert" : "object-contain";
 
   return (
     <InteractiveCard>
@@ -296,7 +298,7 @@ function LLMProviderCard({ name, models }: { name: string; models: string[] }) {
         <div className="flex items-center gap-3">
           {logoSrc ? (
             <div className="w-10 h-10 rounded-2xl bg-white dark:bg-blue-900/30 flex items-center justify-center shadow-[0_2px_0_rgba(147,197,253,0.4),0_4px_10px_rgba(37,99,235,0.08)] flex-shrink-0">
-              <Image src={logoSrc} alt={`${name} logo`} width={28} height={28} className="object-contain" />
+              <Image src={logoSrc} alt={`${name} logo`} width={28} height={28} className={logoClass} />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900/40 dark:to-blue-900/40 flex items-center justify-center shadow-[0_2px_0_rgba(147,197,253,0.4)] flex-shrink-0">
