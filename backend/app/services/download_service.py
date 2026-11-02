@@ -7,6 +7,7 @@ from typing import List, Dict, Optional
 from datetime import datetime
 
 from backend.app.services.pdf_generator import PDFGenerator
+from tradingagents.dataflows.news_models import resolve_company_name
 
 
 # 分析師中英文名稱對照表
@@ -114,6 +115,9 @@ class DownloadService:
         
         sorted_reports = sorted(reports, key=get_order)
         
+        # Resolve company full name for the cover page (falls back to ticker)
+        company_name = resolve_company_name(ticker)
+
         # Generate combined PDF
         pdf_bytes = self.pdf_generator.generate_combined_report_pdf(
             ticker=ticker,
@@ -124,6 +128,7 @@ class DownloadService:
             language=language,
             deep_think_llm=deep_think_llm,
             quick_think_llm=quick_think_llm,
+            company_name=company_name,
         )
         
         # Generate filename: TICKER_Combined_Report_DATE.pdf

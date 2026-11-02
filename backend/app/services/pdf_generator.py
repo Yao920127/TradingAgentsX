@@ -712,19 +712,30 @@ class PDFGenerator:
     # ------------------------------------------------------------------
 
     def _build_cover_page(self, pdf: FPDF, ticker: str, analysis_date: str, language: str,
-                          deep_think_llm: str = None, quick_think_llm: str = None): # type: ignore
-        """Cover page: large ticker, date, TradingAgentsX branding"""
+                          deep_think_llm: str = None, quick_think_llm: str = None, # type: ignore
+                          company_name: str = None): # type: ignore
+        """Cover page: company full name (ticker fallback), date, TradingAgentsX branding"""
         fn = self._fn()
         pdf.add_page()
 
         # Vertical center — push down ~80mm
         pdf.ln(60)
 
-        # Ticker — large, letter-spaced, regular weight
-        spaced_ticker = '  '.join(ticker)
-        pdf.set_font(fn, '', size=48)
+        has_company_name = bool(company_name) and company_name.strip().upper() != ticker.strip().upper()
         self._set_color(pdf, '#1a1a1a')
-        pdf.cell(0, 20, spaced_ticker, align='C', new_x='LMARGIN', new_y='NEXT')
+        if has_company_name:
+            # Company full name — wraps over multiple lines; ticker shown beneath
+            pdf.set_font(fn, '', size=34)
+            pdf.multi_cell(0, 16, company_name.strip(), align='C', wrapmode='WORD', # type: ignore
+                           new_x='LMARGIN', new_y='NEXT')
+            pdf.set_font(fn, size=20)
+            self._set_color(pdf, '#555555')
+            pdf.cell(0, 14, ticker, align='C', new_x='LMARGIN', new_y='NEXT')
+        else:
+            # Ticker — large, letter-spaced, regular weight
+            spaced_ticker = '  '.join(ticker)
+            pdf.set_font(fn, '', size=48)
+            pdf.cell(0, 20, spaced_ticker, align='C', new_x='LMARGIN', new_y='NEXT')
 
         # Date
         pdf.set_font(fn, size=16)
@@ -974,6 +985,7 @@ class PDFGenerator:
         language: str = 'zh-TW',
         deep_think_llm: str = None, # type: ignore
         quick_think_llm: str = None, # type: ignore
+        company_name: str = None, # type: ignore
     ) -> bytes:
         """
         Generate a combined PDF containing all analyst reports.
@@ -985,6 +997,7 @@ class PDFGenerator:
             price_data: Optional list of OHLC price data dicts
             price_stats: Optional dict with growth_rate, duration_days, etc.
             language: 'en' or 'zh-TW'
+            company_name: Optional company full name shown on the cover page
 
         Returns:
             PDF file content as bytes
@@ -1030,7 +1043,8 @@ class PDFGenerator:
 
         # 1. Cover page (page 1 — no footer)
         self._build_cover_page(pdf, ticker, analysis_date, language,
-                               deep_think_llm=deep_think_llm, quick_think_llm=quick_think_llm)
+                               deep_think_llm=deep_think_llm, quick_think_llm=quick_think_llm,
+                               company_name=company_name)
 
         # 2. TOC page (page 2 — no footer)
         self._build_toc_page(pdf, reports, has_chart, TEAMS, language)
