@@ -2,6 +2,8 @@
 
 <div align="center">
 
+**🌐 語言 / Language：繁體中文 | [English](README_EN.md)**
+
 <img src="frontend/public/icon-v8.png" alt="TradingAgentsX Logo" width="300" />
 
 **基於 LangGraph 的 AI 股票交易分析平台，結合多個專業 AI 代理進行協作決策**

@@ -2,6 +2,8 @@
 
 <div align="center">
 
+**🌐 Language / 語言: [繁體中文](README.md) | English**
+
 <img src="frontend/public/icon-v8.png" alt="TradingAgentsX Logo" width="300" />
 
 **An AI stock trading analysis platform based on LangGraph, combining multiple specialized AI agents for collaborative decision-making**
