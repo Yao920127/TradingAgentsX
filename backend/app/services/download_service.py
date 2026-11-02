@@ -3,11 +3,15 @@ Download Service for Analyst Reports
 Generates combined PDF reports with all analyst analyses
 """
 import io
+import logging
 from typing import List, Dict, Optional
 from datetime import datetime
 
 from backend.app.services.pdf_generator import PDFGenerator
 from tradingagents.dataflows.news_models import resolve_company_name
+from tradingagents.dataflows.finmind_common import _make_api_request, get_yfinance_ticker, normalize_stock_id
+
+logger = logging.getLogger(__name__)
 
 
 # 分析師中英文名稱對照表
@@ -34,6 +38,50 @@ ANALYST_NAME_MAPPING = {
     # 交易員
     "交易員": "Trader",
 }
+
+
+def _is_taiwan_ticker(ticker: str) -> bool:
+    return bool(ticker) and ticker.strip()[0].isdigit()
+
+
+_finmind_name_cache: Dict[str, str] = {}
+
+
+def _finmind_stock_name(ticker: str) -> str:
+    """以 FinMind TaiwanStockInfo 取得台股中文簡稱（如 2379 → 瑞昱），失敗回傳空字串（不快取失敗）。"""
+    if ticker in _finmind_name_cache:
+        return _finmind_name_cache[ticker]
+    try:
+        stock_id = normalize_stock_id(ticker)
+        response = _make_api_request(dataset="TaiwanStockInfo", data_id=stock_id)
+        for item in response.get("data") or []:
+            if item.get("stock_id") == stock_id and item.get("stock_name"):
+                _finmind_name_cache[ticker] = item["stock_name"]
+                return item["stock_name"]
+    except Exception as e:
+        logger.warning("FinMind 取得 %s 公司名稱失敗：%s", ticker, e)
+    return ""
+
+
+def resolve_cover_company_name(ticker: str) -> str:
+    """解析封面公司全名：一律優先英文名（yfinance），台股查不到時退回 FinMind 中文名，再不行回傳 ticker。"""
+    if not _is_taiwan_ticker(ticker):
+        return resolve_company_name(ticker)
+
+    yf_name = ""
+    try:
+        primary = get_yfinance_ticker(ticker)
+        base = primary.split(".")[0]
+        # 市場類型不明時 get_yfinance_ticker 預設 .TW，上櫃股需再試 .TWO
+        for candidate in dict.fromkeys((primary, f"{base}.TW", f"{base}.TWO")):
+            name = resolve_company_name(candidate)
+            if name != candidate:
+                yf_name = name
+                break
+    except Exception as e:
+        logger.warning("yfinance 取得 %s 公司名稱失敗：%s", ticker, e)
+
+    return yf_name or _finmind_stock_name(ticker) or ticker
 
 
 class DownloadService:
@@ -116,7 +164,7 @@ class DownloadService:
         sorted_reports = sorted(reports, key=get_order)
         
         # Resolve company full name for the cover page (falls back to ticker)
-        company_name = resolve_company_name(ticker)
+        company_name = resolve_cover_company_name(ticker)
 
         # Generate combined PDF
         pdf_bytes = self.pdf_generator.generate_combined_report_pdf(
