@@ -1,0 +1,36 @@
+{
+  "files": {
+    "clean_cache.sh": {
+      "name": "清除快取",
+      "description": "刪除整個專案裡各種暫存與快取檔案。"
+    },
+    "main.py": {
+      "name": "範例：直接跑一次分析",
+      "description": "不經網站，直接用 Claude 模型分析 NVDA 一次並印出結果。"
+    },
+    "scripts/_json_rows.py": {
+      "name": "股票清單寫入",
+      "description": "把股票清單寫成網站使用的資料檔。"
+    },
+    "scripts/refresh_stocks_tw.py": {
+      "name": "更新台股清單",
+      "description": "對照證交所與櫃買中心名冊，更新網站的台股代號清單，讓新上市股票也搜得到。"
+    },
+    "scripts/refresh_stocks_us.py": {
+      "name": "更新美股清單",
+      "description": "對照 SEC 名冊更新網站的美股代號清單。"
+    },
+    "setup.py": {
+      "name": "套件安裝設定",
+      "description": "讓 AI 引擎能以套件形式安裝。"
+    },
+    "test-duplicate-records.js": {
+      "name": "清除瀏覽器重複報告",
+      "description": "手動在瀏覽器執行，清掉本機報告庫中的重複紀錄。"
+    },
+    "test.py": {
+      "name": "Yahoo 資料速度測試",
+      "description": "手動測試從 Yahoo 抓 30 天技術指標要花多久。"
+    }
+  }
+}

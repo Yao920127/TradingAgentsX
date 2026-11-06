@@ -1,0 +1,132 @@
+{
+  "files": {
+    "tradingagents/dataflows/__init__.py": {
+      "name": "資料模組入口",
+      "description": "把資料來源資料夾標記為可匯入的程式。"
+    },
+    "tradingagents/dataflows/alpha_vantage_common.py": {
+      "name": "Alpha Vantage 共用",
+      "description": "讀取 Alpha Vantage 金鑰、發送請求，並辨認額度用盡等錯誤。"
+    },
+    "tradingagents/dataflows/alpha_vantage_fundamentals.py": {
+      "name": "Alpha Vantage 財報",
+      "description": "從 Alpha Vantage 取得美股公司概況與三大財務報表。"
+    },
+    "tradingagents/dataflows/alpha_vantage_indicator.py": {
+      "name": "Alpha Vantage 技術指標",
+      "description": "從 Alpha Vantage 取得一段期間的技術指標數值。"
+    },
+    "tradingagents/dataflows/alpha_vantage_news.py": {
+      "name": "Alpha Vantage 新聞",
+      "description": "從 Alpha Vantage 取得個股與市場新聞及情緒分數。"
+    },
+    "tradingagents/dataflows/alpha_vantage_stock.py": {
+      "name": "Alpha Vantage 股價",
+      "description": "從 Alpha Vantage 取得每日股價與除權息事件。"
+    },
+    "tradingagents/dataflows/alpha_vantage.py": {
+      "name": "Alpha Vantage 總入口",
+      "description": "把 Alpha Vantage 各類資料功能集中在一處。"
+    },
+    "tradingagents/dataflows/config.py": {
+      "name": "資料來源設定",
+      "description": "保存並提供目前使用的資料來源設定。"
+    },
+    "tradingagents/dataflows/findmind.py": {
+      "name": "FinMind 舊名相容",
+      "description": "保留拼錯的舊名稱，讓舊程式仍能找到 FinMind 功能。"
+    },
+    "tradingagents/dataflows/finmind_common.py": {
+      "name": "FinMind 共用",
+      "description": "讀取 FinMind 金鑰、發送請求，並處理額度、金鑰錯誤與查無資料。"
+    },
+    "tradingagents/dataflows/finmind_fundamentals.py": {
+      "name": "FinMind 台股財報",
+      "description": "取得台股損益表、資產負債表、現金流量表與月營收。"
+    },
+    "tradingagents/dataflows/finmind_indicator.py": {
+      "name": "FinMind 台股指標與籌碼",
+      "description": "取得台股本益比、殖利率、融資融券、三大法人與外資持股，並計算技術指標。"
+    },
+    "tradingagents/dataflows/finmind_news.py": {
+      "name": "FinMind 台股新聞",
+      "description": "取得台股新聞與除權息、月營收等公告。"
+    },
+    "tradingagents/dataflows/finmind_stock.py": {
+      "name": "FinMind 台股股價",
+      "description": "取得台股每日開高低收與成交量。"
+    },
+    "tradingagents/dataflows/finmind.py": {
+      "name": "FinMind 總入口",
+      "description": "整合台股股價、財報與籌碼，一次產出股票概覽。"
+    },
+    "tradingagents/dataflows/google.py": {
+      "name": "Google 新聞",
+      "description": "透過 Google 新聞搜尋個股與總體經濟新聞。"
+    },
+    "tradingagents/dataflows/googlenews_utils.py": {
+      "name": "Google 新聞抓取",
+      "description": "抓取 Google 新聞搜尋結果，被限流時自動等待重試。"
+    },
+    "tradingagents/dataflows/interface.py": {
+      "name": "資料來源總機",
+      "description": "依設定把每種資料請求送到對的供應商，失敗時自動改用備援來源。"
+    },
+    "tradingagents/dataflows/jina_reader.py": {
+      "name": "新聞全文讀取",
+      "description": "用 Jina 把新聞網址轉成乾淨全文，讓 AI 讀到內容而不只是標題。"
+    },
+    "tradingagents/dataflows/local.py": {
+      "name": "本機離線資料",
+      "description": "從預先下載的檔案讀取股價、新聞與財報，不連網也能測試。"
+    },
+    "tradingagents/dataflows/news_aggregator.py": {
+      "name": "多來源新聞彙整",
+      "description": "同時向 Finnhub、Marketaux、NewsAPI、GDELT 查新聞，去重排序後補上全文。"
+    },
+    "tradingagents/dataflows/news_models.py": {
+      "name": "新聞共用格式",
+      "description": "把各家新聞轉成同一種格式，並提供去重與日期區間工具。"
+    },
+    "tradingagents/dataflows/news_providers.py": {
+      "name": "各家新聞連線",
+      "description": "分別向 Finnhub、Marketaux、NewsAPI、GDELT 取新聞。"
+    },
+    "tradingagents/dataflows/openai.py": {
+      "name": "用 AI 搜尋新聞",
+      "description": "請 OpenAI 模型上網搜尋個股、社群與全球新聞。"
+    },
+    "tradingagents/dataflows/reddit_utils.py": {
+      "name": "Reddit 貼文",
+      "description": "從預先下載的 Reddit 資料中挑出指定日期的熱門貼文。"
+    },
+    "tradingagents/dataflows/retry_utils.py": {
+      "name": "自動重試",
+      "description": "資料請求失敗時，等一下再試，間隔逐次拉長。"
+    },
+    "tradingagents/dataflows/social_paid_sources.py": {
+      "name": "付費社群來源",
+      "description": "有金鑰時，從 StockTwits、X（Twitter）與 LunarCrush 取得社群貼文與熱度。"
+    },
+    "tradingagents/dataflows/social_sentiment.py": {
+      "name": "社群情緒彙整",
+      "description": "先查免費來源（ApeWisdom、Hacker News、PTT、Reddit），再查付費來源，彙整成社群情緒。"
+    },
+    "tradingagents/dataflows/stockstats_utils.py": {
+      "name": "技術指標計算",
+      "description": "用股價資料自行計算各種技術指標。"
+    },
+    "tradingagents/dataflows/utils.py": {
+      "name": "資料小工具",
+      "description": "儲存資料表、取得今天日期等共用小工具。"
+    },
+    "tradingagents/dataflows/y_finance.py": {
+      "name": "Yahoo 股價與財報",
+      "description": "從 Yahoo Finance 取得股價、技術指標、財報與內部人交易。"
+    },
+    "tradingagents/dataflows/yfin_utils.py": {
+      "name": "Yahoo 查詢小工具",
+      "description": "包裝 Yahoo Finance 的常用查詢，例如公司資訊與分析師建議。"
+    }
+  }
+}

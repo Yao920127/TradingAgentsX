@@ -1,0 +1,14 @@
+{
+  "updatedAt": "2026-11-06T08:30:00Z",
+  "tasks": [
+    {
+      "title": "PDF 封面顯示公司全名",
+      "request": "讓 PDF 報告封面顯示公司名稱",
+      "summary": "近期提交讓下載的 PDF 封面印出公司全名：優先用 Yahoo 的英文名，台股查不到時改用 FinMind 中文名，再不行才顯示股票代號。已完成並提交。",
+      "items": [
+        { "ref": "backend/app/services/download_service.py", "change": "changed", "note": "新增查詢公司全名的步驟，依序嘗試 Yahoo 英文名、FinMind 中文名，最後退回代號，封面因此能顯示完整公司名稱。" },
+        { "ref": "backend/app/services/pdf_generator.py", "change": "changed", "note": "封面排版改為印出查到的公司全名。" }
+      ]
+    }
+  ]
+}

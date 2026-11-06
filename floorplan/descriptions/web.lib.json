@@ -1,0 +1,80 @@
+{
+  "files": {
+    "frontend/lib/api-helpers.ts": {
+      "name": "選擇模型金鑰",
+      "description": "依使用者選的 AI 模型，找出該用哪把金鑰和哪個服務網址。"
+    },
+    "frontend/lib/api-key-sources.ts": {
+      "name": "金鑰申請網址",
+      "description": "記錄每種金鑰可以去哪個網站申請。"
+    },
+    "frontend/lib/api.ts": {
+      "name": "主伺服器連線",
+      "description": "網站呼叫主伺服器的統一窗口，會自動附上登入通行證。"
+    },
+    "frontend/lib/backend-url.ts": {
+      "name": "主伺服器位址",
+      "description": "決定網站內建轉接站要把請求送到哪個主伺服器位址。"
+    },
+    "frontend/lib/crypto.ts": {
+      "name": "金鑰加密",
+      "description": "在瀏覽器裡把 AI 金鑰加密後才存起來，讀取時再解密。"
+    },
+    "frontend/lib/i18n/en.ts": {
+      "name": "英文介面文字",
+      "description": "網站所有英文介面文字。"
+    },
+    "frontend/lib/i18n/index.ts": {
+      "name": "多語系入口",
+      "description": "列出可用語言（英文、繁體中文）與預設語言。"
+    },
+    "frontend/lib/i18n/zh-TW.ts": {
+      "name": "繁體中文介面文字",
+      "description": "網站所有繁體中文介面文字。"
+    },
+    "frontend/lib/pending-task.ts": {
+      "name": "未完成分析的記錄",
+      "description": "記下進行中的分析，就算不小心關掉頁面，24 小時內回來仍能接續。"
+    },
+    "frontend/lib/report-format.ts": {
+      "name": "報告排版整理",
+      "description": "把 AI 寫的報告標題層級整理一致，顯示時更整齊。"
+    },
+    "frontend/lib/report-utils.ts": {
+      "name": "報告小工具",
+      "description": "判斷報告語言、找出重複報告、取出最終買賣建議與信心度。"
+    },
+    "frontend/lib/reports-db.ts": {
+      "name": "瀏覽器內的報告庫",
+      "description": "把報告存在使用者瀏覽器裡，可查詢、刪除、避免重複並標記雲端同步狀態。"
+    },
+    "frontend/lib/stock-search.ts": {
+      "name": "股票代號搜尋",
+      "description": "輸入時即時比對台股與美股清單，給出代號與公司名稱建議。"
+    },
+    "frontend/lib/storage.ts": {
+      "name": "金鑰設定保存",
+      "description": "登入者把金鑰加密長期保存；未登入者只存到關閉瀏覽器為止。"
+    },
+    "frontend/lib/sync-retry.ts": {
+      "name": "雲端同步重試",
+      "description": "定時重新上傳先前同步失敗的報告。"
+    },
+    "frontend/lib/types.ts": {
+      "name": "資料格式定義",
+      "description": "定義網站與主伺服器之間傳遞的請求、進度與結果長什麼樣子。"
+    },
+    "frontend/lib/user-api.ts": {
+      "name": "雲端同步窗口",
+      "description": "登入時把金鑰設定與報告上傳、下載或刪除到雲端。"
+    },
+    "frontend/lib/utils.ts": {
+      "name": "樣式合併小工具",
+      "description": "合併畫面元件的樣式名稱，避免互相衝突。"
+    },
+    "frontend/types/css.d.ts": {
+      "name": "樣式檔型別宣告",
+      "description": "讓程式檢查工具接受直接匯入樣式檔。"
+    }
+  }
+}

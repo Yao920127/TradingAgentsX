@@ -1,0 +1,26 @@
+{
+  "files": {
+    "backend/__main__.py": {
+      "name": "啟動主伺服器",
+      "description": "用一行指令開啟主伺服器，可設定連接埠與是否自動重新載入。"
+    },
+    "backend/app/__init__.py": {
+      "name": "伺服器程式入口",
+      "description": "把伺服器程式資料夾標記為可匯入的程式。"
+    },
+    "backend/app/main.py": {
+      "name": "主伺服器組裝",
+      "description": "組裝主伺服器：掛上所有請求、加上安全標頭、限制請求頻率，並在記錄中遮蔽金鑰。"
+    },
+    "backend/test_chat.py": {
+      "name": "報告聊天手動測試",
+      "description": "手動呼叫 AI 模型，確認報告聊天功能能連得上。"
+    }
+  },
+  "routes": {
+    "GET /": {
+      "name": "伺服器首頁",
+      "description": "直接打開伺服器網址時，轉到自動產生的接口說明頁。"
+    }
+  }
+}

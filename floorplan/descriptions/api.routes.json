@@ -1,0 +1,130 @@
+{
+  "files": {
+    "backend/app/api/__init__.py": {
+      "name": "接口模組入口",
+      "description": "把對外接口資料夾標記為可匯入的程式。"
+    },
+    "backend/app/api/auth.py": {
+      "name": "Google 登入",
+      "description": "處理 Google 帳號登入，把登入碼換成網站用的登入通行證，並建立或更新使用者。"
+    },
+    "backend/app/api/dependencies.py": {
+      "name": "共用登入檢查",
+      "description": "提供各接口共用的登入檢查（必須登入或選擇性登入）與分析服務。"
+    },
+    "backend/app/api/routes.py": {
+      "name": "分析相關接口",
+      "description": "開始分析、查詢進度、產生 PDF、報告聊天與驗證金鑰的所有請求都在這裡。"
+    },
+    "backend/app/api/user.py": {
+      "name": "使用者資料同步",
+      "description": "讓登入使用者在雲端保存金鑰設定與報告，並即時通知其他裝置有變動。"
+    }
+  },
+  "routes": {
+    "GET /api/auth/google/login": {
+      "name": "前往 Google 登入",
+      "description": "把使用者轉到 Google 的登入頁面。"
+    },
+    "GET /api/auth/google/callback": {
+      "name": "Google 登入完成",
+      "description": "Google 登入完成後回到這裡，建立或更新使用者並帶著通行證回到網站。"
+    },
+    "POST /api/auth/google/token": {
+      "name": "換取登入通行證",
+      "description": "網站拿到 Google 登入碼後送來這裡，換成網站使用的登入通行證。"
+    },
+    "GET /api/auth/me": {
+      "name": "我是誰",
+      "description": "回傳目前登入者的名字、信箱與頭像；未登入則回傳空。"
+    },
+    "GET /api/health": {
+      "name": "伺服器健康檢查",
+      "description": "回報伺服器是否正常運作。"
+    },
+    "GET /api/config": {
+      "name": "可選的分析設定",
+      "description": "列出可選的分析師、AI 模型與資料來源，讓表單產生選項。"
+    },
+    "POST /api/analyze": {
+      "name": "開始分析",
+      "description": "收下股票代號、日期與模型設定，在背景啟動一次 AI 分析並回傳任務編號。"
+    },
+    "GET /api/task/{task_id}": {
+      "name": "分析進度",
+      "description": "回報某次分析做到哪一步、哪位分析師在工作，完成後交出全部結果。"
+    },
+    "DELETE /api/task/{task_id}/cleanup": {
+      "name": "清除分析任務",
+      "description": "分析結束後把暫存的任務資料刪掉。"
+    },
+    "GET /api/tickers": {
+      "name": "熱門股票清單",
+      "description": "回傳一份示範用的熱門股票代號清單。"
+    },
+    "POST /api/download/reports": {
+      "name": "下載完整 PDF 報告",
+      "description": "把所有分析師報告、價格圖與封面合成一份 PDF 直接下載。"
+    },
+    "POST /api/pdf/generate": {
+      "name": "產生 PDF 預覽",
+      "description": "先產生 PDF 暫存起來，回傳編號供網站預覽。"
+    },
+    "GET /api/pdf/serve/{temp_id}": {
+      "name": "開啟 PDF 預覽",
+      "description": "依編號送出先前暫存的 PDF 檔。"
+    },
+    "DELETE /api/pdf/temp/{temp_id}": {
+      "name": "丟棄 PDF 預覽",
+      "description": "使用者關掉預覽沒下載時，刪除暫存的 PDF。"
+    },
+    "POST /api/chat": {
+      "name": "和報告聊天",
+      "description": "用使用者自己的 AI 金鑰，回答關於這份分析報告的問題。"
+    },
+    "POST /api/validate-keys": {
+      "name": "檢查金鑰是否有效",
+      "description": "實際連到各 AI 與資料供應商，確認使用者填的每把金鑰能用。"
+    },
+    "GET /api/user/events": {
+      "name": "跨裝置即時通知",
+      "description": "保持連線，當設定或報告在其他裝置變動時立刻通知。"
+    },
+    "GET /api/user/settings": {
+      "name": "讀取雲端設定",
+      "description": "取回登入者存在雲端的金鑰設定（解密後回傳）。"
+    },
+    "PUT /api/user/settings": {
+      "name": "儲存雲端設定",
+      "description": "把登入者的金鑰設定加密後存到雲端。"
+    },
+    "GET /api/user/reports": {
+      "name": "雲端報告清單",
+      "description": "列出登入者存在雲端的報告，可依市場與語言篩選並分頁。"
+    },
+    "POST /api/user/reports": {
+      "name": "上傳報告到雲端",
+      "description": "把一份報告存到雲端；同股票、日期、語言與模型的舊報告會被更新。"
+    },
+    "GET /api/user/reports/counts": {
+      "name": "各市場報告數量",
+      "description": "快速統計美股、上市、上櫃各有幾份雲端報告。"
+    },
+    "GET /api/user/reports/{report_id}": {
+      "name": "讀取一份雲端報告",
+      "description": "取回某一份雲端報告的完整內容。"
+    },
+    "DELETE /api/user/reports/cleanup-duplicates": {
+      "name": "清除重複報告",
+      "description": "刪掉雲端裡重複的報告，每組只留最新一份。"
+    },
+    "DELETE /api/user/reports/{report_id}": {
+      "name": "刪除一份雲端報告",
+      "description": "從雲端刪除指定的報告。"
+    },
+    "DELETE /api/user/reports": {
+      "name": "刪除全部雲端報告",
+      "description": "清空登入者在雲端的所有報告。"
+    }
+  }
+}

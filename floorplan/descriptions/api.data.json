@@ -1,0 +1,24 @@
+{
+  "files": {
+    "backend/app/db/__init__.py": {
+      "name": "資料庫模組入口",
+      "description": "集中匯出資料庫連線與資料表，讓其他地方一次取用。"
+    },
+    "backend/app/db/database.py": {
+      "name": "資料庫連線",
+      "description": "連上 PostgreSQL、在啟動時建立資料表，並檢查資料庫是否正常。"
+    },
+    "backend/app/db/models.py": {
+      "name": "使用者、設定與報告的儲存方式",
+      "description": "定義 Google 登入使用者、加密的金鑰設定與分析報告在資料庫中怎麼存。"
+    },
+    "backend/app/models/__init__.py": {
+      "name": "格式模組入口",
+      "description": "把請求與回應格式的資料夾標記為可匯入的程式。"
+    },
+    "backend/app/models/schemas.py": {
+      "name": "請求與回應格式",
+      "description": "規定分析請求、任務進度、價格資料、下載報告等資料必須長什麼樣子。"
+    }
+  }
+}

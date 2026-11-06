@@ -1,0 +1,8 @@
+{
+  "files": {
+    "tests/test_news_and_social.py": {
+      "name": "新聞與社群測試",
+      "description": "檢查新聞去重、多來源合併、社群情緒、錯誤處理與簡轉繁是否正確，不連外網。"
+    }
+  }
+}

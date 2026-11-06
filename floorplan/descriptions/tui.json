@@ -1,0 +1,40 @@
+{
+  "files": {
+    "tui/__init__.py": {
+      "name": "終端機版入口",
+      "description": "把終端機版資料夾標記為可匯入的程式。"
+    },
+    "tui/analysis.py": {
+      "name": "終端機版執行分析",
+      "description": "依終端機上的選擇組好設定、執行 AI 分析，並即時回報進度給畫面。"
+    },
+    "tui/constants.py": {
+      "name": "終端機版選項",
+      "description": "列出可選的模型、供應商與分析師，並從環境變數找對應金鑰。"
+    },
+    "tui/main.py": {
+      "name": "啟動終端機版",
+      "description": "開啟終端機版應用程式。"
+    },
+    "tui/message_buffer.py": {
+      "name": "進度訊息暫存",
+      "description": "保存分析過程的訊息、工具使用與各段報告，供畫面顯示。"
+    },
+    "tui/models.py": {
+      "name": "分析師種類",
+      "description": "列出四種分析師：技術面、社群、新聞、基本面。"
+    },
+    "tui/screens/__init__.py": {
+      "name": "畫面模組入口",
+      "description": "把終端機畫面資料夾標記為可匯入的程式。"
+    },
+    "tui/screens/config.py": {
+      "name": "終端機設定畫面",
+      "description": "在終端機裡填寫股票、日期、模型與分析師等分析選項。"
+    },
+    "tui/screens/dashboard.py": {
+      "name": "終端機儀表板",
+      "description": "即時顯示 AI 進度、訊息與目前的報告內容。"
+    }
+  }
+}

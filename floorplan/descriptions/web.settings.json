@@ -1,0 +1,24 @@
+{
+  "files": {
+    "frontend/components/auth/login-button.tsx": {
+      "name": "Google 登入按鈕",
+      "description": "顯示登入按鈕或已登入者頭像與登出選單，也有鼓勵登入的提示卡。"
+    },
+    "frontend/components/settings/ApiKeyHelpLink.tsx": {
+      "name": "金鑰申請連結",
+      "description": "在金鑰欄位下方顯示「去哪裡取得金鑰」的連結。"
+    },
+    "frontend/components/settings/ApiSettingsDialog.tsx": {
+      "name": "金鑰設定視窗",
+      "description": "讓使用者填寫各家 AI 與資料來源金鑰、測試是否有效並儲存。"
+    },
+    "frontend/components/settings/DataSourceKeyFields.tsx": {
+      "name": "資料來源金鑰欄位",
+      "description": "設定視窗裡填寫 FinMind、Alpha Vantage、新聞與社群來源金鑰的區塊。"
+    },
+    "frontend/components/settings/LanguageSwitcher.tsx": {
+      "name": "語言切換",
+      "description": "在英文與繁體中文之間切換介面語言。"
+    }
+  }
+}

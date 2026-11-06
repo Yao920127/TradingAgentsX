@@ -1,0 +1,16 @@
+{
+  "files": {
+    "backend/app/core/__init__.py": {
+      "name": "設定模組入口",
+      "description": "把伺服器設定資料夾標記為一組可匯入的程式。"
+    },
+    "backend/app/core/config.py": {
+      "name": "伺服器設定",
+      "description": "從環境變數讀入金鑰、資料庫位址、允許的網站等所有伺服器設定。"
+    },
+    "backend/app/core/cors.py": {
+      "name": "允許呼叫的網站",
+      "description": "決定哪些網站網址可以向主伺服器發出請求。"
+    }
+  }
+}

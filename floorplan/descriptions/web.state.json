@@ -1,0 +1,24 @@
+{
+  "files": {
+    "frontend/context/AnalysisContext.tsx": {
+      "name": "目前分析狀態",
+      "description": "讓各頁共享進行中的分析與其結果。"
+    },
+    "frontend/contexts/auth-context.tsx": {
+      "name": "登入狀態",
+      "description": "記住誰登入了、保持登入，並提供呼叫主伺服器時要附上的通行證。"
+    },
+    "frontend/contexts/LanguageContext.tsx": {
+      "name": "目前語言",
+      "description": "記住使用者選的語言，讓所有畫面顯示對應文字。"
+    },
+    "frontend/hooks/useAnalysis.ts": {
+      "name": "執行分析流程",
+      "description": "送出分析、每隔幾秒詢問進度，完成後取回結果並保存。"
+    },
+    "frontend/hooks/useConfig.ts": {
+      "name": "取得可選設定",
+      "description": "向主伺服器取得可選的模型與分析師清單。"
+    }
+  }
+}

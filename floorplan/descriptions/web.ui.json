@@ -1,0 +1,68 @@
+{
+  "files": {
+    "frontend/components/ui/badge.tsx": {
+      "name": "標籤徽章",
+      "description": "小型彩色標籤，例如顯示市場或建議。"
+    },
+    "frontend/components/ui/button.tsx": {
+      "name": "按鈕",
+      "description": "全站共用的各種樣式按鈕。"
+    },
+    "frontend/components/ui/calendar.tsx": {
+      "name": "月曆",
+      "description": "選日期用的月曆。"
+    },
+    "frontend/components/ui/card.tsx": {
+      "name": "卡片",
+      "description": "帶標題與內容區的方框卡片。"
+    },
+    "frontend/components/ui/checkbox.tsx": {
+      "name": "勾選框",
+      "description": "可勾選的方框，例如選擇要哪些分析師。"
+    },
+    "frontend/components/ui/date-picker.tsx": {
+      "name": "日期選擇器",
+      "description": "點開月曆挑選分析日期的欄位。"
+    },
+    "frontend/components/ui/dialog.tsx": {
+      "name": "對話視窗",
+      "description": "浮在頁面上方的對話視窗，例如金鑰設定。"
+    },
+    "frontend/components/ui/dropdown-menu.tsx": {
+      "name": "下拉選單",
+      "description": "點擊後展開的選項選單。"
+    },
+    "frontend/components/ui/form.tsx": {
+      "name": "表單欄位",
+      "description": "表單欄位的標籤、說明與錯誤訊息排版。"
+    },
+    "frontend/components/ui/input.tsx": {
+      "name": "文字輸入框",
+      "description": "單行文字輸入框。"
+    },
+    "frontend/components/ui/label.tsx": {
+      "name": "欄位標籤",
+      "description": "表單欄位旁的文字標籤。"
+    },
+    "frontend/components/ui/popover.tsx": {
+      "name": "浮動小視窗",
+      "description": "點擊後在旁邊彈出的小視窗。"
+    },
+    "frontend/components/ui/select.tsx": {
+      "name": "下拉選擇框",
+      "description": "從清單挑一個選項的選擇框，例如選 AI 模型。"
+    },
+    "frontend/components/ui/spinner.tsx": {
+      "name": "小轉圈圖示",
+      "description": "按鈕內等候用的小轉圈。"
+    },
+    "frontend/components/ui/table.tsx": {
+      "name": "表格",
+      "description": "整齊排列資料的表格。"
+    },
+    "frontend/components/ui/tabs.tsx": {
+      "name": "分頁切換",
+      "description": "在同一區塊用分頁切換不同內容。"
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "files": {
+    "frontend/components/AgentFlowDiagram.tsx": {
+      "name": "AI 團隊流程圖",
+      "description": "在首頁畫出 12 位 AI 角色之間資料如何流動。"
+    },
+    "frontend/components/CustomCursor.tsx": {
+      "name": "自訂游標",
+      "description": "把滑鼠游標換成網站風格的造型。"
+    },
+    "frontend/components/home/HeroTradingCanvas.tsx": {
+      "name": "首頁行情動畫",
+      "description": "首頁頂端會動的行情線條背景。"
+    },
+    "frontend/components/home/ImmersivePortalHero.tsx": {
+      "name": "首頁沉浸式開場",
+      "description": "隨捲動展開的首頁開場畫面。"
+    },
+    "frontend/components/home/InteractiveCard.tsx": {
+      "name": "互動卡片",
+      "description": "首頁卡片會隨滑鼠位置微微傾斜發光。"
+    },
+    "frontend/components/home/ScrollReveal.tsx": {
+      "name": "捲動淡入",
+      "description": "內容捲到畫面中時才淡入出現。"
+    },
+    "frontend/components/layout/Footer.tsx": {
+      "name": "頁尾",
+      "description": "每頁底部的連結與版權資訊。"
+    },
+    "frontend/components/layout/Header.tsx": {
+      "name": "頁首選單",
+      "description": "每頁頂端的導覽選單、設定、語言、主題與登入按鈕，手機上可收合。"
+    },
+    "frontend/components/PendingTaskRecovery.tsx": {
+      "name": "接續未完成分析",
+      "description": "開啟網站時若有中斷的分析，提示使用者接續或放棄。"
+    },
+    "frontend/components/providers/SyncInitializer.tsx": {
+      "name": "啟動同步重試",
+      "description": "網站開啟時自動開始重試之前同步失敗的報告。"
+    },
+    "frontend/components/shared/ErrorAlert.tsx": {
+      "name": "錯誤提示",
+      "description": "以好懂的文字顯示錯誤，請求太頻繁時另外說明要等多久。"
+    },
+    "frontend/components/shared/LoadingSpinner.tsx": {
+      "name": "載入中圖示",
+      "description": "資料載入時顯示的轉圈圖示。"
+    },
+    "frontend/components/SoftAurora.css": {
+      "name": "極光背景樣式",
+      "description": "極光背景特效的樣式。"
+    },
+    "frontend/components/SoftAurora.jsx": {
+      "name": "極光背景特效",
+      "description": "在背景畫出緩慢流動的極光光暈。"
+    },
+    "frontend/components/SplashCursor.jsx": {
+      "name": "游標流體特效",
+      "description": "滑鼠移動時在背景留下彩色流體拖尾。"
+    },
+    "frontend/components/theme/SoftAuroraBackground.tsx": {
+      "name": "極光背景外殼",
+      "description": "依主題決定是否顯示極光背景。"
+    },
+    "frontend/components/theme/SplashCursorBackground.tsx": {
+      "name": "流體特效外殼",
+      "description": "依主題決定是否顯示游標流體特效。"
+    },
+    "frontend/components/theme/ThemeProvider.tsx": {
+      "name": "深淺色主題",
+      "description": "讓整個網站記住並套用深色或淺色主題。"
+    },
+    "frontend/components/theme/ThemeToggle.tsx": {
+      "name": "主題切換按鈕",
+      "description": "切換深色與淺色模式的按鈕。"
+    }
+  }
+}

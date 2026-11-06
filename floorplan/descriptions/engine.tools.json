@@ -1,0 +1,56 @@
+{
+  "files": {
+    "tradingagents/agents/utils/agent_states.py": {
+      "name": "共享分析紀錄",
+      "description": "定義整場分析中大家共用的筆記：各報告、多空辯論與風險討論的內容。"
+    },
+    "tradingagents/agents/utils/agent_utils.py": {
+      "name": "AI 訊息小工具",
+      "description": "建立給 AI 的指示訊息；用 Claude 時自動開啟提示快取以省錢。"
+    },
+    "tradingagents/agents/utils/core_stock_tools.py": {
+      "name": "查股價工具",
+      "description": "讓 AI 查詢一段期間的每日股價。"
+    },
+    "tradingagents/agents/utils/fundamental_data_tools.py": {
+      "name": "查財報工具",
+      "description": "讓 AI 查詢公司概況、資產負債表、現金流量表與損益表。"
+    },
+    "tradingagents/agents/utils/hybrid_search.py": {
+      "name": "混合搜尋",
+      "description": "同時用關鍵字與語意搜尋，找出最相關的過往情境。"
+    },
+    "tradingagents/agents/utils/memory.py": {
+      "name": "經驗記憶庫",
+      "description": "保存過去的市場情境與教訓，分析時找出相似案例給 AI 參考。"
+    },
+    "tradingagents/agents/utils/news_data_tools.py": {
+      "name": "查新聞工具",
+      "description": "讓 AI 查詢個股新聞、全球新聞與社群情緒。"
+    },
+    "tradingagents/agents/utils/output_filter.py": {
+      "name": "AI 輸出清理",
+      "description": "修正 AI 回答中的亂碼、多餘開場白，並在被截斷時加註提醒。"
+    },
+    "tradingagents/agents/utils/prompts.py": {
+      "name": "AI 指示文字",
+      "description": "集中管理各角色的指示與語言要求（英文或繁體中文）。"
+    },
+    "tradingagents/agents/utils/technical_indicators_tools.py": {
+      "name": "查技術指標工具",
+      "description": "讓 AI 查詢均線、RSI、MACD、布林通道等技術指標。"
+    },
+    "tradingagents/utils/report_format.py": {
+      "name": "報告標題整理",
+      "description": "把 AI 混用的標題寫法統一成一致的層級，並去掉開頭的思考過程。"
+    },
+    "tradingagents/utils/toon_converter.py": {
+      "name": "精簡資料格式",
+      "description": "把資料轉成更精簡的寫法再交給 AI，減少用量與費用。"
+    },
+    "tradingagents/utils/zh_convert.py": {
+      "name": "簡轉繁",
+      "description": "把 AI 混入的簡體字轉成台灣繁體，也避免 PDF 缺字。"
+    }
+  }
+}

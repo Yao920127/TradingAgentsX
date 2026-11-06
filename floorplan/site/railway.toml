@@ -1,0 +1,8 @@
+# Railway config for the "floorplan" service (static codebase map).
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["floorplan/site/**"]
+
+[deploy]
+restartPolicyType = "on_failure"

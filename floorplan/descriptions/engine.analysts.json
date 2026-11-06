@@ -1,0 +1,24 @@
+{
+  "files": {
+    "tradingagents/agents/analysts/fundamentals_analyst.py": {
+      "name": "基本面分析師",
+      "description": "查財報、資產負債與現金流，寫出公司體質報告。"
+    },
+    "tradingagents/agents/analysts/market_analyst.py": {
+      "name": "技術面分析師",
+      "description": "看股價走勢與技術指標（均線、RSI、MACD 等），寫出技術面報告。"
+    },
+    "tradingagents/agents/analysts/news_analyst.py": {
+      "name": "新聞分析師",
+      "description": "整理個股與總體經濟新聞，評估對股價的影響。"
+    },
+    "tradingagents/agents/analysts/report_summarizer.py": {
+      "name": "報告摘要員",
+      "description": "把四份分析師報告壓縮成一份短摘要，讓後面的辯論省下約四分之三的 AI 費用。"
+    },
+    "tradingagents/agents/analysts/social_media_analyst.py": {
+      "name": "社群情緒分析師",
+      "description": "整理 Reddit、PTT、StockTwits 等社群討論，判斷散戶情緒。"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "files": {
+    "frontend/eslint.config.mjs": {
+      "name": "程式碼檢查規則",
+      "description": "設定網站程式碼的自動檢查規則。"
+    },
+    "frontend/next.config.ts": {
+      "name": "網站建置設定",
+      "description": "設定網站如何打包、安全標頭與圖片來源。"
+    },
+    "frontend/postcss.config.mjs": {
+      "name": "樣式處理設定",
+      "description": "設定網站樣式表的處理工具。"
+    },
+    "frontend/public/googlecdd36ee1015b2a67.html": {
+      "name": "Google 網站驗證",
+      "description": "向 Google 證明這個網域屬於網站擁有者。"
+    }
+  }
+}

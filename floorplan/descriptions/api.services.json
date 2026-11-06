@@ -1,0 +1,44 @@
+{
+  "files": {
+    "backend/app/services/__init__.py": {
+      "name": "服務模組入口",
+      "description": "把伺服器工作資料夾標記為可匯入的程式。"
+    },
+    "backend/app/services/auth_utils.py": {
+      "name": "登入通行證與加密",
+      "description": "簽發與驗證登入通行證，並加解密存到雲端的金鑰設定。"
+    },
+    "backend/app/services/chat_service.py": {
+      "name": "報告聊天",
+      "description": "把報告內容和使用者問題交給使用者選的 AI 模型，取回回答。"
+    },
+    "backend/app/services/download_service.py": {
+      "name": "組合下載報告",
+      "description": "整理各分析師報告與公司全名，交給 PDF 產生器做成一份檔案。"
+    },
+    "backend/app/services/key_validation_service.py": {
+      "name": "金鑰連線檢查",
+      "description": "同時對每把填寫的 AI 與資料來源金鑰做一次真實連線，回報哪把能用。"
+    },
+    "backend/app/services/pdf_generator.py": {
+      "name": "PDF 排版",
+      "description": "把文字報告排成含中文字型、封面、目錄與價格圖的 PDF。"
+    },
+    "backend/app/services/price_service.py": {
+      "name": "股價圖資料",
+      "description": "讀取分析期間的股價並算出漲跌幅等統計，給價格圖使用。"
+    },
+    "backend/app/services/redis_client.py": {
+      "name": "Redis 暫存",
+      "description": "在 Redis 存放任務進度與快取，伺服器重啟也不會遺失；沒有 Redis 時自動略過。"
+    },
+    "backend/app/services/task_manager.py": {
+      "name": "分析任務排程",
+      "description": "記錄每個背景分析任務的狀態，有 Redis 就存進去，沒有就放在記憶體。"
+    },
+    "backend/app/services/trading_service.py": {
+      "name": "執行 AI 分析",
+      "description": "把網站傳來的設定與金鑰交給 AI 分析團隊，執行分析並整理結果。"
+    }
+  }
+}

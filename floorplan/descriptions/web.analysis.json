@@ -1,0 +1,52 @@
+{
+  "files": {
+    "frontend/components/analysis/AnalysisForm.tsx": {
+      "name": "分析表單",
+      "description": "填股票代號、市場、日期、分析師與 AI 模型，檢查無誤後送出分析。"
+    },
+    "frontend/components/analysis/AnalysisProgress.tsx": {
+      "name": "分析進度面板",
+      "description": "顯示哪位 AI 正在工作、做到第幾步，以及已花多少時間。"
+    },
+    "frontend/components/analysis/AnalystReport.tsx": {
+      "name": "分析師報告分頁",
+      "description": "用分頁切換顯示四位分析師與後續各階段的報告。"
+    },
+    "frontend/components/analysis/DebateCard.tsx": {
+      "name": "辯論發言卡",
+      "description": "以一欄呈現一位辯論者（看多、看空或風險角色）的論點。"
+    },
+    "frontend/components/analysis/DownloadReports.tsx": {
+      "name": "下載 PDF 按鈕",
+      "description": "請主伺服器產生整份 PDF 報告，先預覽再下載。"
+    },
+    "frontend/components/analysis/FullReport.tsx": {
+      "name": "完整報告長頁",
+      "description": "把所有報告依序疊在同一頁，方便一路讀完。"
+    },
+    "frontend/components/analysis/MarkdownReport.tsx": {
+      "name": "報告內文顯示",
+      "description": "把 AI 寫的報告文字（含表格）排成好讀的格式。"
+    },
+    "frontend/components/analysis/PriceChart.tsx": {
+      "name": "股價走勢圖",
+      "description": "畫出分析期間的股價走勢與漲跌幅等統計。"
+    },
+    "frontend/components/analysis/ReportChat.tsx": {
+      "name": "報告問答",
+      "description": "在結果頁直接針對這份報告問 AI 問題。"
+    },
+    "frontend/components/analysis/TickerCombobox.tsx": {
+      "name": "股票代號輸入框",
+      "description": "輸入時跳出符合的股票代號與公司名稱供選擇。"
+    },
+    "frontend/components/analysis/TradingDecision.tsx": {
+      "name": "交易建議卡",
+      "description": "顯示交易員的最終買、賣或持有建議。"
+    },
+    "frontend/components/analysis/VerdictBanner.tsx": {
+      "name": "結論橫幅",
+      "description": "在報告頂端顯示最終建議、信心度與關鍵數字，一眼看懂結論。"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "files": {
+    "tradingagents/default_config.py": {
+      "name": "引擎預設設定",
+      "description": "AI 引擎的預設值：用哪些模型、辯論幾回合、各類資料用哪個供應商。"
+    },
+    "tradingagents/graph/__init__.py": {
+      "name": "流程模組入口",
+      "description": "集中匯出分析流程的主要組件。"
+    },
+    "tradingagents/graph/conditional_logic.py": {
+      "name": "下一步誰上場",
+      "description": "決定分析師是否還要查資料、辯論是否繼續，或該交給下一位。"
+    },
+    "tradingagents/graph/progress.py": {
+      "name": "進度追蹤",
+      "description": "把引擎內部的每一步轉成「誰在工作、做到第幾步、花了多久」給網站顯示。"
+    },
+    "tradingagents/graph/propagation.py": {
+      "name": "分析起始資料",
+      "description": "準備一次分析的起始內容（股票、日期）與執行上限。"
+    },
+    "tradingagents/graph/reflection.py": {
+      "name": "事後反思",
+      "description": "回頭檢討過去的決策對錯，把學到的經驗存進記憶。"
+    },
+    "tradingagents/graph/setup.py": {
+      "name": "組裝 AI 團隊流程",
+      "description": "依選擇的分析師與模式，把所有 AI 角色串成一條分析流程。"
+    },
+    "tradingagents/graph/signal_processing.py": {
+      "name": "萃取最終建議",
+      "description": "從交易員的文字結論中取出明確的買、賣或持有。"
+    },
+    "tradingagents/graph/trading_graph.py": {
+      "name": "AI 團隊總指揮",
+      "description": "建立 AI 模型、記憶與工具，啟動整套分析並回傳最終建議。"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "files": {
+    "tradingagents/agents/__init__.py": {
+      "name": "AI 角色總匯出",
+      "description": "集中匯出所有 AI 角色，方便流程組裝時取用。"
+    },
+    "tradingagents/agents/managers/research_manager.py": {
+      "name": "研究經理",
+      "description": "聽完多空辯論後做出投資判斷並擬定計畫。"
+    },
+    "tradingagents/agents/managers/risk_manager.py": {
+      "name": "風險經理",
+      "description": "聽完三位風險辯手的意見後，做出最終風險裁決。"
+    },
+    "tradingagents/agents/researchers/bear_researcher.py": {
+      "name": "看空研究員",
+      "description": "找出不該買的理由，與看多研究員辯論。"
+    },
+    "tradingagents/agents/researchers/bull_researcher.py": {
+      "name": "看多研究員",
+      "description": "找出值得買的理由，與看空研究員辯論。"
+    },
+    "tradingagents/agents/risk_mgmt/aggresive_debator.py": {
+      "name": "積極派風險辯手",
+      "description": "主張承擔較高風險換取較高報酬。"
+    },
+    "tradingagents/agents/risk_mgmt/conservative_debator.py": {
+      "name": "保守派風險辯手",
+      "description": "主張保護本金、降低風險。"
+    },
+    "tradingagents/agents/risk_mgmt/neutral_debator.py": {
+      "name": "中立派風險辯手",
+      "description": "在積極與保守之間尋求平衡。"
+    },
+    "tradingagents/agents/trader/trader.py": {
+      "name": "交易員",
+      "description": "綜合所有報告與討論，給出買、賣或持有建議與信心度。"
+    }
+  }
+}

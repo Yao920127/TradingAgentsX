@@ -1,0 +1,62 @@
+{
+  "files": {
+    "frontend/app/api/[...path]/route.ts": {
+      "name": "轉接到主伺服器",
+      "description": "把網站上所有 /api 請求原封不動轉給主伺服器，讓瀏覽器不必直接連後端。"
+    },
+    "frontend/app/api/auth/callback/google/route.ts": {
+      "name": "Google 登入返回點",
+      "description": "接住 Google 登入後的跳轉，把登入碼帶到網站的登入處理頁。"
+    },
+    "frontend/app/api/auth/google/token/route.ts": {
+      "name": "轉交登入碼",
+      "description": "把 Google 登入碼轉給主伺服器換成登入通行證。"
+    },
+    "frontend/app/api/chat/route.ts": {
+      "name": "轉交報告聊天",
+      "description": "把報告聊天的問題轉給主伺服器。"
+    },
+    "frontend/app/api/config/route.ts": {
+      "name": "網站公開設定",
+      "description": "在網站執行時提供主伺服器位址與 Google 登入編號等公開設定。"
+    }
+  },
+  "routes": {
+    "GET /api/[...path]": {
+      "name": "轉接讀取請求",
+      "description": "把讀取資料的請求轉給主伺服器並回傳結果。"
+    },
+    "POST /api/[...path]": {
+      "name": "轉接送出請求",
+      "description": "把送出資料的請求（例如開始分析）轉給主伺服器。"
+    },
+    "PUT /api/[...path]": {
+      "name": "轉接更新請求",
+      "description": "把整筆更新的請求（例如儲存設定）轉給主伺服器。"
+    },
+    "PATCH /api/[...path]": {
+      "name": "轉接部分更新",
+      "description": "把部分更新的請求轉給主伺服器。"
+    },
+    "DELETE /api/[...path]": {
+      "name": "轉接刪除請求",
+      "description": "把刪除報告或任務的請求轉給主伺服器。"
+    },
+    "GET /api/auth/callback/google": {
+      "name": "Google 登入返回",
+      "description": "Google 登入完成後跳回這裡，再轉到網站的登入處理頁。"
+    },
+    "POST /api/auth/google/token": {
+      "name": "換取登入通行證",
+      "description": "網站拿到 Google 登入碼後送來這裡，換成網站使用的登入通行證。"
+    },
+    "POST /api/chat": {
+      "name": "和報告聊天",
+      "description": "用使用者自己的 AI 金鑰，回答關於這份分析報告的問題。"
+    },
+    "GET /api/config": {
+      "name": "可選的分析設定",
+      "description": "列出可選的分析師、AI 模型與資料來源，讓表單產生選項。"
+    }
+  }
+}

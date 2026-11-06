@@ -1,0 +1,36 @@
+{
+  "files": {
+    "frontend/app/analysis/page.tsx": {
+      "name": "分析頁",
+      "description": "顯示分析表單；送出後呈現即時進度，完成即跳到結果頁。"
+    },
+    "frontend/app/analysis/results/page.tsx": {
+      "name": "分析結果頁",
+      "description": "顯示最終買賣建議、價格圖、各分析師報告、辯論與下載按鈕。"
+    },
+    "frontend/app/auth/callback/page.tsx": {
+      "name": "登入處理頁",
+      "description": "Google 登入回來後換取通行證、記住登入狀態，再回到原本的頁面。"
+    },
+    "frontend/app/globals.css": {
+      "name": "全站樣式",
+      "description": "整個網站共用的顏色、字型、深淺色主題與動畫樣式。"
+    },
+    "frontend/app/history/chat/page.tsx": {
+      "name": "歷史報告聊天頁",
+      "description": "挑選一份已存的報告，用自己的 AI 金鑰針對內容提問。"
+    },
+    "frontend/app/history/page.tsx": {
+      "name": "歷史報告頁",
+      "description": "瀏覽、搜尋、刪除存過的報告，並與雲端同步。"
+    },
+    "frontend/app/layout.tsx": {
+      "name": "全站外框",
+      "description": "每一頁共用的外框：頁首頁尾、主題、語言、登入狀態與背景特效。"
+    },
+    "frontend/app/page.tsx": {
+      "name": "首頁",
+      "description": "介紹 AI 分析團隊如何運作，並引導使用者開始分析。"
+    }
+  }
+}

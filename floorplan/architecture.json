@@ -1,0 +1,89 @@
+{
+  "$schema": "floorplan/architecture@1",
+  "audience": "everyone",
+  "project": {
+    "name": "TradingAgentsX",
+    "summary": "一個 AI 股票分析平台：使用者在網站上輸入股票代號，由 12 位分工的 AI 分析師（技術面、新聞、社群、基本面、多空辯論、風險、交易員）合作產出買／賣／持有建議與完整報告。使用者自帶 AI 金鑰，金鑰加密存在自己的瀏覽器。",
+    "entrypoints": ["frontend/app/page.tsx", "backend/app/main.py", "backend/__main__.py", "tui/main.py", "main.py"]
+  },
+  "ignore": [".claude/**", "graphify-out/**", "floorplan/**", "CLAUDE-SECURITY-*/**", "report/**", "web_screenshot/**"],
+  "nodes": [
+    { "id": "web", "label": "網站", "kind": "ui", "summary": "使用者看到的網站：首頁、開始分析、查看結果與歷史報告、設定 AI 金鑰。", "paths": ["frontend"] },
+    { "id": "web.pages", "parent": "web", "label": "頁面", "kind": "feature", "summary": "網站的每一頁：首頁、分析頁、結果頁、歷史紀錄、登入回呼。", "paths": ["frontend/app"] },
+    { "id": "web.proxy", "parent": "web", "label": "網站內建轉接站", "kind": "feature", "summary": "網站自己的小型後台：把請求轉給主伺服器、處理 Google 登入與報告聊天。", "paths": ["frontend/app/api"] },
+    { "id": "web.analysis", "parent": "web", "label": "分析畫面元件", "kind": "feature", "summary": "填寫分析表單、顯示進度、價格圖、各分析師報告、辯論與最終建議。", "paths": ["frontend/components/analysis"] },
+    { "id": "web.settings", "parent": "web", "label": "設定與登入", "kind": "feature", "summary": "設定 AI 與資料來源金鑰、切換語言、Google 登入按鈕。", "paths": ["frontend/components/settings", "frontend/components/auth"] },
+    { "id": "web.look", "parent": "web", "label": "外觀與版面", "kind": "feature", "summary": "首頁動畫、頁首頁尾、背景特效、主題切換與共用小元件。", "paths": ["frontend/components/home", "frontend/components/layout", "frontend/components/theme", "frontend/components/shared", "frontend/components/providers", "frontend/components/*"] },
+    { "id": "web.ui", "parent": "web", "label": "基本元件庫", "kind": "library", "summary": "按鈕、對話框、表單、表格等通用的畫面積木。", "paths": ["frontend/components/ui"] },
+    { "id": "web.state", "parent": "web", "label": "畫面狀態", "kind": "library", "summary": "記住登入狀態、語言、目前分析進度，讓各頁共用。", "paths": ["frontend/context", "frontend/contexts", "frontend/hooks"] },
+    { "id": "web.lib", "parent": "web", "label": "網站工具箱", "kind": "library", "summary": "跟主伺服器溝通、加密保存金鑰、把報告存在瀏覽器、中斷後接續分析、多語系文字。", "paths": ["frontend/lib", "frontend/types"] },
+
+    { "id": "api", "label": "主伺服器", "kind": "service", "summary": "接收網站的分析請求，在背景執行 AI 分析，並提供結果、PDF 下載、登入與雲端同步。", "paths": ["backend"] },
+    { "id": "api.routes", "parent": "api", "label": "對外接口", "kind": "feature", "summary": "網站呼叫的所有網址：開始分析、查進度、下載報告、登入、使用者資料同步。", "paths": ["backend/app/api"] },
+    { "id": "api.services", "parent": "api", "label": "伺服器工作", "kind": "feature", "summary": "實際做事的地方：跑分析、排隊管理、產生 PDF、報告聊天、驗證金鑰、查股價。", "paths": ["backend/app/services"] },
+    { "id": "api.data", "parent": "api", "label": "資料格式與資料庫", "kind": "data", "summary": "使用者與報告在資料庫裡的樣子，以及請求與回應的格式。", "paths": ["backend/app/db", "backend/app/models"] },
+    { "id": "api.core", "parent": "api", "label": "伺服器設定", "kind": "config", "summary": "從環境變數讀設定、決定哪些網站可以呼叫伺服器。", "paths": ["backend/app/core"] },
+
+    { "id": "engine", "label": "AI 分析引擎", "kind": "library", "summary": "整套 AI 分析團隊：決定誰先做、誰辯論、最後誰拍板。", "paths": ["tradingagents"] },
+    { "id": "engine.graph", "parent": "engine", "label": "分析流程指揮", "kind": "feature", "summary": "安排 12 位 AI 角色的順序：先四位分析師同時進行，再多空辯論、風險討論，最後交易員決策。", "paths": ["tradingagents/graph", "tradingagents/default_config.py"] },
+    { "id": "engine.analysts", "parent": "engine", "label": "四位分析師", "kind": "feature", "summary": "技術面、新聞、社群情緒、基本面四位 AI 分析師，各自查資料寫報告。", "paths": ["tradingagents/agents/analysts"] },
+    { "id": "engine.debate", "parent": "engine", "label": "辯論與決策", "kind": "feature", "summary": "看多與看空研究員辯論、三位風險辯手討論，再由經理與交易員做出最終建議。", "paths": ["tradingagents/agents/researchers", "tradingagents/agents/managers", "tradingagents/agents/risk_mgmt", "tradingagents/agents/trader", "tradingagents/agents/*.py"] },
+    { "id": "engine.tools", "parent": "engine", "label": "AI 的工具與記憶", "kind": "library", "summary": "AI 查資料用的工具、共享的分析紀錄、提示詞，以及過往經驗的記憶。", "paths": ["tradingagents/agents/utils", "tradingagents/utils"] },
+    { "id": "engine.data", "parent": "engine", "label": "市場資料來源", "kind": "feature", "summary": "到 Yahoo、Alpha Vantage、FinMind、新聞與社群網站抓股價、財報、新聞和情緒資料。", "paths": ["tradingagents/dataflows"] },
+
+    { "id": "tui", "label": "終端機版", "kind": "ui", "summary": "不用網站、直接在終端機裡執行分析並看即時進度的版本。", "paths": ["tui"] },
+    { "id": "scripts", "label": "維護腳本", "kind": "script", "summary": "定期更新台股與美股代號清單、清快取，以及手動測試用的小程式。", "paths": ["scripts", "clean_cache.sh", "main.py", "test.py", "test-duplicate-records.js", "setup.py"] },
+    { "id": "tests", "label": "自動測試", "kind": "test", "summary": "檢查新聞與社群資料來源是否正常。", "paths": ["tests"] },
+
+    { "id": "ext.llm", "label": "AI 模型服務", "kind": "external", "summary": "OpenAI、Anthropic、Gemini、Grok、DeepSeek、通義千問等，使用者自帶金鑰。", "packages": ["pypi:langchain_openai", "pypi:openai", "pypi:anthropic", "pypi:langchain_anthropic", "pypi:langchain_google_genai"], "hosts": ["api.openai.com", "api.anthropic.com", "generativelanguage.googleapis.com", "api.x.ai", "api.deepseek.com", "dashscope-intl.aliyuncs.com"] },
+    { "id": "ext.market", "label": "股市資料供應商", "kind": "external", "summary": "Yahoo Finance、Alpha Vantage（美股）與 FinMind（台股）。", "packages": ["pypi:yfinance"], "hosts": ["www.alphavantage.co", "api.finmindtrade.com"] },
+    { "id": "ext.news", "label": "新聞與社群來源", "kind": "external", "summary": "Finnhub、NewsAPI、Marketaux、GDELT、Google 新聞、Reddit、PTT、Hacker News、LunarCrush、Jina 讀網頁等。", "hosts": ["finnhub.io", "newsapi.org", "lunarcrush.com", "api.marketaux.com", "api.gdeltproject.org", "api.apify.com", "apewisdom.io", "hn.algolia.com", "www.ptt.cc", "s.jina.ai", "r.jina.ai", "www.google.com"] },
+    { "id": "ext.db", "label": "PostgreSQL 資料庫", "kind": "external", "summary": "（選用）登入使用者的雲端同步資料。", "packages": ["pypi:sqlalchemy", "pypi:asyncpg"] },
+    { "id": "ext.redis", "label": "Redis 快取", "kind": "external", "summary": "（選用）暫存分析結果 4 小時。", "packages": ["pypi:redis"] },
+    { "id": "ext.google", "label": "Google 登入", "kind": "external", "summary": "用 Google 帳號登入以啟用雲端同步。", "hosts": ["oauth2.googleapis.com", "accounts.google.com"] }
+  ],
+  "edges": [
+    { "from": "api.services", "to": "engine.graph", "kind": "call", "label": "啟動分析", "description": "伺服器收到請求後在背景建立 AI 團隊並執行整套分析。" },
+    { "from": "api.data", "to": "ext.db", "kind": "data", "label": "讀寫", "description": "登入使用者的報告與設定存在 PostgreSQL。" },
+    { "from": "api.services", "to": "ext.redis", "kind": "data", "label": "暫存結果", "description": "分析結果在 Redis 保留 4 小時。" }
+  ],
+  "annotations": [
+    { "path": "tradingagents/graph/trading_graph.py", "note": "整個 AI 團隊的總指揮：在這裡組好所有角色並開始分析。", "tags": ["hotspot"] },
+    { "path": "backend/app/services/trading_service.py", "note": "網站與 AI 引擎之間的橋樑：把表單設定轉成引擎設定並收集結果。", "tags": ["hotspot"] }
+  ],
+  "flows": [
+    {
+      "id": "run-analysis",
+      "title": "從網站跑一次股票分析",
+      "description": "使用者按下「開始分析」到看到買賣建議的完整過程。",
+      "steps": [
+        { "node": "web.analysis", "note": "使用者在表單填股票代號、日期、選 AI 模型，按下開始。" },
+        { "node": "web.lib", "note": "網站工具箱帶上加密保存的金鑰，把請求送到主伺服器。" },
+        { "node": "api.routes", "note": "主伺服器收到請求，建立一個背景任務並回傳任務編號。" },
+        { "node": "api.services", "note": "背景任務準備好設定，啟動 AI 分析引擎。" },
+        { "node": "engine.graph", "note": "總指揮依序叫出分析師、辯論、風險討論與交易員。" },
+        { "node": "engine.analysts", "note": "四位分析師同時上網查資料、寫各自的報告。" },
+        { "node": "engine.data", "note": "實際去 Yahoo、FinMind、新聞網站抓資料。" },
+        { "node": "ext.market", "note": "股價、財報等原始數據從這裡來。" }
+      ]
+    },
+    {
+      "id": "see-results",
+      "title": "查看結果與下載報告",
+      "steps": [
+        { "node": "web.state", "note": "網站定時詢問任務進度。" },
+        { "node": "api.routes", "note": "主伺服器回報進度，完成後交出完整結果。" },
+        { "node": "web.lib", "note": "結果存進瀏覽器的本機資料庫，日後在歷史頁還找得到。" },
+        { "node": "web.pages", "note": "結果頁顯示最終建議；也可以請伺服器產生 PDF 下載。" }
+      ]
+    }
+  ],
+  "tour": [
+    { "node": "web", "title": "這是什麼", "note": "TradingAgentsX 讓一整組 AI 分析師幫你研究一支股票，最後給出買、賣或持有的建議。這是大家使用的網站。" },
+    { "node": "web.lib", "title": "金鑰留在你的瀏覽器", "note": "使用者自帶 AI 金鑰，網站把它加密存在瀏覽器，送出分析時才附上。" },
+    { "node": "api", "title": "主伺服器", "note": "接下分析工作，在背景慢慢跑（約 15 分鐘以上），並負責 PDF、登入與雲端同步。" },
+    { "node": "engine", "title": "AI 分析團隊", "note": "真正的核心：四位分析師先各自研究，再經過多空辯論、風險討論，由交易員拍板。" },
+    { "node": "ext.market", "title": "資料從哪來", "note": "美股用 Yahoo 與 Alpha Vantage，台股用 FinMind，另有多個新聞與社群來源。" },
+    { "node": "frontend/components/analysis/AnalysisForm.tsx", "title": "一切從這張表單開始", "note": "使用者在這裡填股票、日期與模型，按下開始分析。" }
+  ]
+}
