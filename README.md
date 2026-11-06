@@ -15,6 +15,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://tradingagentsx.up.railway.app)
+[![程式碼地圖](https://img.shields.io/badge/程式碼地圖-Floorplan-7c3aed?logo=googlemaps&logoColor=white)](https://floorplan-tradinganentsx.up.railway.app/)
 
 </div>
 
@@ -49,6 +50,8 @@
 ---
 
 ## 🏗️ 系統架構
+
+> 🗺️ **互動式程式碼地圖**：[floorplan-tradinganentsx.up.railway.app](https://floorplan-tradinganentsx.up.railway.app/)：以可縮放的圖呈現每個子系統、檔案與 API 網址，附中文說明與「從網站跑一次股票分析」的逐步導覽。
 
 ### 整體系統架構圖
 

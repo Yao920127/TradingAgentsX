@@ -15,6 +15,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://tradingagentsx.up.railway.app)
+[![Codebase Map](https://img.shields.io/badge/Codebase_Map-Floorplan-7c3aed?logo=googlemaps&logoColor=white)](https://floorplan-tradinganentsx.up.railway.app/)
 
 </div>
 
@@ -49,6 +50,8 @@
 ---
 
 ## 🏗️ System Architecture
+
+> 🗺️ **Interactive codebase map**: [floorplan-tradinganentsx.up.railway.app](https://floorplan-tradinganentsx.up.railway.app/): a zoomable diagram of every subsystem, file and API route with plain-language descriptions (in Traditional Chinese), plus a step-by-step walkthrough of running a stock analysis.
 
 ### Overall System Architecture Diagram
 
