@@ -17,6 +17,7 @@ from backend.app.core.cors import setup_cors
 from backend.app.api.routes import router
 from backend.app.api.auth import router as auth_router
 from backend.app.api.user import router as user_router
+from backend.app.api.price import router as price_router
 
 # Configure logging
 logging.basicConfig(
@@ -144,6 +145,7 @@ setup_cors(app)
 app.include_router(router)
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(price_router)
 
 
 # Database initialization on startup

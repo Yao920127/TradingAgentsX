@@ -218,3 +218,39 @@ export interface KeyValidationResult {
 export interface ValidateKeysResponse {
   results: Record<string, KeyValidationResult>;
 }
+
+// ── Live price (results page "Live" mode) ───────────────────────────────────
+// All times are Unix seconds.
+export interface LivePricePoint {
+  time: number;
+  value: number;
+}
+
+export interface LiveCandle {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+export interface LiveVolumeBar {
+  time: number;
+  volume: number;
+}
+
+export interface LiveQuote {
+  symbol: string;
+  currency: string | null;
+  price: number;
+  previous_close: number | null;
+  change: number | null;
+  change_percent: number | null;
+  market_open: boolean;
+  as_of: number;
+  points: LivePricePoint[];
+  candles: LiveCandle[];
+  volumes: LiveVolumeBar[];
+}
+
+export type LiveMarketType = "us" | "twse" | "tpex";

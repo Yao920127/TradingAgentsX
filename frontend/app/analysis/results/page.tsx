@@ -11,6 +11,7 @@ import { FullReport, type FullReportSection } from "@/components/analysis/FullRe
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { lookupStockName, type MarketType } from "@/lib/stock-search";
+import type { LiveMarketType } from "@/lib/types";
 import {
   extractConfidence,
   extractDecisionFromResult,
@@ -235,6 +236,7 @@ export default function AnalysisResultsPage() {
               priceData={analysisResult.price_data}
               priceStats={analysisResult.price_stats}
               ticker={analysisResult.ticker}
+              marketType={(analysisResult.market_type ?? marketType) as LiveMarketType | undefined}
             />
           )}
 

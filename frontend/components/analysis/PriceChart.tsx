@@ -15,13 +15,17 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { PriceData, PriceStats } from "@/lib/types";
+import type { LiveMarketType, PriceData, PriceStats } from "@/lib/types";
+import { LivePriceChart } from "@/components/analysis/LivePriceChart";
 
 interface PriceChartProps {
   priceData: PriceData[];
   priceStats: PriceStats;
   ticker: string;
+  marketType?: LiveMarketType;
 }
+
+type PriceMode = "history" | "live";
 
 // Heikin Ashi data structure
 interface HeikinAshiData extends PriceData {
@@ -70,9 +74,11 @@ function calculateHeikinAshi(data: PriceData[]): HeikinAshiData[] {
   return haData;
 }
 
-export function PriceChart({ priceData, priceStats, ticker }: PriceChartProps) {
+export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceChartProps) {
   const { t, locale } = useLanguage();
   const [chartType, setChartType] = useState<"line" | "candlestick">("line");
+  const [priceMode, setPriceMode] = useState<PriceMode>("history");
+  const isLive = priceMode === "live";
 
   // Calculate Heikin Ashi data
   const heikinAshiData = useMemo(() => calculateHeikinAshi(priceData), [priceData]);
@@ -126,17 +132,29 @@ export function PriceChart({ priceData, priceStats, ticker }: PriceChartProps) {
   return (
     <Card className="w-full hover-lift animate-scale-up">
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-3">
           <CardTitle className="text-2xl">{ticker} {labels.priceTitle}</CardTitle>
-          <Tabs value={chartType} onValueChange={(v: string) => setChartType(v as "line" | "candlestick")}>
-            <TabsList>
-              <TabsTrigger value="line">{labels.lineChart}</TabsTrigger>
-              <TabsTrigger value="candlestick">{labels.candlestick}</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex flex-wrap items-center gap-2">
+            <Tabs value={priceMode} onValueChange={(v: string) => setPriceMode(v as PriceMode)}>
+              <TabsList>
+                <TabsTrigger value="history">{t.results.priceSection.history}</TabsTrigger>
+                <TabsTrigger value="live" className="gap-1.5">
+                  <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
+                  {t.results.priceSection.live}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Tabs value={chartType} onValueChange={(v: string) => setChartType(v as "line" | "candlestick")}>
+              <TabsList>
+                <TabsTrigger value="line">{labels.lineChart}</TabsTrigger>
+                <TabsTrigger value="candlestick">{isLive ? t.results.priceSection.liveCandlestick : labels.candlestick}</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
 
-        {/* 統計資訊 */}
+        {/* 統計資訊（歷史模式；即時模式的統計在 LivePriceChart 內） */}
+        {!isLive && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
             <p className="text-sm text-muted-foreground">{labels.growth}</p>
@@ -159,9 +177,14 @@ export function PriceChart({ priceData, priceStats, ticker }: PriceChartProps) {
             <p className="text-xs text-muted-foreground">{priceStats.end_date}</p>
           </div>
         </div>
+        )}
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {isLive ? (
+          <LivePriceChart ticker={ticker} marketType={marketType} chartType={chartType} />
+        ) : (
+        <>
         {/* 價格圖表 */}
         <div>
           <h3 className="text-lg font-semibold mb-4">{labels.priceTitle}</h3>
@@ -320,6 +343,8 @@ export function PriceChart({ priceData, priceStats, ticker }: PriceChartProps) {
             </BarChart>
           </ResponsiveContainer>
         </div>
+        </>
+        )}
       </CardContent>
     </Card>
   );

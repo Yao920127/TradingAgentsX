@@ -268,3 +268,39 @@ class ValidateKeysResponse(BaseModel):
     """Keyed by field name; only fields that were actually tested appear."""
     results: Dict[str, KeyValidationResult]
 
+
+
+class LivePricePoint(BaseModel):
+    """One intraday price point (Unix seconds)."""
+    time: int
+    value: float
+
+
+class LiveCandle(BaseModel):
+    """One intraday 1-minute OHLC bar (Unix seconds)."""
+    time: int
+    open: float
+    high: float
+    low: float
+    close: float
+
+
+class LiveVolumeBar(BaseModel):
+    """Volume traded in one intraday minute (Unix seconds)."""
+    time: int
+    volume: int
+
+
+class LiveQuoteResponse(BaseModel):
+    """Live (possibly delayed) quote with today's 1-minute series."""
+    symbol: str
+    currency: Optional[str] = None
+    price: float
+    previous_close: Optional[float] = None
+    change: Optional[float] = None
+    change_percent: Optional[float] = None
+    market_open: bool
+    as_of: int
+    points: List[LivePricePoint]
+    candles: List[LiveCandle]
+    volumes: List[LiveVolumeBar]

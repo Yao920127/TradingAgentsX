@@ -14,6 +14,8 @@ import type {
   ChatMessageResponse,
   ValidateKeysRequest,
   ValidateKeysResponse,
+  LiveQuote,
+  LiveMarketType,
 } from "./types";
 
 const apiClient = axios.create({
@@ -57,6 +59,16 @@ export const api = {
     const response = await apiClient.get<TaskStatusResponse>(
       `/api/task/${taskId}`
     );
+    return response.data;
+  },
+
+  /**
+   * Get the latest (possibly delayed) price plus today's 1-minute series
+   */
+  async getLivePrice(ticker: string, marketType?: LiveMarketType): Promise<LiveQuote> {
+    const response = await apiClient.get<LiveQuote>("/api/price/live", {
+      params: { ticker, ...(marketType ? { market_type: marketType } : {}) },
+    });
     return response.data;
   },
 
