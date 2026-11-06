@@ -1,232 +1,172 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 # ========================================
-# 清理所有緩存腳本（全域版本）
-# 此腳本會清理整個專案中所有類型的緩存文件
-# 不限定特定目錄，徹底清理所有緩存
+# TradingAgentsX：清除快取與暫存檔
+#
+#   ./clean_cache.sh            清建置產物、工具快取、日誌、系統暫存檔
+#   ./clean_cache.sh --app      另外清應用快取（股價資料快取、本機 Redis 的 cache:* 與 ratelimit:*）
+#   ./clean_cache.sh --deep     另外刪除 node_modules 與 *.egg-info（之後需重新安裝）
+#   ./clean_cache.sh --all      等於 --app --deep
+#   ./clean_cache.sh -n         只列出會刪什麼，不實際刪除
+#
+# 不會碰：原始碼、.env、lock 檔（bun.lock / uv.lock）、分析結果與 PDF（results/、report/）、
+#         floorplan/、conda 環境、Redis 裡進行中的分析任務（task:*）
 # ========================================
 
-set -e  # 遇到錯誤立即停止
+set -euo pipefail
 
-echo "🧹 開始全域清理所有緩存..."
-echo "================================"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT"
 
-# 記錄腳本執行位置
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+DRY_RUN=0
+CLEAN_APP=0
+CLEAN_DEEP=0
 
-# ========================================
-# Next.js / React 緩存清理
-# ========================================
-echo ""
-echo "⚛️  清理 Next.js / React 緩存..."
+usage() {
+  sed -n '3,13p' "$0" | sed 's/^# \{0,1\}//'
+  exit 0
+}
 
-# 清理 .next 目錄（整個專案）
-NEXT_COUNT=$(find . -type d -name ".next" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$NEXT_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $NEXT_COUNT 個 .next 目錄"
-    find . -type d -name ".next" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 .next 目錄，跳過"
+for arg in "$@"; do
+  case "$arg" in
+    -n | --dry-run) DRY_RUN=1 ;;
+    --app) CLEAN_APP=1 ;;
+    --deep) CLEAN_DEEP=1 ;;
+    --all) CLEAN_APP=1 CLEAN_DEEP=1 ;;
+    -h | --help) usage ;;
+    *)
+      echo "未知參數：${arg}（用 -h 看說明）" >&2
+      exit 1
+      ;;
+  esac
+done
+
+REMOVED=0
+
+# 刪除單一路徑（檔案或目錄），dry-run 時只印出
+remove_path() {
+  local path="$1"
+  [ -e "$path" ] || return 0
+  local size
+  size="$(du -sh "$path" 2>/dev/null | cut -f1)"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "  [預覽] $path ($size)"
+  else
+    rm -rf -- "$path"
+    echo "  ✓ $path ($size)"
+  fi
+  REMOVED=$((REMOVED + 1))
+}
+
+# 依名稱在專案中搜尋並刪除；跳過 node_modules、.venv、.git，避免刪到依賴套件內的同名目錄
+remove_by_name() {
+  local type="$1" name="$2" path
+  while IFS= read -r path; do
+    remove_path "$path"
+  done < <(
+    find . \( -name node_modules -o -name .venv -o -name .git \) -prune -o \
+      -type "$type" -name "$name" -print 2>/dev/null
+  )
+}
+
+section() {
+  echo ""
+  echo "$1"
+}
+
+[ "$DRY_RUN" -eq 1 ] && echo "🔍 預覽模式：只列出、不刪除"
+echo "🧹 清理 TradingAgentsX 快取與暫存檔（${ROOT}）"
+
+section "⚛️  前端（Next.js / TypeScript）"
+remove_path frontend/.next
+remove_path frontend/out
+remove_path frontend/node_modules/.cache
+remove_by_name f "*.tsbuildinfo"
+
+section "🐍 後端與 AI 引擎（Python）"
+remove_by_name d __pycache__
+remove_by_name f "*.py[co]"
+remove_by_name d .pytest_cache
+remove_by_name d .mypy_cache
+remove_by_name d .ruff_cache
+remove_path .coverage
+remove_path htmlcov
+remove_path coverage.xml
+
+section "📝 日誌與系統暫存檔"
+remove_by_name f "*.log"
+remove_by_name f ".DS_Store"
+remove_by_name f "Thumbs.db"
+remove_by_name f "*.sw[op]"
+
+if [ "$CLEAN_DEEP" -eq 1 ]; then
+  section "📦 依賴套件（--deep）"
+  remove_path node_modules
+  remove_path frontend/node_modules
+  remove_by_name d "*.egg-info"
 fi
 
-# 清理 .turbo 目錄
-TURBO_COUNT=$(find . -type d -name ".turbo" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$TURBO_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $TURBO_COUNT 個 .turbo 目錄"
-    find . -type d -name ".turbo" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 .turbo 目錄，跳過"
+# 應用快取：分析時下載的股價資料（24 小時內會重用），以及 Redis 的結果快取與請求次數計數
+if [ "$CLEAN_APP" -eq 1 ]; then
+  section "🗄️  應用快取（--app）"
+  remove_path "${TRADINGAGENTS_DATA_CACHE_DIR:-tradingagents/dataflows/data_cache}"
+
+  # 不清 task:*，以免中斷正在跑的分析
+  PATTERNS="cache:* ratelimit:*"
+
+  REDIS_URL_VALUE="${REDIS_URL:-}"
+  if [ -z "$REDIS_URL_VALUE" ] && [ -f .env ]; then
+    REDIS_URL_VALUE="$(grep -E '^REDIS_URL=' .env | tail -1 | cut -d= -f2- || true)"
+  fi
+  # 只動本機的 Redis：.env 若指向雲端（例如 Railway 正式環境），一律不清
+  REDIS_HOST="$(printf '%s' "$REDIS_URL_VALUE" | sed -E 's#^[a-z]+://([^@]*@)?([^:/]+).*#\2#')"
+
+  REDIS_CMD=""
+  if [ -n "$REDIS_URL_VALUE" ]; then
+    case "$REDIS_HOST" in
+      localhost | 127.0.0.1 | ::1 | redis)
+        if command -v redis-cli >/dev/null 2>&1; then
+          REDIS_CMD="redis-cli -u $REDIS_URL_VALUE"
+        fi
+        ;;
+      *)
+        echo "  - REDIS_URL 指向 ${REDIS_HOST}（不是本機），為了安全不清它。"
+        echo "    要清正式環境的快取，請到 Railway 後台操作。"
+        ;;
+    esac
+  elif command -v docker >/dev/null 2>&1 &&
+    docker compose ps --status running --services 2>/dev/null | grep -qx redis; then
+    REDIS_CMD="docker compose exec -T redis redis-cli"
+  fi
+
+  if [ -z "$REDIS_CMD" ]; then
+    echo "  - 沒有可連線的本機 Redis：本機開發時任務與快取存在後端行程的記憶體裡，"
+    echo "    重新啟動後端（python -m backend）即會清空。"
+  else
+    for pattern in $PATTERNS; do
+      count="$($REDIS_CMD --scan --pattern "$pattern" | wc -l | tr -d ' ')"
+      if [ "$count" -eq 0 ]; then
+        echo "  - ${pattern}：沒有資料"
+      elif [ "$DRY_RUN" -eq 1 ]; then
+        echo "  [預覽] ${pattern}：$count 筆"
+      else
+        $REDIS_CMD --scan --pattern "$pattern" | xargs -n 100 $REDIS_CMD DEL >/dev/null
+        echo "  ✓ ${pattern}：刪除 $count 筆"
+      fi
+    done
+  fi
 fi
 
-# 清理 out 目錄
-OUT_COUNT=$(find . -type d -name "out" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$OUT_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $OUT_COUNT 個 out 目錄"
-    find . -type d -name "out" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 out 目錄，跳過"
-fi
-
-# 清理 build 目錄
-BUILD_COUNT=$(find . -type d -name "build" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$BUILD_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $BUILD_COUNT 個 build 目錄"
-    find . -type d -name "build" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 build 目錄，跳過"
-fi
-
-# 清理 dist 目錄
-DIST_COUNT=$(find . -type d -name "dist" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$DIST_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $DIST_COUNT 個 dist 目錄"
-    find . -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 dist 目錄，跳過"
-fi
-
-# ========================================
-# TypeScript 緩存清理
-# ========================================
-echo ""
-echo "📘 清理 TypeScript 緩存..."
-
-# 清理 tsconfig.tsbuildinfo
-TSBUILDINFO_COUNT=$(find . -name "tsconfig.tsbuildinfo" -o -name "*.tsbuildinfo" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$TSBUILDINFO_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $TSBUILDINFO_COUNT 個 TypeScript 緩存文件"
-    find . \( -name "tsconfig.tsbuildinfo" -o -name "*.tsbuildinfo" \) -delete 2>/dev/null || true
-else
-    echo "  - 沒有 TypeScript 緩存，跳過"
-fi
-
-# ========================================
-# Python 緩存清理
-# ========================================
-echo ""
-echo "🐍 清理 Python 緩存..."
-
-# 清理 __pycache__
-PYCACHE_COUNT=$(find . -type d -name "__pycache__" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$PYCACHE_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $PYCACHE_COUNT 個 __pycache__ 目錄"
-    find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 __pycache__ 目錄，跳過"
-fi
-
-# 清理 .pyc 文件
-PYC_COUNT=$(find . -type f -name "*.pyc" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$PYC_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $PYC_COUNT 個 .pyc 文件"
-    find . -type f -name "*.pyc" -delete 2>/dev/null || true
-else
-    echo "  - 沒有 .pyc 文件，跳過"
-fi
-
-# 清理 .pyo 文件
-PYO_COUNT=$(find . -type f -name "*.pyo" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$PYO_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $PYO_COUNT 個 .pyo 文件"
-    find . -type f -name "*.pyo" -delete 2>/dev/null || true
-else
-    echo "  - 沒有 .pyo 文件，跳過"
-fi
-
-# 清理 .pytest_cache
-PYTEST_COUNT=$(find . -type d -name ".pytest_cache" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$PYTEST_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $PYTEST_COUNT 個 .pytest_cache 目錄"
-    find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 .pytest_cache 目錄，跳過"
-fi
-
-# 清理 *.egg-info
-EGGINFO_COUNT=$(find . -type d -name "*.egg-info" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$EGGINFO_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $EGGINFO_COUNT 個 .egg-info 目錄"
-    find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 .egg-info 目錄，跳過"
-fi
-
-# ========================================
-# 通用緩存目錄清理
-# ========================================
-echo ""
-echo "📦 清理通用緩存目錄..."
-
-# 清理 .cache 目錄
-CACHE_COUNT=$(find . -type d -name ".cache" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$CACHE_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $CACHE_COUNT 個 .cache 目錄"
-    find . -type d -name ".cache" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 .cache 目錄，跳過"
-fi
-
-# 清理 .parcel-cache
-PARCEL_COUNT=$(find . -type d -name ".parcel-cache" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$PARCEL_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $PARCEL_COUNT 個 .parcel-cache 目錄"
-    find . -type d -name ".parcel-cache" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 .parcel-cache 目錄，跳過"
-fi
-
-# 清理 .vite 目錄
-VITE_COUNT=$(find . -type d -name ".vite" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$VITE_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $VITE_COUNT 個 .vite 目錄"
-    find . -type d -name ".vite" -exec rm -rf {} + 2>/dev/null || true
-else
-    echo "  - 沒有 .vite 目錄，跳過"
-fi
-
-# ========================================
-# 系統緩存清理
-# ========================================
-echo ""
-echo "🔧 清理系統緩存..."
-
-# 清理 .DS_Store (macOS)
-DS_STORE_COUNT=$(find . -name ".DS_Store" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$DS_STORE_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $DS_STORE_COUNT 個 .DS_Store 文件"
-    find . -name ".DS_Store" -delete 2>/dev/null || true
-else
-    echo "  - 沒有 .DS_Store 文件，跳過"
-fi
-
-# 清理 Thumbs.db (Windows)
-THUMBS_COUNT=$(find . -name "Thumbs.db" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$THUMBS_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $THUMBS_COUNT 個 Thumbs.db 文件"
-    find . -name "Thumbs.db" -delete 2>/dev/null || true
-else
-    echo "  - 沒有 Thumbs.db 文件，跳過"
-fi
-
-# ========================================
-# 日誌文件清理
-# ========================================
-echo ""
-echo "📝 清理日誌文件..."
-
-# 清理 npm/yarn 日誌
-LOG_COUNT=$(find . \( -name "npm-debug.log" -o -name "yarn-error.log" -o -name "yarn-debug.log" -o -name "pnpm-debug.log" \) 2>/dev/null | wc -l | tr -d ' ')
-if [ "$LOG_COUNT" -gt 0 ]; then
-    echo "  ✓ 刪除 $LOG_COUNT 個日誌文件"
-    find . \( -name "npm-debug.log" -o -name "yarn-error.log" -o -name "yarn-debug.log" -o -name "pnpm-debug.log" \) -delete 2>/dev/null || true
-else
-    echo "  - 沒有日誌文件，跳過"
-fi
-
-# ========================================
-# 完成
-# ========================================
 echo ""
 echo "================================"
-echo "✅ 全域緩存清理完成！"
-echo ""
-echo "📋 保留的重要文件/目錄："
-echo "  ✓ node_modules (依賴包)"
-echo "  ✓ pnpm-lock.yaml / package-lock.json (鎖定文件)"
-echo "  ✓ package.json (包配置)"
-echo "  ✓ .git (版本控制)"
-echo "  ✓ 所有源代碼文件"
-echo ""
-echo "�️  已清理的緩存類型："
-echo "  • Next.js/React: .next, .turbo, out, build, dist"
-echo "  • TypeScript: *.tsbuildinfo"
-echo "  • Python: __pycache__, *.pyc, *.pyo, .pytest_cache, *.egg-info"
-echo "  • 通用緩存: .cache, .parcel-cache, .vite"
-echo "  • 系統文件: .DS_Store, Thumbs.db"
-echo "  • 日誌文件: npm-debug.log, yarn-error.log 等"
-echo ""
-echo "💡 提示："
-echo "  - 下次運行開發服務器時，緩存會自動重新生成"
-echo "  - 如果需要重新安裝依賴，請運行 'pnpm install'"
-echo ""
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "🔍 預覽完成：共 $REMOVED 個項目會被刪除（Redis 鍵值另計）"
+else
+  echo "✅ 清理完成：共刪除 $REMOVED 個項目"
+fi
+if [ "$CLEAN_DEEP" -eq 1 ] && [ "$DRY_RUN" -eq 0 ]; then
+  echo ""
+  echo "💡 依賴已刪除，請重新安裝："
+  echo "   bun install"
+  echo "   (cd frontend && bun install)"
+  echo "   conda activate tradingagents && pip install -e ."
+fi
