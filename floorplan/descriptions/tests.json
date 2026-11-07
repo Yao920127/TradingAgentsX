@@ -3,6 +3,10 @@
     "tests/test_news_and_social.py": {
       "name": "新聞與社群測試",
       "description": "檢查新聞去重、多來源合併、社群情緒、錯誤處理與簡轉繁是否正確，不連外網。"
+    },
+    "tests/test_live_price.py": {
+      "name": "即時股價測試",
+      "description": "自動檢查即時股價服務與接口：代號轉換、資料整理、快取與錯誤處理，不需連到外部網站。"
     }
   }
 }

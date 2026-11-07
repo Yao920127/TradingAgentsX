@@ -47,6 +47,10 @@
     "frontend/components/analysis/VerdictBanner.tsx": {
       "name": "結論橫幅",
       "description": "在報告頂端顯示最終建議、信心度與關鍵數字，一眼看懂結論。"
+    },
+    "frontend/components/analysis/LivePriceChart.tsx": {
+      "name": "即時股價圖",
+      "description": "結果頁價格區的「即時」模式：顯示目前股價、今天每分鐘的走勢線或 K 棒與成交量，並自動更新。"
     }
   }
 }

@@ -19,6 +19,10 @@
     "backend/app/api/user.py": {
       "name": "使用者資料同步",
       "description": "讓登入使用者在雲端保存金鑰設定與報告，並即時通知其他裝置有變動。"
+    },
+    "backend/app/api/price.py": {
+      "name": "即時股價接口",
+      "description": "提供結果頁「即時」模式所需的當日股價與成交量。"
     }
   },
   "routes": {
@@ -125,6 +129,10 @@
     "DELETE /api/user/reports": {
       "name": "刪除全部雲端報告",
       "description": "清空登入者在雲端的所有報告。"
+    },
+    "GET /api/price/live": {
+      "name": "取得即時股價",
+      "description": "回傳某支股票的最新價格、今天每分鐘的價格與成交量（來自 Yahoo，可能有延遲）。"
     }
   }
 }

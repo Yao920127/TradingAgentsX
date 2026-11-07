@@ -39,6 +39,10 @@
     "backend/app/services/trading_service.py": {
       "name": "執行 AI 分析",
       "description": "把網站傳來的設定與金鑰交給 AI 分析團隊，執行分析並整理結果。"
+    },
+    "backend/app/services/live_price_service.py": {
+      "name": "即時股價服務",
+      "description": "向 Yahoo Finance 取得當日每分鐘的價格與成交量，整理成圖表需要的格式，並短暫快取，避免多人同時看時一直重抓。"
     }
   }
 }

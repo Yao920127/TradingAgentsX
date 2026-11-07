@@ -19,6 +19,14 @@
     "frontend/hooks/useConfig.ts": {
       "name": "取得可選設定",
       "description": "向主伺服器取得可選的模型與分析師清單。"
+    },
+    "frontend/hooks/useLivePrice.test.ts": {
+      "name": "即時報價輪詢測試",
+      "description": "自動檢查開盤與休市時多久重新抓一次報價。"
+    },
+    "frontend/hooks/useLivePrice.ts": {
+      "name": "即時報價輪詢",
+      "description": "開啟即時模式時定期向主伺服器要最新報價；開盤時更新得快，休市時放慢。"
     }
   }
 }

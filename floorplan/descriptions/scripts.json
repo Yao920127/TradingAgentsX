@@ -2,7 +2,7 @@
   "files": {
     "clean_cache.sh": {
       "name": "清除快取",
-      "description": "刪除整個專案裡各種暫存與快取檔案。"
+      "description": "清掉建置產物、工具快取、日誌與暫存檔；可選擇一併清股價快取與 Redis 快取，或連安裝的套件一起刪。"
     },
     "main.py": {
       "name": "範例：直接跑一次分析",

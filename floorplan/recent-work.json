@@ -1,13 +1,30 @@
 {
-  "updatedAt": "2026-11-06T08:30:00Z",
   "tasks": [
     {
-      "title": "PDF 封面顯示公司全名",
-      "request": "讓 PDF 報告封面顯示公司名稱",
-      "summary": "近期提交讓下載的 PDF 封面印出公司全名：優先用 Yahoo 的英文名，台股查不到時改用 FinMind 中文名，再不行才顯示股票代號。已完成並提交。",
+      "title": "即時股價模式",
+      "request": "在分析結果頁加入即時股價（實時更新）功能",
+      "summary": "結果頁的價格區新增「即時」模式：主伺服器向 Yahoo 抓當日每分鐘價格與成交量並短暫快取，網站定期輪詢並畫出走勢線／K 棒與成交量。已提交（1a359d3），附前後端測試。",
       "items": [
-        { "ref": "backend/app/services/download_service.py", "change": "changed", "note": "新增查詢公司全名的步驟，依序嘗試 Yahoo 英文名、FinMind 中文名，最後退回代號，封面因此能顯示完整公司名稱。" },
-        { "ref": "backend/app/services/pdf_generator.py", "change": "changed", "note": "封面排版改為印出查到的公司全名。" }
+        {"ref": "GET /api/price/live", "change": "new", "note": "新的網址，網站從這裡拿即時報價；是整個即時模式的資料來源。"},
+        {"ref": "backend/app/api/price.py", "change": "new", "note": "掛上即時股價網址，把查詢錯誤轉成清楚的回應。"},
+        {"ref": "backend/app/services/live_price_service.py", "change": "new", "note": "實際向 Yahoo 抓今天每分鐘的價格與成交量，並快取一小段時間，避免多人同時看時一直重抓。"},
+        {"ref": "backend/app/models/schemas.py", "change": "changed", "note": "新增即時報價的資料格式，讓網站知道會收到什麼。"},
+        {"ref": "backend/app/main.py", "change": "changed", "note": "把新的即時股價網址接上主伺服器。"},
+        {"ref": "frontend/hooks/useLivePrice.ts", "change": "new", "note": "開啟即時模式時定期向伺服器要新報價，開盤時更新快、休市時放慢。"},
+        {"ref": "frontend/lib/live-price.ts", "change": "new", "note": "即時圖用的時間計算：圖表顯示多長、時間用交易所當地時間顯示。"},
+        {"ref": "frontend/components/analysis/LivePriceChart.tsx", "change": "new", "note": "畫出目前股價、今天每分鐘的走勢與成交量，並自動更新。"},
+        {"ref": "frontend/components/analysis/PriceChart.tsx", "change": "changed", "note": "價格區加上切換到「即時」模式的入口。"},
+        {"ref": "frontend/app/analysis/results/page.tsx", "change": "changed", "note": "結果頁把股票代號與市場傳給即時圖使用。"},
+        {"ref": "frontend/lib/api.ts", "change": "changed", "note": "新增向主伺服器要即時報價的呼叫。"},
+        {"ref": "frontend/lib/types.ts", "change": "changed", "note": "新增即時報價的資料格式定義。"}
+      ]
+    },
+    {
+      "title": "清快取腳本更新",
+      "request": "整理清除快取腳本",
+      "summary": "clean_cache.sh 改成分層選項：預設清建置與暫存、--app 另清股價與 Redis 快取、--deep 連安裝套件一起刪。",
+      "items": [
+        {"ref": "clean_cache.sh", "change": "changed", "note": "加入 --app、--deep 等選項，可依需要清得更徹底。"}
       ]
     }
   ]

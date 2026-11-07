@@ -62,7 +62,7 @@
     },
     "frontend/lib/types.ts": {
       "name": "資料格式定義",
-      "description": "定義網站與主伺服器之間傳遞的請求、進度與結果長什麼樣子。"
+      "description": "定義網站與主伺服器之間傳遞的請求、進度、結果與即時股價資料長什麼樣子。"
     },
     "frontend/lib/user-api.ts": {
       "name": "雲端同步窗口",
@@ -75,6 +75,14 @@
     "frontend/types/css.d.ts": {
       "name": "樣式檔型別宣告",
       "description": "讓程式檢查工具接受直接匯入樣式檔。"
+    },
+    "frontend/lib/live-price.test.ts": {
+      "name": "即時股價小工具測試",
+      "description": "自動檢查即時模式的時間換算與圖表時間範圍算得對不對。"
+    },
+    "frontend/lib/live-price.ts": {
+      "name": "即時股價小工具",
+      "description": "即時模式用的小計算：把報價時間對齊現在、決定圖表顯示多長時間，並用交易所當地時間顯示時刻。"
     }
   }
 }
