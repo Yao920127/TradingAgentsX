@@ -121,6 +121,12 @@ export const zhTW = {
     ],
     fullApiSupport: "完整 API 支援",
     fullApiSupportFeatures: ["RESTful API 架構", "異步任務處理", "Swagger 互動文檔"],
+
+    // Architecture map section
+    architectureMapTitle: "🗺️ 互動式系統架構地圖",
+    architectureMapDesc:
+      "一張圖看懂 TradingAgentsX 怎麼運作：每個模組、檔案與 API 都有白話說明，還有導覽帶你跟著一次真實的分析請求走一遍。",
+    architectureMapButton: "開啟架構地圖",
     
     // CTA Section
     readyToStart: "準備好開始智能交易分析了嗎？",

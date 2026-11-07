@@ -244,6 +244,12 @@ export const en = {
       "Swagger interactive docs",
     ],
 
+    // Architecture map section
+    architectureMapTitle: "Interactive Architecture Map",
+    architectureMapDesc:
+      "Explore how TradingAgentsX fits together: every part, file and API route with a plain-language description, plus guided flows that follow a real analysis request.",
+    architectureMapButton: "Open the architecture map",
+
     // CTA Section
     readyToStart: "Ready to Start Smart Trading Analysis?",
     ctaDescription:

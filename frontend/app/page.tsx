@@ -20,6 +20,8 @@ import {
   Database,
   Lock,
   CheckCircle2,
+  Map as MapIcon,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +36,8 @@ import { ImmersivePortalHero } from "@/components/home/ImmersivePortalHero";
 import { InteractiveCard } from "@/components/home/InteractiveCard";
 import { ScrollReveal } from "@/components/home/ScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+const ARCHITECTURE_MAP_URL = "https://floorplan-tradinganentsx.up.railway.app";
 
 export default function HomePage() {
   const { t } = useLanguage();
@@ -183,6 +187,29 @@ export default function HomePage() {
             <TechnicalCard title={t.home.realTimeData} features={t.home.realTimeDataFeatures} icon={<TrendingUp className="w-5 h-5 text-blue-500" />} />
             <TechnicalCard title={t.home.fullApiSupport} features={t.home.fullApiSupportFeatures} icon={<Lock className="w-5 h-5 text-pink-500" />} />
           </div>
+        </ScrollReveal>
+
+        {/* Architecture Map Section */}
+        <ScrollReveal from="left" className="mb-32 md:mb-40">
+          <SectionHeading title={t.home.architectureMapTitle} />
+          <InteractiveCard>
+            <Card className="max-w-3xl mx-auto">
+              <CardContent className="pt-6 flex flex-col items-center text-center gap-6">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 flex items-center justify-center shadow-[0_2px_0_rgba(147,197,253,0.5),0_4px_12px_rgba(37,99,235,0.1)]">
+                  <MapIcon className="w-7 h-7 text-cyan-500" />
+                </div>
+                <p className="text-blue-500/80 dark:text-blue-400/80 font-medium max-w-2xl">
+                  {t.home.architectureMapDesc}
+                </p>
+                <a href={ARCHITECTURE_MAP_URL} target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="gap-2">
+                    {t.home.architectureMapButton}
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
+          </InteractiveCard>
         </ScrollReveal>
 
         {/* Call to Action Section */}
