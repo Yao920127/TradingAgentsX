@@ -5,7 +5,7 @@ import yfinance as yf
 import os
 import time
 import logging
-from .stockstats_utils import StockstatsUtils
+from .stockstats_utils import StockstatsUtils, load_price_csv_cached
 from .retry_utils import retry
 
 logger = logging.getLogger(__name__)
@@ -279,54 +279,26 @@ def _get_stock_stats_bulk(
             f"{symbol}-YFin-data-{start_date_str}-{end_date_str}.csv",
         )
         
-        # 檢查緩存是否存在且有效（24小時內）
-        cache_valid = False
-        if os.path.exists(data_file):
-            file_mtime = os.path.getmtime(data_file)
-            current_time = time.time()
-            cache_age_hours = (current_time - file_mtime) / 3600
-            
-            if cache_age_hours < 24:
-                cache_valid = True
-                logger.info(f"{symbol} 緩存有效（年齡：{cache_age_hours:.1f} 小時）")
-            else:
-                logger.info(f"{symbol} 緩存過期（年齡：{cache_age_hours:.1f} 小時），將重新下載")
-        
-        if cache_valid:
-            data_pl = pl.read_csv(data_file)
-            data_pl = data_pl.with_columns(pl.col("Date").str.to_datetime())
-            # stockstats 需要 pandas DataFrame
-            data = data_pl.to_pandas()
-        else:
-            # 使用重試機制下載數據
-            @retry(max_attempts=3, backoff=2.0)
-            def download_data():
-                return yf.download(
-                    symbol,
-                    start=start_date_str,
-                    end=end_date_str,
-                    multi_level_index=False,
-                    progress=False,
-                    auto_adjust=False,
-                    timeout=30
-                )
-            
-            try:
-                data = download_data()
-                data = data.reset_index()
-                data.to_csv(data_file, index=False)
-                logger.info(f"成功下載並緩存 {symbol} 數據到 {data_file}")
-            except Exception as e:
-                logger.error(f"下載 {symbol} 數據失敗: {e}")
-                # 如果下載失敗但有舊緩存，使用舊緩存
-                if os.path.exists(data_file):
-                    logger.warning(f"使用過期緩存作為備援")
-                    data_pl = pl.read_csv(data_file)
-                    data_pl = data_pl.with_columns(pl.col("Date").str.to_datetime())
-                    data = data_pl.to_pandas()
-                else:
-                    raise
-        
+        # 使用重試機制下載數據
+        @retry(max_attempts=3, backoff=2.0)
+        def download_data():
+            return yf.download(
+                symbol,
+                start=start_date_str,
+                end=end_date_str,
+                multi_level_index=False,
+                progress=False,
+                auto_adjust=False,
+                timeout=30
+            ).reset_index()
+
+        try:
+            # 24 小時內的快取直接使用；寫入為原子操作且以鎖序列化平行呼叫
+            data = load_price_csv_cached(data_file, download_data, max_age_hours=24)
+        except Exception as e:
+            logger.error(f"下載 {symbol} 數據失敗: {e}")
+            raise
+
         df = wrap(data)
         df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
     

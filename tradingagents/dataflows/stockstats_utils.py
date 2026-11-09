@@ -1,9 +1,62 @@
+import logging
+import threading
+import time
+import pandas as pd
 import polars as pl
 import yfinance as yf
 from stockstats import wrap
-from typing import Annotated
+from typing import Annotated, Callable
 import os
 from .config import get_config, DATA_DIR
+
+logger = logging.getLogger(__name__)
+
+
+_cache_locks: dict[str, threading.Lock] = {}
+_cache_locks_guard = threading.Lock()
+
+
+def _lock_for(path: str) -> threading.Lock:
+    """每個快取檔案一把鎖，避免平行工具呼叫同時讀寫同一個 CSV。"""
+    with _cache_locks_guard:
+        return _cache_locks.setdefault(path, threading.Lock())
+
+
+def load_price_csv_cached(
+    data_file: str,
+    download: Callable[[], pd.DataFrame],
+    max_age_hours: float | None = None,
+) -> pd.DataFrame:
+    """
+    讀取（或下載並寫入）價格快取，回傳 pandas DataFrame（Date 為 datetime）。
+
+    - 以檔案鎖序列化平行呼叫，避免讀到寫到一半的檔案。
+    - 以暫存檔 + os.replace 原子寫入。
+    - 快取損壞（解析失敗）時刪除並重新下載。
+    """
+    with _lock_for(data_file):
+        if os.path.exists(data_file):
+            fresh = (
+                max_age_hours is None
+                or (time.time() - os.path.getmtime(data_file)) / 3600 < max_age_hours
+            )
+            if fresh:
+                try:
+                    df = pd.read_csv(data_file)
+                    df["Date"] = pd.to_datetime(df["Date"])
+                    return df
+                except Exception as e:
+                    logger.warning(f"價格快取損壞，將刪除並重新下載 {data_file}: {e}")
+                    os.remove(data_file)
+
+        df = download().reset_index(drop=True)
+        if "Date" not in df.columns:
+            df = df.reset_index()
+        tmp_file = f"{data_file}.{os.getpid()}.{threading.get_ident()}.tmp"
+        df.to_csv(tmp_file, index=False)
+        os.replace(tmp_file, data_file)
+        df["Date"] = pd.to_datetime(df["Date"])
+        return df
 
 
 class StockstatsUtils:
@@ -72,24 +125,17 @@ class StockstatsUtils:
                 f"{symbol}-YFin-data-{start_date_str}-{end_date_str}.csv",
             )
 
-            if os.path.exists(data_file):
-                data = pl.read_csv(data_file)
-                data = data.with_columns(pl.col("Date").str.to_datetime())
-            else:
-                data_yf = yf.download(
+            def _download() -> pd.DataFrame:
+                return yf.download(
                     symbol,
                     start=start_date_str,
                     end=end_date_str,
                     multi_level_index=False,
                     progress=False,
                     auto_adjust=False,
-                )
-                data_yf = data_yf.reset_index() # type: ignore
-                data_yf.to_csv(data_file, index=False)
-                data = pl.from_pandas(data_yf)
+                ).reset_index()  # type: ignore
 
-            # stockstats 需要 pandas DataFrame
-            data_pd = data.to_pandas()
+            data_pd = load_price_csv_cached(data_file, _download)
             df = wrap(data_pd)
             df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
             curr_date = curr_date_dt.strftime("%Y-%m-%d")
