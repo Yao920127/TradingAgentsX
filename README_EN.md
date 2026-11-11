@@ -248,9 +248,9 @@ TradingAgentsX/
 
 | Agent             | Role             | Output                                                                  |
 | ----------------- | ---------------- | ----------------------------------------------------------------------- |
-| Report Summarizer | Report Synthesis | ~700-word, five-section summary: key data snapshot, technicals, sentiment, news, fundamentals |
+| Report Summarizer | Report Synthesis | Each report summarized separately, then merged: technicals, sentiment, news, fundamentals, each with its key data |
 
-The Report Summarizer runs after the four analysts. It uses the quick-thinking model to condense the four full reports into one summary, keeping every number, ratio and price level verbatim. The bull/bear researchers and the three risk debaters read this summary instead of the full reports, which cuts token usage substantially across multi-round debates. If summarization fails, it returns an empty summary and the analysis continues.
+The Report Summarizer runs after the four analysts. It uses the quick-thinking model to condense each of the four reports in its own call (run in parallel) and merge the results into one summary, keeping every number, ratio and price level verbatim. The bull/bear researchers and the three risk debaters read this summary instead of the full reports, which cuts token usage substantially across multi-round debates. If summarizing one report fails, that section falls back to the original report and the analysis continues.
 
 ### Research Team (3 Agents)
 

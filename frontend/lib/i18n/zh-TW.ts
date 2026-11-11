@@ -253,7 +253,7 @@ export const zhTW = {
     summaryHandoff: "摘要分送辯論代理",
     summarizerDesc: "壓縮四份報告為精簡摘要",
     keepKeyData: "逐字保留關鍵數據與價位",
-    structuredSummary: "約 700 字五段式摘要",
+    structuredSummary: "四份報告分別摘要後合併",
     saveTokens: "減少辯論代理的 token 用量",
     researchPrep: "研究整合與辯論準備",
     riskDebate: "風險評估與管理",

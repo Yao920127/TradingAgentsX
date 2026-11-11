@@ -391,7 +391,7 @@ export const en = {
     summaryHandoff: "Summary Sent to Debaters",
     summarizerDesc: "Condenses four reports into one summary",
     keepKeyData: "Keeps key figures and price levels verbatim",
-    structuredSummary: "~700-word, five-section summary",
+    structuredSummary: "Each report summarized separately, then merged",
     saveTokens: "Cuts token usage for the debating agents",
     researchPrep: "Research Integration & Debate Prep",
     riskDebate: "Risk Assessment & Management",

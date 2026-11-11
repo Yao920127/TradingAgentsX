@@ -869,46 +869,62 @@ Please provide a comprehensive trading plan with clear execution guidelines.
 {lang_closing}"""
 
 
-def get_report_summarizer_prompt(language: str = "zh-TW") -> str:
-    """Get the report summarizer system prompt."""
-    if language == "en":
-        return """You are a concise analyst synthesizer. Compress four analyst reports into a single structured summary of approximately 700 words total.
+# 各份報告的摘要設定：(章節名稱, 字數上限, 摘要重點)。順序即合併後的章節順序。
+REPORT_SUMMARY_SECTIONS = {
+    "market": {
+        "en": ("Market Technical Summary", 200, "key trend, moving averages, RSI / MACD and other indicators, support and resistance levels, trading signal"),
+        "zh-TW": ("市場技術摘要", 200, "關鍵趨勢、均線、RSI／MACD 等技術指標、支撐與壓力位、交易信號"),
+    },
+    "sentiment": {
+        "en": ("Sentiment Summary", 150, "overall market mood, key themes and discussion volume from social data"),
+        "zh-TW": ("情緒摘要", 150, "整體市場情緒、社群數據的主要主題與討論量"),
+    },
+    "news": {
+        "en": ("News Summary", 150, "the most important 1-3 events and their investment implications"),
+        "zh-TW": ("新聞摘要", 150, "最重要的 1-3 個事件及其投資意涵"),
+    },
+    "fundamentals": {
+        "en": ("Fundamentals Summary", 200, "key financial metrics, valuation, competitive position, growth outlook"),
+        "zh-TW": ("基本面摘要", 200, "關鍵財務指標、估值、競爭地位、成長展望"),
+    },
+}
 
-Output exactly five labelled sections:
-0. Key Data Snapshot (~100 words): List the 8-10 most critical quantitative metrics in this exact format:
-   - Price: $XXX | 50-day MA: $XXX | 200-day MA: $XXX
-   - RSI: XX | MACD: XX (direction)
-   - P/E: XXx | PEG: X.XX | Gross Margin: XX%
-   - Latest Quarter Revenue: $XXX (YoY +XX%) | Net Margin: XX%
-   - Analyst Target Price: $XXX | Technical Signal: [Bullish/Bearish/Neutral]
-1. Market Technical Summary (~150 words): Key trend, indicators, support/resistance levels, trading signal
-2. Sentiment Summary (~100 words): Overall market mood, key themes from social data
-3. News Summary (~100 words): Most important 1-2 events and their investment implications
-4. Fundamentals Summary (~150 words): Key financial metrics, valuation, competitive position, growth outlook
+
+def get_section_summary_title(section: str, language: str = "zh-TW") -> str:
+    """Get the heading used for one section of the combined analyst summary."""
+    lang = "en" if language == "en" else "zh-TW"
+    return REPORT_SUMMARY_SECTIONS[section][lang][0]
+
+
+def get_section_summarizer_prompt(section: str, language: str = "zh-TW") -> str:
+    """Get the system prompt that compresses ONE analyst report.
+
+    Each report is summarized in its own call so numbers from one report cannot
+    leak into another section and no report is squeezed out by a longer one.
+    """
+    if language == "en":
+        title, words, focus = REPORT_SUMMARY_SECTIONS[section]["en"]
+        return f"""You are a concise analyst synthesizer. Compress the single analyst report you are given into the "{title}" section, at most {words} words.
+
+Output exactly two parts, with no heading:
+Key data: one line listing the most critical numbers found in this report, separated by " | " (for example: Price: $XXX | RSI: XX). Write "Key data: none" if the report contains no numbers.
+Summary: {focus}.
 
 Rules:
 - **MUST verbatim preserve** all specific numbers, ratios, price levels, and percentages — vague phrases like "elevated" or "strong" MUST be replaced with actual values
+- Use ONLY numbers and facts that appear in this report; never estimate or fill in values that are missing
 - Use plain text only, no markdown tables
-- Do not add new analysis or opinions — only compress existing content
-- If a report section is unavailable, write "Data unavailable" for that section"""
+- Do not add new analysis or opinions — only compress existing content"""
 
-    return """您是簡潔的分析師整合員。將四份分析師報告壓縮成約 700 字的單一結構化摘要。
+    title, words, focus = REPORT_SUMMARY_SECTIONS[section]["zh-TW"]
+    return f"""您是簡潔的分析師整合員。將收到的單一份分析師報告壓縮成「{title}」段落，最多 {words} 字。
 
-請輸出以下五個標示明確的段落：
-0. 關鍵數據速查（約 100 字）：以下列格式列出最重要的 8-10 個量化指標：
-   - 股價：$XXX | 50日均線：$XXX | 200日均線：$XXX
-   - RSI：XX | MACD：XX（方向）
-   - 本益比：XX倍 | PEG：X.XX | 毛利率：XX%
-   - 最新季度營收：$XXX（YoY +XX%）| 淨利潤率：XX%
-   - 分析師目標價：$XXX | 技術訊號：[看漲/看跌/中性]
-1. 市場技術摘要（約 150 字）：關鍵趨勢、技術指標、支撐/壓力位、交易信號
-2. 情緒摘要（約 100 字）：整體市場情緒、社群數據的主要主題
-3. 新聞摘要（約 100 字）：最重要的 1-2 個事件及其投資意涵
-4. 基本面摘要（約 150 字）：關鍵財務指標、估值、競爭地位、成長展望
+請輸出以下兩個部分，不要加標題：
+關鍵數據：用一行列出這份報告中最重要的數字，以「 | 」分隔（例如：股價：$XXX | RSI：XX）。報告中沒有數字時寫「關鍵數據：無」。
+摘要：{focus}。
 
 規則：
 - **必須逐字保留**所有具體數字、比率、價位和百分比——模糊描述（如「偏高」、「強勁」）**必須替換**為實際數值
+- 只能使用這份報告中出現的數字與事實；缺少的數值不可估計或自行補上
 - 僅使用純文字，不使用 Markdown 表格
-- 不要添加新的分析或意見——只壓縮現有內容
-- 如果某個報告部分不可用，請在該部分寫「無資料」"""
-
+- 不要添加新的分析或意見——只壓縮現有內容"""

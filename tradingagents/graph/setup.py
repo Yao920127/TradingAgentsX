@@ -121,7 +121,7 @@ class GraphSetup:
         )
         trader_node = create_trader(self.quick_thinking_llm, self.trader_memory, self.language)
 
-        # 建立報告摘要節點（壓縮 4 份分析師報告為 ~600 字，減少下游 agent input tokens）
+        # 建立報告摘要節點（4 份分析師報告分別壓縮後合併，減少下游 agent input tokens）
         report_summarizer_node = create_report_summarizer(
             self.quick_thinking_llm, self.language
         )
