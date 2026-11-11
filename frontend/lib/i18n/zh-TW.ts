@@ -641,6 +641,8 @@ export const zhTW = {
     apifyDesc: "抓取 StockTwits 散戶多空貼文與 X（Twitter）貼文。按用量計費；X 需要 Apify 付費方案才能透過 API 使用",
     lunarcrushKey: "LunarCrush API Key（社群指標）",
     lunarcrushDesc: "X、Reddit、YouTube、TikTok 的社群情緒與討論量。社群端點需要付費方案",
+    hfTokenKey: "Hugging Face Token（本地嵌入模型）",
+    hfTokenDesc: "下載本地嵌入模型時使用，可提高 Hugging Face 的速率上限與下載速度。建立只有 Read 權限的 token 即可",
     openaiDesc: "用於 OpenAI 模型及 OpenAI 嵌入式模型",
     anthropicDesc: "用於 Claude 模型",
     googleDesc: "用於 Gemini 模型",

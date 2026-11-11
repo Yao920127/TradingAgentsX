@@ -12,6 +12,10 @@ from .config import get_config, DATA_DIR
 logger = logging.getLogger(__name__)
 
 
+class NoPriceDataError(Exception):
+    """下載結果為空：代碼不存在、已下市，或該期間沒有任何價格資料。"""
+
+
 _cache_locks: dict[str, threading.Lock] = {}
 _cache_locks_guard = threading.Lock()
 
@@ -50,8 +54,10 @@ def load_price_csv_cached(
                     os.remove(data_file)
 
         df = download().reset_index(drop=True)
-        if "Date" not in df.columns:
-            df = df.reset_index()
+        # 查無資料（代碼錯誤、已下市）時不可寫入快取：空檔案沒有 Date 欄，
+        # 之後每次讀取都會被判定為「損壞」而反覆刪除、重新下載。
+        if df.empty or "Date" not in df.columns:
+            raise NoPriceDataError(f"查無價格資料：{os.path.basename(data_file)}")
         tmp_file = f"{data_file}.{os.getpid()}.{threading.get_ident()}.tmp"
         df.to_csv(tmp_file, index=False)
         os.replace(tmp_file, data_file)

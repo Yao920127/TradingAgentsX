@@ -29,6 +29,7 @@ export const API_KEY_SOURCES = {
     url: "https://lunarcrush.com/developers/api/authentication",
     site: "LunarCrush Developers",
   },
+  hf_token: { url: "https://huggingface.co/settings/tokens", site: "Hugging Face" },
 } as const satisfies Record<string, ApiKeySource>;
 
 export type ApiKeySourceField = keyof typeof API_KEY_SOURCES;

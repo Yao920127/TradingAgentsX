@@ -30,6 +30,7 @@ export interface AnalysisRequest {
   jina_api_key?: string;
   apify_api_token?: string;
   lunarcrush_api_key?: string;
+  hf_token?: string;  // Hugging Face（本地嵌入模型下載）
   language?: "en" | "zh-TW";  // Language for agent reports
 }
 

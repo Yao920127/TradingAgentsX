@@ -70,6 +70,7 @@ class AnalysisRequest(BaseModel):
     jina_api_key: Optional[str] = Field(None, description="Jina AI API Key (article reader / social search)", min_length=0)
     apify_api_token: Optional[str] = Field(None, description="Apify API Token (StockTwits / X scrapers)", min_length=0)
     lunarcrush_api_key: Optional[str] = Field(None, description="LunarCrush API Key (social metrics)", min_length=0)
+    hf_token: Optional[str] = Field(None, description="Hugging Face access token (local embedding model download)", min_length=0)
     language: Optional[Literal["en", "zh-TW"]] = Field(
         default="zh-TW",
         description="Language for agent reports: 'en' for English, 'zh-TW' for Traditional Chinese"

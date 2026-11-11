@@ -30,6 +30,7 @@ export interface ApiSettings {
   jina_api_key: string;
   apify_api_token: string;
   lunarcrush_api_key: string;
+  hf_token: string;  // Hugging Face（本地嵌入模型下載）
   
   // Custom endpoint
   custom_base_url: string;
@@ -59,6 +60,7 @@ export const DEFAULT_API_SETTINGS: ApiSettings = {
   jina_api_key: "",
   apify_api_token: "",
   lunarcrush_api_key: "",
+  hf_token: "",
   custom_base_url: "",
   custom_api_key: "",
 };

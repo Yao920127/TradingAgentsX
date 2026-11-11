@@ -98,6 +98,7 @@ class SettingsUpdate(BaseModel):
     jina_api_key: str = ""
     apify_api_token: str = ""
     lunarcrush_api_key: str = ""
+    hf_token: str = ""
     custom_base_url: str = ""
     custom_api_key: str = ""
 

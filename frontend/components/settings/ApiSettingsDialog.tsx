@@ -60,6 +60,7 @@ const formSchema = z.object({
   jina_api_key: z.string().optional().or(z.literal("")),
   apify_api_token: z.string().optional().or(z.literal("")),
   lunarcrush_api_key: z.string().optional().or(z.literal("")),
+  hf_token: z.string().optional().or(z.literal("")),  // Hugging Face（本地嵌入模型下載）
   
   // LLM Providers
   anthropic_api_key: z.string().optional().or(z.literal("")),

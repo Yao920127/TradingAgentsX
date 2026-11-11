@@ -27,6 +27,8 @@ DATA_API_KEY_ENV_VARS = {
     "jina_api_key": "JINA_API_KEY",
     "apify_api_token": "APIFY_API_TOKEN",
     "lunarcrush_api_key": "LUNARCRUSH_API_KEY",
+    # Hugging Face：下載本地嵌入模型時使用（huggingface_hub 於請求當下讀取 HF_TOKEN）
+    "hf_token": "HF_TOKEN",
 }
 
 

@@ -31,6 +31,7 @@ const DATA_SOURCE_FIELDS: DataSourceField[] = [
   { name: "jina_api_key", label: "jinaKey", description: "jinaDesc" },
   { name: "apify_api_token", label: "apifyKey", description: "apifyDesc" },
   { name: "lunarcrush_api_key", label: "lunarcrushKey", description: "lunarcrushDesc" },
+  { name: "hf_token", label: "hfTokenKey", description: "hfTokenDesc" },
 ];
 
 type Props<T extends FieldValues> = {

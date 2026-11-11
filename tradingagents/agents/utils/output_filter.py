@@ -5,6 +5,8 @@ Fixes common LLM output errors including character corruption and format issues
 """
 import re
 
+_NON_TEXT_BLOCK_TYPES = frozenset({"reasoning", "thinking", "function_call", "tool_use"})
+
 
 def _normalize_content(text) -> str:
     """
@@ -24,11 +26,19 @@ def _normalize_content(text) -> str:
     if isinstance(text, list):
         parts = []
         for block in text:
-            if isinstance(block, dict):
-                # Standard content-block format used by Gemini / OpenAI multimodal
-                parts.append(block.get("text", "") or block.get("content", ""))
-            elif isinstance(block, str):
+            if isinstance(block, str):
                 parts.append(block)
+            elif isinstance(block, dict):
+                # 非文字區塊（OpenAI Responses API 的 reasoning / function_call 等）
+                # 不屬於報告內容；其 content 欄位可能是 list，不可直接串接。
+                if block.get("type") in _NON_TEXT_BLOCK_TYPES:
+                    continue
+                # Standard content-block format used by Gemini / OpenAI multimodal
+                value = block.get("text") or block.get("content")
+                if isinstance(value, str):
+                    parts.append(value)
+                elif isinstance(value, list):
+                    parts.append(_normalize_content(value))
         return "".join(parts)
     # Fallback: coerce to string (should not normally reach here)
     return str(text)

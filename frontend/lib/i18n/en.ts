@@ -80,6 +80,8 @@ export const en = {
     apifyDesc: "Scrapes StockTwits bullish/bearish posts and X (Twitter) posts. Pay per use; X requires a paid Apify plan for API access",
     lunarcrushKey: "LunarCrush API Key (Social Metrics)",
     lunarcrushDesc: "Social sentiment and discussion volume across X, Reddit, YouTube and TikTok. Social endpoints need a paid plan",
+    hfTokenKey: "Hugging Face Token (Local Embedding Model)",
+    hfTokenDesc: "Used when downloading the local embedding model; raises Hugging Face rate limits and download speed. A read-only token is enough",
     openaiDesc:
       "For OpenAI models and OpenAI embeddings",
     anthropicDesc: "For Claude models",

@@ -5,7 +5,7 @@ import yfinance as yf
 import os
 import time
 import logging
-from .stockstats_utils import StockstatsUtils, load_price_csv_cached
+from .stockstats_utils import NoPriceDataError, StockstatsUtils, load_price_csv_cached
 from .retry_utils import retry
 
 logger = logging.getLogger(__name__)
@@ -206,6 +206,13 @@ def get_stock_stats_indicators_window(
         for date_str, value in date_values:
             ind_string += f"{date_str}: {value}\n"
         
+    except NoPriceDataError:
+        # 代碼查無資料時逐日重試也不會成功（每一天都會再打一次 Yahoo），
+        # 直接回覆明確訊息讓模型修正參數。
+        return (
+            f"錯誤：查無代碼 '{symbol}' 的價格資料，無法計算 {indicator}。"
+            "請確認 symbol 參數是股票代碼（例如 AAPL），而不是指標名稱。"
+        )
     except Exception as e:
         print(f"獲取批量 stockstats 數據時出錯：{e}")
         # 如果批量方法失敗，則回退到原始實現

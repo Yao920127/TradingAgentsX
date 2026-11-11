@@ -91,6 +91,7 @@ const formSchema = z.object({
   jina_api_key: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
   apify_api_token: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
   lunarcrush_api_key: z.string().optional().or(z.literal("")), // 選填（新聞 / 社群資料）
+  hf_token: z.string().optional().or(z.literal("")), // 選填（Hugging Face 模型下載）
 });
 
 interface AnalysisFormProps {
@@ -138,6 +139,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
       jina_api_key: "",
       apify_api_token: "",
       lunarcrush_api_key: "",
+      hf_token: "",
     },
   });
 
@@ -229,6 +231,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
           "jina_api_key",
           "apify_api_token",
           "lunarcrush_api_key",
+          "hf_token",
         ] as const
       ).forEach((field) => form.setValue(field, savedSettings[field] || ""));
     };
