@@ -2,7 +2,6 @@
 """
 辯論歷史的共用工具。
 
-- append_round：把某位辯論者的本輪發言累加到他自己的歷史（報告顯示用），並標上輪次。
 - compact_debate_history：把完整辯論歷史壓成「較早發言的開頭摘錄 + 最近一輪全文」，
   讓辯論者在多輪辯論後仍記得先前的論點，同時控制 input tokens。
 """
@@ -32,15 +31,6 @@ _TURN_START = re.compile(
     r"^(?=(?:" + "|".join(re.escape(label) for label in _SPEAKER_LABELS) + r"))",
     re.MULTILINE,
 )
-
-
-def append_round(previous: str, content: str, round_number: int, language: str = "zh-TW") -> str:
-    """把本輪發言接在該辯論者先前的發言之後，並加上輪次標題。"""
-    heading = f"# Round {round_number}" if language == "en" else f"# 第 {round_number} 輪"
-    entry = f"{heading}\n\n{content.strip()}"
-    if not previous:
-        return entry
-    return f"{previous}\n\n{entry}"
 
 
 def _split_turns(history: str) -> list[str]:

@@ -203,7 +203,7 @@ export const zhTW = {
     working: "正在工作",
     fetchingData: "正在取得資料：",
     listSeparator: "、",
-    turn: "第 {done} / {total} 輪發言",
+    turn: "第 {done} / {total} 次發言",
     research_debate: "多空研究辯論",
     risk_debate: "風險辯論",
     stepDesc: {

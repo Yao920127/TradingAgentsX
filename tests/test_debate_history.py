@@ -6,7 +6,7 @@ from tradingagents.agents.researchers.bull_researcher import create_bull_researc
 from tradingagents.agents.risk_mgmt.aggresive_debator import create_risky_debator
 from tradingagents.agents.risk_mgmt.conservative_debator import create_safe_debator
 from tradingagents.agents.risk_mgmt.neutral_debator import create_neutral_debator
-from tradingagents.agents.utils.debate_history import append_round, compact_debate_history
+from tradingagents.agents.utils.debate_history import compact_debate_history
 
 
 class FakeLLM:
@@ -24,16 +24,6 @@ class FakeLLM:
 class FakeMemory:
     def get_memories(self, situation, n_matches=2):
         return []
-
-
-def test_append_round_labels_first_round_without_leading_blank():
-    assert append_round("", "內容", 1) == "# 第 1 輪\n\n內容"
-
-
-def test_append_round_keeps_earlier_rounds():
-    result = append_round(append_round("", "first", 1, "en"), "second", 2, "en")
-
-    assert result == "# Round 1\n\nfirst\n\n# Round 2\n\nsecond"
 
 
 def test_compact_returns_short_history_unchanged():
@@ -69,7 +59,7 @@ def test_compact_falls_back_to_tail_when_turns_cannot_be_split():
     assert len(compacted) < 3100
 
 
-def test_bull_and_bear_accumulate_their_own_rounds():
+def test_bull_and_bear_keep_only_their_final_round():
     bull = create_bull_researcher(FakeLLM("BULL"), FakeMemory())
     bear = create_bear_researcher(FakeLLM("BEAR"), FakeMemory())
     debate = {"history": "", "bull_history": "", "bear_history": "", "current_response": "", "count": 0}
@@ -78,14 +68,17 @@ def test_bull_and_bear_accumulate_their_own_rounds():
         debate = bull({"investment_debate_state": debate, "analyst_summary": "S"})["investment_debate_state"]
         debate = bear({"investment_debate_state": debate, "analyst_summary": "S"})["investment_debate_state"]
 
-    assert debate["bull_history"] == "# 第 1 輪\n\nBULL-1\n\n# 第 2 輪\n\nBULL-2"
-    assert debate["bear_history"] == "# 第 1 輪\n\nBEAR-1\n\n# 第 2 輪\n\nBEAR-2"
+    # 報告只保留各自最後一輪的發言
+    assert debate["bull_history"] == "BULL-2"
+    assert debate["bear_history"] == "BEAR-2"
+    # 完整辯論過程仍保留在共用 history，供辯論者與研究經理閱讀
+    assert "BULL-1" in debate["history"] and "BEAR-1" in debate["history"]
     assert debate["count"] == 4
     # 路由仍依賴 current_response 的發言者前綴
     assert debate["current_response"] == "看跌分析師：BEAR-2"
 
 
-def test_risk_debaters_accumulate_their_own_rounds():
+def test_risk_debaters_keep_only_their_final_round():
     nodes = [
         create_risky_debator(FakeLLM("RISKY")),
         create_safe_debator(FakeLLM("SAFE")),
@@ -105,7 +98,10 @@ def test_risk_debaters_accumulate_their_own_rounds():
                 "trader_investment_plan": "PLAN",
             })["risk_debate_state"]
 
-    assert debate["risky_history"] == "# 第 1 輪\n\nRISKY-1\n\n# 第 2 輪\n\nRISKY-2"
-    assert debate["safe_history"] == "# 第 1 輪\n\nSAFE-1\n\n# 第 2 輪\n\nSAFE-2"
-    assert debate["neutral_history"] == "# 第 1 輪\n\nNEUTRAL-1\n\n# 第 2 輪\n\nNEUTRAL-2"
+    # 報告只保留各自最後一輪的發言
+    assert debate["risky_history"] == "RISKY-2"
+    assert debate["safe_history"] == "SAFE-2"
+    assert debate["neutral_history"] == "NEUTRAL-2"
+    # 完整辯論過程仍保留在共用 history，供辯論者與風險經理閱讀
+    assert "RISKY-1" in debate["history"] and "NEUTRAL-1" in debate["history"]
     assert debate["count"] == 6

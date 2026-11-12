@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from langchain_core.messages import HumanMessage
 from tradingagents.agents.utils.agent_utils import make_cached_system_message
-from tradingagents.agents.utils.debate_history import append_round, compact_debate_history
+from tradingagents.agents.utils.debate_history import compact_debate_history
 from tradingagents.agents.utils.output_filter import fix_common_llm_errors, validate_and_warn
 from tradingagents.agents.utils.prompts import get_conservative_debator_prompt
 
@@ -72,14 +72,10 @@ Please provide your conservative risk analysis."""
         else:
             argument = f"保守分析師：{response.content}"
 
+        # 個人歷史（報告顯示用）只保留最後一輪發言；完整過程留在共用 history
         new_risk_debate_state = {
             "history": risk_debate_state.get("history", "") + "\n" + argument,
-            "safe_history": append_round(
-                risk_debate_state.get("safe_history", ""),
-                response.content,
-                risk_debate_state["count"] // 3 + 1,
-                language,
-            ),
+            "safe_history": response.content.strip(),
             "risky_history": risk_debate_state.get("risky_history", ""),
             "neutral_history": risk_debate_state.get("neutral_history", ""),
             "latest_speaker": "Safe",
