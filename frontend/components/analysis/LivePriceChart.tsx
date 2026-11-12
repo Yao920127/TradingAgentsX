@@ -3,23 +3,47 @@
 /**
  * "Live" mode of the price section: current price, today's 1-minute price
  * line / candles (Liveline) and per-minute volume, refreshed automatically.
+ * Covers pre-market, regular hours and after hours.
  */
 import { useMemo } from "react";
 import { useTheme } from "next-themes";
 import { Liveline } from "liveline";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ReferenceArea,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLivePrice } from "@/hooks/useLivePrice";
 import {
   LIVE_BAR_SECONDS,
   anchorQuoteToNow,
   formatMarketTime,
+  hasExtendedHours,
   liveWindowSeconds,
+  sessionAt,
 } from "@/lib/live-price";
-import type { LiveMarketType, LiveQuote } from "@/lib/types";
+import type {
+  LiveBarSession,
+  LiveMarketSession,
+  LiveMarketType,
+  LiveQuote,
+  LiveSessionRange,
+} from "@/lib/types";
 
 const LIVE_LINE_COLOR = "#3b82f6";
-const VOLUME_BAR_COLOR = "#93c5fd";
+const SESSION_COLORS: Record<LiveBarSession, string> = {
+  pre: "#f59e0b",
+  regular: "#93c5fd",
+  post: "#a78bfa",
+};
+const SESSION_SHADE_OPACITY = 0.12;
 
 interface LivePriceChartProps {
   ticker: string;
@@ -28,6 +52,22 @@ interface LivePriceChartProps {
 }
 
 type PriceSectionLabels = ReturnType<typeof useLanguage>["t"]["results"]["priceSection"];
+
+function sessionNames(labels: PriceSectionLabels): Record<LiveBarSession, string> {
+  return { pre: labels.sessionPre, regular: labels.sessionRegular, post: labels.sessionPost };
+}
+
+function marketStatusLabel(session: LiveMarketSession, labels: PriceSectionLabels): string {
+  if (session === "pre") return labels.preMarketOpen;
+  if (session === "post") return labels.postMarketOpen;
+  if (session === "regular") return labels.marketOpen;
+  return labels.marketClosed;
+}
+
+/** Label of the close that the change is measured against. */
+function referenceCloseLabel(priceSession: LiveBarSession, labels: PriceSectionLabels): string {
+  return priceSession === "post" ? labels.regularClose : labels.previousClose;
+}
 
 function formatCompactVolume(value: number): string {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
@@ -50,8 +90,15 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
     [quote, receivedAt],
   );
   const offset = anchored?.offset ?? 0;
+  const sessions = quote?.sessions ?? [];
+  const showSessions = hasExtendedHours(sessions);
   const volumeData = useMemo(
-    () => (quote?.volumes ?? []).map((v) => ({ ...v, label: formatMarketTime(v.time, marketType) })),
+    () =>
+      (quote?.volumes ?? []).map((v) => ({
+        ...v,
+        label: formatMarketTime(v.time, marketType),
+        session: sessionAt(quote?.sessions ?? [], v.time),
+      })),
     [quote, marketType],
   );
 
@@ -65,7 +112,17 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
       {quote && hasError && <p className="text-sm text-amber-600">{labels.liveError}</p>}
 
       <div>
-        <h3 className="text-lg font-semibold mb-4">{labels.title}</h3>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <h3 className="text-lg font-semibold">{labels.title}</h3>
+          {showSessions && (
+            <SessionLegend
+              sessions={sessions}
+              current={quote?.session ?? "closed"}
+              labels={labels}
+              marketType={marketType}
+            />
+          )}
+        </div>
         <div className="h-[400px] w-full">
           <Liveline
             data={anchored?.points ?? []}
@@ -80,7 +137,7 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
             emptyText={hasError ? labels.liveError : labels.liveLoading}
             referenceLine={
               quote?.previous_close != null
-                ? { value: quote.previous_close, label: labels.previousClose }
+                ? { value: quote.previous_close, label: referenceCloseLabel(quote.price_session, labels) }
                 : undefined
             }
             formatValue={formatPrice}
@@ -102,13 +159,76 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
             <Tooltip
               formatter={(value: number | undefined) => [value?.toLocaleString() ?? "-", labels.liveVolume]}
             />
-            <Bar dataKey="volume" fill={VOLUME_BAR_COLOR} isAnimationActive={false} />
+            {showSessions &&
+              sessions
+                .filter((range) => range.session !== "regular")
+                .map((range) => (
+                  <ReferenceArea
+                    key={`${range.session}-${range.start}`}
+                    x1={formatMarketTime(range.start, marketType)}
+                    x2={formatMarketTime(range.end, marketType)}
+                    fill={SESSION_COLORS[range.session]}
+                    fillOpacity={SESSION_SHADE_OPACITY}
+                    label={{
+                      value: sessionNames(labels)[range.session],
+                      position: "insideTop",
+                      fontSize: 12,
+                      fill: "currentColor",
+                    }}
+                  />
+                ))}
+            <Bar dataKey="volume" isAnimationActive={false}>
+              {volumeData.map((bar) => (
+                <Cell key={bar.time} fill={SESSION_COLORS[bar.session]} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
+        {showSessions && (
+          <p className="mt-2 text-xs text-muted-foreground">{labels.extendedVolumeNote}</p>
+        )}
       </div>
 
       <p className="text-xs text-muted-foreground">{labels.liveDelayNote}</p>
     </div>
+  );
+}
+
+interface SessionLegendProps {
+  sessions: LiveSessionRange[];
+  current: LiveMarketSession;
+  labels: PriceSectionLabels;
+  marketType?: LiveMarketType;
+}
+
+/** Which sessions the chart covers, with their time range in exchange time. */
+function SessionLegend({ sessions, current, labels, marketType }: SessionLegendProps) {
+  const names = sessionNames(labels);
+  return (
+    <ul className="flex flex-wrap gap-2 text-xs">
+      {sessions.map((range) => {
+        const isCurrent = range.session === current;
+        return (
+          <li
+            key={`${range.session}-${range.start}`}
+            aria-current={isCurrent ? "true" : undefined}
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${
+              isCurrent ? "border-foreground/40 font-semibold" : "border-border text-muted-foreground"
+            }`}
+          >
+            <span
+              aria-hidden
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: SESSION_COLORS[range.session] }}
+            />
+            {names[range.session]}
+            <span className="tabular-nums">
+              {formatMarketTime(range.start, marketType)}–{formatMarketTime(range.end, marketType)}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -128,10 +248,15 @@ function LiveStats({ quote, labels, marketType, formatPrice }: LiveStatsProps) {
       ? `${sign}${formatPrice(quote.change)} (${sign}${quote.change_percent.toFixed(2)}%)`
       : "-";
   const currency = quote.currency ? ` ${quote.currency}` : "";
+  const priceLabels: Record<LiveBarSession, string> = {
+    pre: labels.prePrice,
+    regular: labels.livePrice,
+    post: labels.postPrice,
+  };
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard label={labels.livePrice}>
+      <StatCard label={priceLabels[quote.price_session]}>
         <p className={`text-2xl font-bold ${changeColor}`}>
           {formatPrice(quote.price)}
           <span className="text-sm font-normal text-muted-foreground">{currency}</span>
@@ -140,7 +265,7 @@ function LiveStats({ quote, labels, marketType, formatPrice }: LiveStatsProps) {
       <StatCard label={labels.change}>
         <p className={`text-lg font-semibold ${changeColor}`}>{changeText}</p>
       </StatCard>
-      <StatCard label={labels.previousClose}>
+      <StatCard label={referenceCloseLabel(quote.price_session, labels)}>
         <p className="text-lg font-semibold">
           {quote.previous_close != null ? formatPrice(quote.previous_close) : "-"}
         </p>
@@ -151,7 +276,7 @@ function LiveStats({ quote, labels, marketType, formatPrice }: LiveStatsProps) {
             aria-hidden
             className={`inline-block h-2 w-2 rounded-full ${quote.market_open ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}
           />
-          {quote.market_open ? labels.marketOpen : labels.marketClosed}
+          {marketStatusLabel(quote.session, labels)}
         </p>
         <p className="text-xs text-muted-foreground">
           {labels.updatedAt} {formatMarketTime(quote.as_of, marketType)}

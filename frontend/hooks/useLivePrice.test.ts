@@ -5,6 +5,7 @@ import type { LiveQuote } from "@/lib/types";
 const base = {
   symbol: "NVDA", currency: "USD", price: 1, previous_close: 1, change: 0,
   change_percent: 0, as_of: 0, points: [], candles: [], volumes: [],
+  session: "regular", price_session: "regular", sessions: [],
 } satisfies Omit<LiveQuote, "market_open">;
 
 describe("nextPollDelay", () => {

@@ -1,7 +1,8 @@
 /**
  * Polls the backend for a live quote while `enabled` is true.
  *
- * - Market open: every 10 s. Market closed (or after an error): every 60 s.
+ * - Market open (pre-market and after hours included): every 10 s.
+ *   Market closed (or after an error): every 60 s.
  * - Pauses while the tab is hidden and refreshes as soon as it is visible again.
  * - Keeps the last good quote on screen when a refresh fails.
  */

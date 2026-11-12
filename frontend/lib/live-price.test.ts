@@ -4,9 +4,11 @@ import {
   liveWindowSeconds,
   marketTimeZone,
   formatMarketTime,
+  hasExtendedHours,
+  sessionAt,
   MIN_LIVE_WINDOW_SECONDS,
 } from "./live-price";
-import type { LiveQuote } from "./types";
+import type { LiveQuote, LiveSessionRange } from "./types";
 
 const quote: LiveQuote = {
   symbol: "NVDA",
@@ -16,6 +18,9 @@ const quote: LiveQuote = {
   change: 4,
   change_percent: 4,
   market_open: false,
+  session: "closed",
+  price_session: "regular",
+  sessions: [{ session: "regular", start: 1_000_000, end: 1_000_120 }],
   as_of: 1_000_120,
   points: [
     { time: 1_000_000, value: 100 },
@@ -51,6 +56,31 @@ describe("liveWindowSeconds", () => {
 
   test("falls back to the minimum window when there is no data", () => {
     expect(liveWindowSeconds([])).toBe(MIN_LIVE_WINDOW_SECONDS);
+  });
+});
+
+describe("sessions", () => {
+  const ranges: LiveSessionRange[] = [
+    { session: "pre", start: 100, end: 160 },
+    { session: "regular", start: 220, end: 400 },
+    { session: "post", start: 460, end: 520 },
+  ];
+
+  test("finds the session a bar time belongs to", () => {
+    expect(sessionAt(ranges, 100)).toBe("pre");
+    expect(sessionAt(ranges, 400)).toBe("regular");
+    expect(sessionAt(ranges, 520)).toBe("post");
+  });
+
+  test("treats times outside every range as regular", () => {
+    expect(sessionAt(ranges, 9_999)).toBe("regular");
+    expect(sessionAt([], 100)).toBe("regular");
+  });
+
+  test("detects whether pre or post market bars are present", () => {
+    expect(hasExtendedHours(ranges)).toBe(true);
+    expect(hasExtendedHours([ranges[1]])).toBe(false);
+    expect(hasExtendedHours([])).toBe(false);
   });
 });
 

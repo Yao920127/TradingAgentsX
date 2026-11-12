@@ -131,6 +131,152 @@ def test_build_live_quote_raises_when_no_usable_data():
         )
 
 
+# ── 盤前 / 盤後 ─────────────────────────────────────────────────────────────
+
+def _ny_epoch(clock: str) -> int:
+    return int(pd.Timestamp(f"2026-11-11 {clock}", tz="America/New_York").timestamp())
+
+
+US_PERIODS = lps.TradingPeriods(
+    pre_start=_ny_epoch("04:00"),
+    regular_start=_ny_epoch("09:30"),
+    regular_end=_ny_epoch("16:00"),
+    post_end=_ny_epoch("20:00"),
+)
+
+
+def _build(frame, *, now, last_price=None, previous_close=None, periods=US_PERIODS):
+    return lps.build_live_quote(
+        symbol="NVDA", frame=frame, last_price=last_price, previous_close=previous_close,
+        currency="USD", now=now, trading_periods=periods,
+    )
+
+
+def test_parse_trading_periods_reads_yahoo_metadata():
+    metadata = {
+        "currentTradingPeriod": {
+            "pre": {"start": 100, "end": 200},
+            "regular": {"start": 200, "end": 300},
+            "post": {"start": 300, "end": 400},
+        }
+    }
+
+    assert lps.parse_trading_periods(metadata) == lps.TradingPeriods(100, 200, 300, 400)
+
+
+@pytest.mark.parametrize(
+    "metadata",
+    [None, {}, {"currentTradingPeriod": {"pre": {}}}, {"currentTradingPeriod": {
+        "pre": {"start": 5}, "regular": {"start": 9, "end": 3}, "post": {"end": 10}}}],
+)
+def test_parse_trading_periods_returns_none_for_unusable_metadata(metadata):
+    assert lps.parse_trading_periods(metadata) is None
+
+
+def test_pre_market_price_is_measured_against_last_regular_close():
+    start = _ny_epoch("04:00")
+    frame = _intraday_frame(start, [160.0, 161.0])
+
+    quote = _build(frame, now=start + 90, last_price=170.0, previous_close=165.0)
+
+    assert quote["session"] == "pre"
+    assert quote["price_session"] == "pre"
+    assert quote["market_open"] is True
+    assert quote["price"] == 161.0
+    assert quote["previous_close"] == 170.0
+    assert quote["change"] == pytest.approx(-9.0)
+    assert quote["sessions"] == [{"session": "pre", "start": start, "end": start + 60}]
+
+
+def test_post_market_bars_are_split_from_regular_session():
+    start = _ny_epoch("15:58")
+    frame = _intraday_frame(start, [100.0, 101.0, 102.0, 103.0])
+
+    quote = _build(frame, now=start + 200, last_price=101.0, previous_close=95.0)
+
+    assert quote["session"] == "post"
+    assert quote["price_session"] == "post"
+    assert quote["price"] == 103.0
+    assert quote["previous_close"] == 101.0
+    assert quote["sessions"] == [
+        {"session": "regular", "start": start, "end": start + 60},
+        {"session": "post", "start": start + 120, "end": start + 180},
+    ]
+
+
+def test_post_market_falls_back_to_last_regular_bar_without_quote_summary():
+    start = _ny_epoch("15:59")
+    frame = _intraday_frame(start, [100.0, 104.0])
+
+    quote = _build(frame, now=start + 90)
+
+    assert quote["price"] == 104.0
+    assert quote["previous_close"] == 100.0
+
+
+def test_regular_session_keeps_previous_close_and_live_price():
+    start = _ny_epoch("09:29")
+    frame = _intraday_frame(start, [100.0, 101.0])
+
+    quote = _build(frame, now=start + 90, last_price=101.5, previous_close=99.0)
+
+    assert quote["session"] == "regular"
+    assert quote["price_session"] == "regular"
+    assert quote["price"] == 101.5
+    assert quote["previous_close"] == 99.0
+    assert [r["session"] for r in quote["sessions"]] == ["pre", "regular"]
+
+
+def test_thin_pre_market_stays_open_even_when_last_bar_is_old():
+    start = _ny_epoch("04:00")
+    frame = _intraday_frame(start, [160.0])
+
+    quote = _build(frame, now=start + 3600)
+
+    assert quote["session"] == "pre"
+
+
+def test_session_is_closed_after_post_market_ends_but_bars_stay_labelled():
+    start = _ny_epoch("19:58")
+    frame = _intraday_frame(start, [100.0, 101.0])
+
+    quote = _build(frame, now=_ny_epoch("21:00"), last_price=99.0)
+
+    assert quote["session"] == "closed"
+    assert quote["market_open"] is False
+    assert quote["price_session"] == "post"
+
+
+def test_session_is_closed_when_bars_are_from_an_earlier_trading_day():
+    # 假日或尚未開盤：Yahoo 回上一個交易日的資料，時段仍照當地時間分段
+    previous_day = int(pd.Timestamp("2026-11-10 15:59", tz="America/New_York").timestamp())
+    frame = _intraday_frame(previous_day, [100.0, 101.0])
+
+    quote = _build(frame, now=_ny_epoch("10:00"), last_price=100.0)
+
+    assert quote["session"] == "closed"
+    assert [r["session"] for r in quote["sessions"]] == ["regular", "post"]
+
+
+def test_market_without_extended_hours_is_all_regular():
+    open_ = int(pd.Timestamp("2026-11-12 09:00", tz="Asia/Taipei").timestamp())
+    close = int(pd.Timestamp("2026-11-12 13:30", tz="Asia/Taipei").timestamp())
+    periods = lps.TradingPeriods(open_, open_, close, close)
+    index = pd.to_datetime([close - 60, close], unit="s", utc=True).tz_convert("Asia/Taipei")
+    frame = pd.DataFrame(
+        {"Open": [1.0, 1.0], "High": [2.0, 2.0], "Low": [1.0, 1.0], "Close": [2.0, 2.0],
+         "Volume": [10, 20]},
+        index=index,
+    )
+
+    quote = _build(frame, now=close + 30, last_price=2.0, previous_close=1.0, periods=periods)
+
+    assert quote["sessions"] == [{"session": "regular", "start": close - 60, "end": close}]
+    assert quote["price_session"] == "regular"
+    assert quote["previous_close"] == 1.0
+    assert quote["session"] == "closed"
+
+
 # ── get_live_quote caching ──────────────────────────────────────────────────
 
 def test_get_live_quote_reuses_cached_result_within_ttl():
@@ -209,12 +355,20 @@ def test_live_price_route_maps_errors_to_status(client, monkeypatch, error, stat
 # ── fetch_live_quote (yfinance stubbed) ─────────────────────────────────────
 
 class _FakeTicker:
-    def __init__(self, frame, info_error=False):
+    def __init__(self, frame, info_error=False, metadata=None):
         self._frame = frame
         self._info_error = info_error
+        self._metadata = metadata
+        self.history_kwargs = {}
 
-    def history(self, **_kwargs):
+    def history(self, **kwargs):
+        self.history_kwargs = kwargs
         return self._frame
+
+    def get_history_metadata(self):
+        if self._metadata is None:
+            raise RuntimeError("no metadata")
+        return self._metadata
 
     @property
     def fast_info(self):
@@ -244,3 +398,25 @@ def test_fetch_live_quote_survives_missing_quote_summary(monkeypatch):
 
     assert quote["price"] == 102.0
     assert quote["previous_close"] is None
+
+
+def test_fetch_live_quote_requests_extended_hours_and_labels_sessions(monkeypatch):
+    start = _ny_epoch("04:00")
+    metadata = {
+        "currentTradingPeriod": {
+            "pre": {"start": US_PERIODS.pre_start, "end": US_PERIODS.regular_start},
+            "regular": {"start": US_PERIODS.regular_start, "end": US_PERIODS.regular_end},
+            "post": {"start": US_PERIODS.regular_end, "end": US_PERIODS.post_end},
+        }
+    }
+    ticker = _FakeTicker(_intraday_frame(start, [100.0, 102.0]), metadata=metadata)
+    _patch_yf(monkeypatch, ticker)
+    monkeypatch.setattr(lps.time, "time", lambda: start + 90)
+
+    quote = lps.fetch_live_quote("NVDA")
+
+    assert ticker.history_kwargs["prepost"] is True
+    assert quote["session"] == "pre"
+    assert quote["price"] == 102.0
+    # 盤前的比較基準是最近一次正常盤收盤價（fast_info 的 lastPrice）
+    assert quote["previous_close"] == 101.0

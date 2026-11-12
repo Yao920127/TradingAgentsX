@@ -240,14 +240,31 @@ export interface LiveVolumeBar {
   volume: number;
 }
 
+/** A trading session a bar belongs to. */
+export type LiveBarSession = "pre" | "regular" | "post";
+/** What the market is doing right now. */
+export type LiveMarketSession = LiveBarSession | "closed";
+
+/** A run of consecutive bars in one session (first and last bar time). */
+export interface LiveSessionRange {
+  session: LiveBarSession;
+  start: number;
+  end: number;
+}
+
 export interface LiveQuote {
   symbol: string;
   currency: string | null;
+  /** Latest price. Pre/post-market price when `price_session` is "pre"/"post". */
   price: number;
+  /** Close that `change` is measured against: the latest regular close in pre/post market. */
   previous_close: number | null;
   change: number | null;
   change_percent: number | null;
   market_open: boolean;
+  session: LiveMarketSession;
+  price_session: LiveBarSession;
+  sessions: LiveSessionRange[];
   as_of: number;
   points: LivePricePoint[];
   candles: LiveCandle[];

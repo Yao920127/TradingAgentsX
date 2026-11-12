@@ -5,7 +5,14 @@
  * can be minutes (or, when the market is closed, days) old, so the series is
  * shifted to end at the moment it arrived, and labels shift it back.
  */
-import type { LiveCandle, LiveMarketType, LivePricePoint, LiveQuote } from "./types";
+import type {
+  LiveBarSession,
+  LiveCandle,
+  LiveMarketType,
+  LivePricePoint,
+  LiveQuote,
+  LiveSessionRange,
+} from "./types";
 
 /** One-minute bars. */
 export const LIVE_BAR_SECONDS = 60;
@@ -32,6 +39,16 @@ export function liveWindowSeconds(points: readonly LivePricePoint[]): number {
   if (points.length === 0) return MIN_LIVE_WINDOW_SECONDS;
   const span = points[points.length - 1].time - points[0].time + LIVE_BAR_SECONDS;
   return Math.max(span, MIN_LIVE_WINDOW_SECONDS);
+}
+
+/** Which session a bar time falls in; bars outside every range count as regular. */
+export function sessionAt(ranges: readonly LiveSessionRange[], time: number): LiveBarSession {
+  return ranges.find((r) => time >= r.start && time <= r.end)?.session ?? "regular";
+}
+
+/** True when the series includes pre-market or post-market bars. */
+export function hasExtendedHours(ranges: readonly LiveSessionRange[]): boolean {
+  return ranges.some((r) => r.session !== "regular");
 }
 
 export function marketTimeZone(marketType: LiveMarketType | undefined): string {

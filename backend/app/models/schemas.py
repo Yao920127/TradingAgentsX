@@ -292,8 +292,19 @@ class LiveVolumeBar(BaseModel):
     volume: int
 
 
+class LiveSessionRange(BaseModel):
+    """A run of consecutive bars in one trading session (Unix seconds)."""
+    session: Literal["pre", "regular", "post"]
+    start: int
+    end: int
+
+
 class LiveQuoteResponse(BaseModel):
-    """Live (possibly delayed) quote with today's 1-minute series."""
+    """Live (possibly delayed) quote with today's 1-minute series, incl. pre/post market.
+
+    When `price_session` is "pre" or "post", `price` is the extended-hours price and
+    `previous_close` is the latest regular-session close.
+    """
     symbol: str
     currency: Optional[str] = None
     price: float
@@ -301,6 +312,9 @@ class LiveQuoteResponse(BaseModel):
     change: Optional[float] = None
     change_percent: Optional[float] = None
     market_open: bool
+    session: Literal["pre", "regular", "post", "closed"] = "closed"
+    price_session: Literal["pre", "regular", "post"] = "regular"
+    sessions: List[LiveSessionRange] = Field(default_factory=list)
     as_of: int
     points: List[LivePricePoint]
     candles: List[LiveCandle]
