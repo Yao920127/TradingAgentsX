@@ -316,12 +316,18 @@ const DEBATE_ROUND_PREFIXES = [
   "Neutral Analyst: ",
 ];
 
+const ROUND_HEADING = /^# (?:第 \d+ 輪|Round \d+)[ \t]*$/m;
+
 /**
  * Keep only the final round of a multi-round debate history.
  * Earlier rounds restate the same arguments and make the cards unreadable.
  */
 export function extractLastDebateRound(history: string): string {
   if (!history) return history;
+
+  // Older reports stack every round under a "# 第 N 輪" / "# Round N" heading.
+  const rounds = history.split(ROUND_HEADING);
+  if (rounds.length > 1) return rounds[rounds.length - 1].trim();
 
   let lastIndex = -1;
   for (const prefix of DEBATE_ROUND_PREFIXES) {

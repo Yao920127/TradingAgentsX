@@ -1,54 +1,44 @@
 {
   "tasks": [
     {
-      "title": "盤前盤後走勢",
-      "request": "即時股價、交易量只有盤中時才會顯示，可以連盤前、盤後也一起顯示走向嗎？",
-      "summary": "即時模式現在會畫出盤前、盤中、盤後整天的價格走勢，並標示目前時段；盤前、盤後的漲跌改以最近一次收盤價為基準。Yahoo 不提供盤前盤後的每分鐘成交量，這兩段成交量會是 0（圖上有說明）。已提交（26e2160），附前後端測試。",
+      "title": "辯論只留最終輪",
+      "request": "為什麼辯論 10、15 次，卻只有辯論 5 次？辯論結果只保留最終辯論結果。",
+      "summary": "10 和 15 是發言次數而非輪數，已修正進度文字。報告中五位辯論者現在只顯示最後一輪發言，完整辯論過程仍供 AI 內部閱讀。已提交（633456b），測試全數通過；舊報告不受影響。",
       "items": [
         {
-          "ref": "backend/app/services/live_price_service.py",
+          "ref": "tradingagents/agents/researchers/bull_researcher.py",
           "change": "changed",
-          "note": "向 Yahoo 多要盤前與盤後的資料，把每分鐘分成盤前、盤中、盤後，並判斷現在是哪個時段；這是畫面能顯示盤前盤後的資料來源。"
+          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
         },
         {
-          "ref": "GET /api/price/live",
+          "ref": "tradingagents/agents/researchers/bear_researcher.py",
           "change": "changed",
-          "note": "回傳的即時報價多了目前時段與各時段的起訖時間；盤前盤後時價格是延長交易的最新價。"
+          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
         },
         {
-          "ref": "backend/app/models/schemas.py",
+          "ref": "tradingagents/agents/risk_mgmt/aggresive_debator.py",
           "change": "changed",
-          "note": "即時報價的格式加上時段資訊，讓網站知道哪一段是盤前、盤後。"
+          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
         },
         {
-          "ref": "frontend/components/analysis/LivePriceChart.tsx",
+          "ref": "tradingagents/agents/risk_mgmt/conservative_debator.py",
           "change": "changed",
-          "note": "走勢圖旁加上時段標籤，價格卡會顯示「盤前價／盤後價」，狀態分成盤前交易中、盤中、盤後交易中、休市，成交量圖用底色標出盤前盤後。"
+          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
         },
         {
-          "ref": "frontend/lib/live-price.ts",
+          "ref": "tradingagents/agents/risk_mgmt/neutral_debator.py",
           "change": "changed",
-          "note": "新增判斷某個時刻屬於哪個時段的小計算，成交量圖靠它替盤前盤後上色。"
+          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
         },
         {
-          "ref": "frontend/lib/types.ts",
+          "ref": "tradingagents/agents/utils/debate_history.py",
           "change": "changed",
-          "note": "即時報價的資料定義加上時段欄位，與主伺服器的新格式一致。"
-        },
-        {
-          "ref": "frontend/hooks/useLivePrice.ts",
-          "change": "changed",
-          "note": "盤前與盤後也算開市，所以這兩個時段同樣每 10 秒更新一次。"
+          "note": "移除了「依輪次累加發言」的功能，因為報告不再需要每一輪的內容；濃縮長辯論紀錄的功能不變。"
         },
         {
           "ref": "frontend/lib/i18n/zh-TW.ts",
           "change": "changed",
-          "note": "新增盤前、盤後相關的中文文字，以及成交量限制的說明。"
-        },
-        {
-          "ref": "frontend/lib/i18n/en.ts",
-          "change": "changed",
-          "note": "新增盤前、盤後相關的英文文字，以及成交量限制的說明。"
+          "note": "進度文字從「第 10 / 10 輪發言」改成「第 10 / 10 次發言」。10 和 15 其實是發言次數（5 輪 × 2 人、5 輪 × 3 人），原本的寫法讓人誤以為辯論了 10、15 輪。"
         }
       ]
     }

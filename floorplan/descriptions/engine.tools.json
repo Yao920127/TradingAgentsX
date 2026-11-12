@@ -54,7 +54,7 @@
     },
     "tradingagents/agents/utils/debate_history.py": {
       "name": "辯論紀錄整理",
-      "description": "把每位辯論者的發言依輪次累積起來，並在多輪後濃縮較早的發言，讓 AI 記得先前論點又不會讀太多字。"
+      "description": "在辯論進行多輪後，把較早的發言濃縮成開頭摘錄、最近一輪保留全文，讓 AI 記得先前論點又不會讀太多字。"
     }
   }
 }

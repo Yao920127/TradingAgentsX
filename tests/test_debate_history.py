@@ -6,7 +6,7 @@ from tradingagents.agents.researchers.bull_researcher import create_bull_researc
 from tradingagents.agents.risk_mgmt.aggresive_debator import create_risky_debator
 from tradingagents.agents.risk_mgmt.conservative_debator import create_safe_debator
 from tradingagents.agents.risk_mgmt.neutral_debator import create_neutral_debator
-from tradingagents.agents.utils.debate_history import compact_debate_history
+from tradingagents.agents.utils.debate_history import compact_debate_history, latest_round
 
 
 class FakeLLM:
@@ -24,6 +24,21 @@ class FakeLLM:
 class FakeMemory:
     def get_memories(self, situation, n_matches=2):
         return []
+
+
+def test_latest_round_keeps_only_final_round_without_heading():
+    history = "# 第 1 輪\n\n舊內容\n\n# 第 2 輪\n\n## 一、標題\n\n最終內容"
+
+    assert latest_round(history) == "## 一、標題\n\n最終內容"
+
+
+def test_latest_round_handles_english_headings():
+    assert latest_round("# Round 1\n\nold\n\n# Round 2\n\nfinal") == "final"
+
+
+def test_latest_round_returns_single_round_content_unchanged():
+    assert latest_round("## 一、標題\n\n內容") == "## 一、標題\n\n內容"
+    assert latest_round("") == ""
 
 
 def test_compact_returns_short_history_unchanged():

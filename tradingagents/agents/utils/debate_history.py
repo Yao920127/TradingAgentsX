@@ -2,6 +2,7 @@
 """
 辯論歷史的共用工具。
 
+- latest_round：報告顯示時只取最後一輪發言、去掉輪次標題（相容舊報告）。
 - compact_debate_history：把完整辯論歷史壓成「較早發言的開頭摘錄 + 最近一輪全文」，
   讓辯論者在多輪辯論後仍記得先前的論點，同時控制 input tokens。
 """
@@ -31,6 +32,17 @@ _TURN_START = re.compile(
     r"^(?=(?:" + "|".join(re.escape(label) for label in _SPEAKER_LABELS) + r"))",
     re.MULTILINE,
 )
+
+
+# 舊版報告會把每一輪發言累加並加上「# 第 N 輪」／「# Round N」標題
+_ROUND_HEADING = re.compile(r"^# (?:第 \d+ 輪|Round \d+)[ \t]*$", re.MULTILINE)
+
+
+def latest_round(history: str) -> str:
+    """只取某位辯論者最後一輪的發言，並去掉輪次標題（相容舊報告的累加格式）。"""
+    if not history:
+        return history
+    return _ROUND_HEADING.split(history)[-1].strip()
 
 
 def _split_turns(history: str) -> list[str]:

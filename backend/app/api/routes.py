@@ -26,6 +26,7 @@ from backend.app.services.trading_service import TradingService, DATA_API_KEY_EN
 from backend.app.services.task_manager import task_manager
 from backend.app.api.dependencies import get_trading_service, get_current_user_optional
 from backend.app.core.config import settings
+from tradingagents.agents.utils.debate_history import latest_round
 from tradingagents.agents.utils.output_filter import _normalize_content
 from tradingagents.utils.zh_convert import localize_for
 from tradingagents.utils.report_format import normalize_report_markdown
@@ -40,6 +41,14 @@ router = APIRouter(prefix="/api", tags=["TradingAgentsX"])
 # (avoids blob-URL issues in Safari). Auto-expires after PDF_TTL seconds.
 _pdf_cache: dict[str, dict] = {}
 _PDF_TTL = 600  # 10 minutes
+
+def _report_text(reports_data: dict, report_key: str, get_value) -> str:
+    """取出某份報告的文字；辯論者的發言只保留最後一輪、不顯示輪次標題。"""
+    content = _normalize_content(get_value(reports_data, report_key))
+    if report_key.endswith("_history"):
+        return latest_round(content)
+    return content
+
 
 def _schedule_pdf_cleanup(temp_id: str, delay: float = _PDF_TTL):
     def _do():
@@ -391,7 +400,7 @@ async def download_reports(request: DownloadRequest):
         
         analyst_name, report_key = ANALYST_MAPPING[analyst_key]
         report_content = localize_for(
-            language, normalize_report_markdown(_normalize_content(get_nested_value(reports_data, report_key)))
+            language, normalize_report_markdown(_report_text(reports_data, report_key, get_nested_value))
         )
         
         if report_content:
@@ -502,7 +511,7 @@ async def generate_pdf_temp(request: DownloadRequest):
             continue
         analyst_name, report_key = ANALYST_MAPPING[analyst_key]
         report_content = localize_for(
-            language, normalize_report_markdown(_normalize_content(get_nested_value(reports_data, report_key)))
+            language, normalize_report_markdown(_report_text(reports_data, report_key, get_nested_value))
         )
         if report_content:
             reports_to_download.append({

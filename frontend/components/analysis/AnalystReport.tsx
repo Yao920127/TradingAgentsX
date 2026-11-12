@@ -6,6 +6,7 @@
 import { MarkdownReport } from "@/components/analysis/MarkdownReport";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { extractLastDebateRound } from "@/lib/report-utils";
 import type { Reports } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -130,41 +131,8 @@ export function AnalystReport({ reports }: AnalystReportProps) {
   );
 }
 
-/**
- * Extract only the last debate round from a history string.
- * Each round is prefixed with a known analyst label (e.g. "看漲分析師：").
- * This prevents showing repetitive multi-round content to the user.
- */
-function extractLastRound(history: string): string {
-  if (!history) return history;
-
-  // Known prefixes that start each debate round (Chinese and English)
-  const prefixes = [
-    "看漲分析師：",
-    "看跌分析師：",
-    "激進分析師：",
-    "保守分析師：",
-    "中立分析師：",
-    "Bull Analyst: ",
-    "Bear Analyst: ",
-    "Aggressive Analyst: ",
-    "Conservative Analyst: ",
-    "Neutral Analyst: ",
-  ];
-
-  // Find the last occurrence of any prefix preceded by a newline
-  let lastIndex = -1;
-  for (const prefix of prefixes) {
-    const idx = history.lastIndexOf("\n" + prefix);
-    if (idx > lastIndex) lastIndex = idx;
-  }
-
-  if (lastIndex === -1) return history.trimStart();
-  return history.slice(lastIndex + 1); // Skip the leading \n
-}
-
 function ReportSection({ title, content, isDebateHistory = false }: { title: string; content: string; isDebateHistory?: boolean }) {
-  const displayContent = isDebateHistory ? extractLastRound(content) : content;
+  const displayContent = isDebateHistory ? extractLastDebateRound(content) : content;
   return (
     <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 dark:from-blue-900/10 dark:to-cyan-900/10 hover:shadow-md transition-shadow">
       <h3 className="font-semibold text-lg mb-2">{title}</h3>

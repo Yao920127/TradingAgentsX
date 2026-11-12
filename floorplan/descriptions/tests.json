@@ -10,7 +10,7 @@
     },
     "tests/test_debate_history.py": {
       "name": "辯論紀錄測試",
-      "description": "自動檢查多空與風險辯論者的發言是否依輪次正確累積，以及過長的辯論紀錄是否被正確濃縮。"
+      "description": "自動檢查多空與風險辯論者在報告中只留下最後一輪的發言、完整辯論過程仍保留給 AI 閱讀，以及過長的辯論紀錄是否被正確濃縮。"
     },
     "tests/test_report_summarizer.py": {
       "name": "報告摘要測試",
