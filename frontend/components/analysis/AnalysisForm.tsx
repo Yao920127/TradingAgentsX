@@ -592,10 +592,10 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Anthropic (Official model IDs) */}
-                          <SelectItem value="claude-fable-5-1">
+                          <SelectItem value="claude-fable-5-2">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Fable 5.1</span>
+                              <span>Claude Fable 5.2</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="claude-opus-5-5">
@@ -773,10 +773,10 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Anthropic (Official model IDs) */}
-                          <SelectItem value="claude-fable-5-1">
+                          <SelectItem value="claude-fable-5-2">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/claude-color.svg" alt="Claude" width={16} height={16} className="shrink-0" />
-                              <span>Claude Fable 5.1</span>
+                              <span>Claude Fable 5.2</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="claude-opus-5-5">

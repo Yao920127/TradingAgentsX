@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from langchain_core.messages import HumanMessage
 from tradingagents.agents.utils.agent_utils import make_cached_system_message
+from tradingagents.agents.utils.debate_history import append_round, compact_debate_history
 from tradingagents.agents.utils.output_filter import fix_common_llm_errors, validate_and_warn
 from tradingagents.agents.utils.prompts import get_bull_researcher_prompt
-
-# 辯論歷史截斷上限（字元），防止多輪辯論累積過多 tokens
-DEBATE_HISTORY_LIMIT = 3000
 
 
 def create_bull_researcher(llm, memory, language: str = "zh-TW"):
@@ -30,9 +28,8 @@ def create_bull_researcher(llm, memory, language: str = "zh-TW"):
         # 使用 analyst_summary（由 Report Summarizer 預先壓縮），節省約 75% input tokens
         analyst_summary = state.get("analyst_summary", "")
 
-        # 辯論歷史截斷：保留最近 3000 字，防止雪球效應
-        if len(history) > DEBATE_HISTORY_LIMIT:
-            history = "...[truncated]\n" + history[-DEBATE_HISTORY_LIMIT:]
+        # 較早發言只留開頭摘錄、最近一輪保留全文，避免多輪後遺忘先前論點
+        history = compact_debate_history(history, recent_turns=2, language=language)
 
         # 記憶體查詢用 analyst_summary 作為情境
         curr_situation = analyst_summary
@@ -80,7 +77,12 @@ Please provide your bullish analysis now."""
 
         new_investment_debate_state = {
             "history": investment_debate_state.get("history", "") + "\n" + argument,
-            "bull_history": response.content,
+            "bull_history": append_round(
+                investment_debate_state.get("bull_history", ""),
+                response.content,
+                investment_debate_state["count"] // 2 + 1,
+                language,
+            ),
             "bear_history": investment_debate_state.get("bear_history", ""),
             "current_response": argument,
             "count": investment_debate_state["count"] + 1,

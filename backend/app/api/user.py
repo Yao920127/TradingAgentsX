@@ -5,7 +5,7 @@ import asyncio
 import json
 from typing import Optional, List
 from uuid import UUID
-from fastapi import APIRouter, HTTPException, Depends, Header, Query # type: ignore
+from fastapi import APIRouter, HTTPException, Depends, Header # type: ignore
 from fastapi.responses import StreamingResponse # type: ignore
 from pydantic import BaseModel # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
@@ -36,13 +36,17 @@ def _notify_user(user_id: str, event_type: str = "report_changed") -> None:
 
 
 @router.get("/events")
-async def user_events(token: str = Query(...)):
+async def user_events(authorization: Optional[str] = Header(None)):
     """
     SSE stream for real-time cross-device sync.
-    Token is passed as a query param because EventSource does not support headers.
+    The JWT must come in the Authorization header (the client reads the stream with fetch,
+    not EventSource) so it never appears in URLs or access logs.
     Sends a 'report_changed' event whenever reports are added or deleted on another device.
     """
-    payload = verify_access_token(token)
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    payload = verify_access_token(authorization.removeprefix("Bearer "))
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid token")
 

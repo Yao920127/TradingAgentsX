@@ -161,8 +161,9 @@ async def google_callback(
         "avatar_url": user.avatar_url,
     })
     
-    # Redirect to frontend with token
-    redirect_url = f"{frontend_url}/auth/callback?token={jwt_token}"
+    # Redirect to frontend with the token in the URL fragment: fragments are never sent to
+    # servers, so the token stays out of access logs, proxies and Referer headers.
+    redirect_url = f"{frontend_url}/auth/callback#token={jwt_token}"
     return RedirectResponse(url=redirect_url)
 
 class TokenExchangeRequest(BaseModel):

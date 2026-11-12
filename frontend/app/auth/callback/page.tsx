@@ -17,9 +17,14 @@ function AuthCallbackContent() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      // Check if we have a token directly (backend-handled flow)
-      const token = searchParams.get("token");
+      // Check if we have a token directly (backend-handled flow).
+      // The backend sends it in the URL fragment so it never reaches server logs;
+      // the query param is still accepted for redirects issued by an older backend.
+      const fragmentParams = new URLSearchParams(window.location.hash.slice(1));
+      const token = fragmentParams.get("token") ?? searchParams.get("token");
       if (token) {
+        // Drop the token from the address bar and history before doing anything else
+        window.history.replaceState(null, "", window.location.pathname);
         setAuthFromCallback(token);
         router.replace("/");
         return;

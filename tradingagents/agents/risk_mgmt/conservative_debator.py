@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from langchain_core.messages import HumanMessage
 from tradingagents.agents.utils.agent_utils import make_cached_system_message
+from tradingagents.agents.utils.debate_history import append_round, compact_debate_history
 from tradingagents.agents.utils.output_filter import fix_common_llm_errors, validate_and_warn
 from tradingagents.agents.utils.prompts import get_conservative_debator_prompt
-
-# 辯論歷史截斷上限（字元），防止多輪辯論累積過多 tokens
-RISK_DEBATE_HISTORY_LIMIT = 3000
 
 
 def create_safe_debator(llm, language: str = "zh-TW"):
@@ -32,9 +30,8 @@ def create_safe_debator(llm, language: str = "zh-TW"):
         analyst_summary = state.get("analyst_summary", "")
         trader_decision = state["trader_investment_plan"]
 
-        # 辯論歷史截斷：保留最近 3000 字
-        if len(history) > RISK_DEBATE_HISTORY_LIMIT:
-            history = "...[truncated]\n" + history[-RISK_DEBATE_HISTORY_LIMIT:]
+        # 較早發言只留開頭摘錄、最近一輪保留全文，避免多輪後遺忘先前論點
+        history = compact_debate_history(history, recent_turns=3, language=language)
 
         # base_prompt 為靜態指令，透過 make_cached_system_message 加上 cache_control（僅 Claude 生效）
         base_prompt = get_conservative_debator_prompt(language)
@@ -77,7 +74,12 @@ Please provide your conservative risk analysis."""
 
         new_risk_debate_state = {
             "history": risk_debate_state.get("history", "") + "\n" + argument,
-            "safe_history": response.content,
+            "safe_history": append_round(
+                risk_debate_state.get("safe_history", ""),
+                response.content,
+                risk_debate_state["count"] // 3 + 1,
+                language,
+            ),
             "risky_history": risk_debate_state.get("risky_history", ""),
             "neutral_history": risk_debate_state.get("neutral_history", ""),
             "latest_speaker": "Safe",

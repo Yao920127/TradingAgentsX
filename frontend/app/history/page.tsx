@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { useAnalysisContext } from "@/context/AnalysisContext";
-import { useAuth, getAuthToken } from "@/contexts/auth-context";
+import { useAuth, getAuthToken, getAuthHeaders } from "@/contexts/auth-context";
+import { readSseStream } from "@/lib/sse";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -439,11 +440,10 @@ export default function HistoryPage() {
   useEffect(() => {
     if (!isAuthenticated || !isCloudSyncEnabled()) return;
 
-    const token = getAuthToken();
-    if (!token) return;
+    if (!getAuthToken()) return;
 
     const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
-    let es: EventSource | null = null;
+    const controller = new AbortController();
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
     let reconnectDelay = 2000;
     let sseWorking = false;
@@ -456,38 +456,44 @@ export default function HistoryPage() {
       }
     }, 30000);
 
+    const scheduleReconnect = () => {
+      sseWorking = false;
+      if (controller.signal.aborted) return;
+      // Exponential backoff, cap at 60s
+      reconnectTimer = setTimeout(() => {
+        reconnectDelay = Math.min(reconnectDelay * 2, 60000);
+        connect();
+      }, reconnectDelay);
+    };
+
     const connect = () => {
-      es = new EventSource(
-        `${API_BASE}/api/user/events?token=${encodeURIComponent(token)}`
-      );
+      // Token goes in the Authorization header (never the URL) so it stays out of access logs;
+      // headers are re-read on every attempt so a refreshed token is picked up.
+      const headers = getAuthHeaders();
+      if (!headers.Authorization) return;
 
-      es.addEventListener("connected", () => {
-        console.log("☁️ SSE connected — real-time sync active");
-        sseWorking = true;
-        reconnectDelay = 2000; // reset backoff on success
-      });
-
-      es.addEventListener("report_changed", () => {
-        console.log("☁️ SSE: report_changed — syncing...");
-        performBidirectionalSync(false);
-      });
-
-      es.onerror = () => {
-        sseWorking = false;
-        es?.close();
-        es = null;
-        // Exponential backoff, cap at 60s
-        reconnectTimer = setTimeout(() => {
-          reconnectDelay = Math.min(reconnectDelay * 2, 60000);
-          connect();
-        }, reconnectDelay);
-      };
+      readSseStream(`${API_BASE}/api/user/events`, headers, controller.signal, (event) => {
+        if (event.event === "connected") {
+          console.log("☁️ SSE connected — real-time sync active");
+          sseWorking = true;
+          reconnectDelay = 2000; // reset backoff on success
+        } else if (event.event === "report_changed") {
+          console.log("☁️ SSE: report_changed — syncing...");
+          performBidirectionalSync(false);
+        }
+      })
+        .then(scheduleReconnect) // server closed the stream
+        .catch((error) => {
+          if (controller.signal.aborted) return;
+          console.warn("☁️ SSE disconnected, will retry:", error);
+          scheduleReconnect();
+        });
     };
 
     connect();
 
     return () => {
-      es?.close();
+      controller.abort();
       clearInterval(fallbackInterval);
       if (reconnectTimer) clearTimeout(reconnectTimer);
     };

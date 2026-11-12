@@ -401,7 +401,7 @@ class TradingService:
             "gpt-6.1-terra",
             "gpt-6-luna",
             # Anthropic (Official model IDs)
-            "claude-fable-5-1",
+            "claude-fable-5-2",
             "claude-opus-5-5",
             "claude-sonnet-5-5",
             "claude-haiku-5-5",

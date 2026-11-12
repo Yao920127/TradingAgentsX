@@ -1,0 +1,98 @@
+# -*- coding: utf-8 -*-
+"""
+辯論歷史的共用工具。
+
+- append_round：把某位辯論者的本輪發言累加到他自己的歷史（報告顯示用），並標上輪次。
+- compact_debate_history：把完整辯論歷史壓成「較早發言的開頭摘錄 + 最近一輪全文」，
+  讓辯論者在多輪辯論後仍記得先前的論點，同時控制 input tokens。
+"""
+
+import re
+
+# 最近發言保留全文時，單次發言的字元上限
+RECENT_TURN_CHAR_LIMIT = 2000
+# 較早發言只保留開頭摘錄的字元數（核心論點通常寫在開頭）
+EARLIER_TURN_DIGEST_CHARS = 220
+# 未超過此長度的歷史不做壓縮
+DEBATE_HISTORY_LIMIT = 3000
+
+_SPEAKER_LABELS = (
+    "看漲分析師：",
+    "看跌分析師：",
+    "激進分析師：",
+    "保守分析師：",
+    "中立分析師：",
+    "Bull Analyst: ",
+    "Bear Analyst: ",
+    "Aggressive Analyst: ",
+    "Conservative Analyst: ",
+    "Neutral Analyst: ",
+)
+_TURN_START = re.compile(
+    r"^(?=(?:" + "|".join(re.escape(label) for label in _SPEAKER_LABELS) + r"))",
+    re.MULTILINE,
+)
+
+
+def append_round(previous: str, content: str, round_number: int, language: str = "zh-TW") -> str:
+    """把本輪發言接在該辯論者先前的發言之後，並加上輪次標題。"""
+    heading = f"# Round {round_number}" if language == "en" else f"# 第 {round_number} 輪"
+    entry = f"{heading}\n\n{content.strip()}"
+    if not previous:
+        return entry
+    return f"{previous}\n\n{entry}"
+
+
+def _split_turns(history: str) -> list[str]:
+    return [turn.strip() for turn in _TURN_START.split(history) if turn.strip()]
+
+
+def _digest(turn: str) -> str:
+    flat = " ".join(turn.split())
+    if len(flat) <= EARLIER_TURN_DIGEST_CHARS:
+        return flat
+    return flat[:EARLIER_TURN_DIGEST_CHARS] + "…"
+
+
+def _cap(turn: str) -> str:
+    if len(turn) <= RECENT_TURN_CHAR_LIMIT:
+        return turn
+    return turn[:RECENT_TURN_CHAR_LIMIT] + "…"
+
+
+def compact_debate_history(
+    history: str,
+    recent_turns: int,
+    language: str = "zh-TW",
+    limit: int = DEBATE_HISTORY_LIMIT,
+) -> str:
+    """
+    壓縮辯論歷史供辯論者閱讀。
+
+    Args:
+        history: 完整辯論歷史（每次發言以發言者標籤開頭）。
+        recent_turns: 保留全文的最近發言數（通常為辯論人數，即最近一整輪）。
+        language: 報告語言，決定區段標題。
+        limit: 未超過此字元數時原樣返回。
+    """
+    if len(history) <= limit:
+        return history
+
+    turns = _split_turns(history)
+    if len(turns) <= recent_turns:
+        # 無法辨識發言邊界或只有最近一輪：退回保留尾段
+        return "...[truncated]\n" + history[-limit:]
+
+    earlier = turns[:-recent_turns]
+    recent = turns[-recent_turns:]
+
+    if language == "en":
+        earlier_title = "[Earlier turns, opening excerpts only]"
+        recent_title = "[Most recent turns, full text]"
+    else:
+        earlier_title = "【較早發言（僅開頭摘錄）】"
+        recent_title = "【最近發言（全文）】"
+
+    earlier_block = "\n".join(f"{i}. {_digest(turn)}" for i, turn in enumerate(earlier, 1))
+    recent_block = "\n\n".join(_cap(turn) for turn in recent)
+    return f"{earlier_title}\n{earlier_block}\n\n{recent_title}\n{recent_block}"
