@@ -114,7 +114,7 @@
     },
     "tradingagents/dataflows/stockstats_utils.py": {
       "name": "技術指標計算",
-      "description": "用股價資料自行計算各種技術指標。"
+      "description": "用股價資料自行計算各種技術指標，並把下載過的股價存成檔案重複使用，多位分析師同時讀取也不會出錯。"
     },
     "tradingagents/dataflows/utils.py": {
       "name": "資料小工具",

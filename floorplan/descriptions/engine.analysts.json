@@ -14,7 +14,7 @@
     },
     "tradingagents/agents/analysts/report_summarizer.py": {
       "name": "報告摘要員",
-      "description": "把四份分析師報告壓縮成一份短摘要，讓後面的辯論省下約四分之三的 AI 費用。"
+      "description": "把四份分析師報告各自壓縮後合併成一份短摘要，數字不會混到別的章節，也讓後面的辯論省下大量 AI 費用。"
     },
     "tradingagents/agents/analysts/social_media_analyst.py": {
       "name": "社群情緒分析師",

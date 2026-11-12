@@ -50,7 +50,7 @@
     },
     "frontend/components/analysis/LivePriceChart.tsx": {
       "name": "即時股價圖",
-      "description": "結果頁價格區的「即時」模式：顯示目前股價、今天每分鐘的走勢線或 K 棒與成交量，並自動更新。"
+      "description": "結果頁價格區的「即時」模式：顯示目前股價與盤前、盤中、盤後整天每分鐘的走勢線或 K 棒與成交量，並自動更新。"
     }
   }
 }

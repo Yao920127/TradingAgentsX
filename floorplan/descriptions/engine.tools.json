@@ -34,7 +34,7 @@
     },
     "tradingagents/agents/utils/prompts.py": {
       "name": "AI 指示文字",
-      "description": "集中管理各角色的指示與語言要求（英文或繁體中文）。"
+      "description": "集中管理各角色的指示、各份報告的摘要指示與語言要求（英文或繁體中文）。"
     },
     "tradingagents/agents/utils/technical_indicators_tools.py": {
       "name": "查技術指標工具",
@@ -51,6 +51,10 @@
     "tradingagents/utils/zh_convert.py": {
       "name": "簡轉繁",
       "description": "把 AI 混入的簡體字轉成台灣繁體，也避免 PDF 缺字。"
+    },
+    "tradingagents/agents/utils/debate_history.py": {
+      "name": "辯論紀錄整理",
+      "description": "把每位辯論者的發言依輪次累積起來，並在多輪後濃縮較早的發言，讓 AI 記得先前論點又不會讀太多字。"
     }
   }
 }

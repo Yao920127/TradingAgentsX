@@ -42,7 +42,7 @@
     },
     "backend/app/services/live_price_service.py": {
       "name": "即時股價服務",
-      "description": "向 Yahoo Finance 取得當日每分鐘的價格與成交量，整理成圖表需要的格式，並短暫快取，避免多人同時看時一直重抓。"
+      "description": "向 Yahoo Finance 取得當日每分鐘的價格與成交量（含盤前、盤後），判斷目前是盤前、盤中、盤後或休市，並短暫快取避免重抓。"
     }
   }
 }

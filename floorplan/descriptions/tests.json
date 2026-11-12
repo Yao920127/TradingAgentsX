@@ -6,7 +6,15 @@
     },
     "tests/test_live_price.py": {
       "name": "即時股價測試",
-      "description": "自動檢查即時股價服務與接口：代號轉換、資料整理、快取與錯誤處理，不需連到外部網站。"
+      "description": "自動檢查即時股價服務：代號轉換、資料整理、盤前盤後的時段判斷與漲跌基準、快取與錯誤處理，不需連到外部網站。"
+    },
+    "tests/test_debate_history.py": {
+      "name": "辯論紀錄測試",
+      "description": "自動檢查多空與風險辯論者的發言是否依輪次正確累積，以及過長的辯論紀錄是否被正確濃縮。"
+    },
+    "tests/test_report_summarizer.py": {
+      "name": "報告摘要測試",
+      "description": "自動檢查四份報告是否各自摘要、依固定順序合併，以及某份摘要失敗時是否只退回該份原文。"
     }
   }
 }

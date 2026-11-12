@@ -1,30 +1,55 @@
 {
   "tasks": [
     {
-      "title": "即時股價模式",
-      "request": "在分析結果頁加入即時股價（實時更新）功能",
-      "summary": "結果頁的價格區新增「即時」模式：主伺服器向 Yahoo 抓當日每分鐘價格與成交量並短暫快取，網站定期輪詢並畫出走勢線／K 棒與成交量。已提交（1a359d3），附前後端測試。",
+      "title": "盤前盤後走勢",
+      "request": "即時股價、交易量只有盤中時才會顯示，可以連盤前、盤後也一起顯示走向嗎？",
+      "summary": "即時模式現在會畫出盤前、盤中、盤後整天的價格走勢，並標示目前時段；盤前、盤後的漲跌改以最近一次收盤價為基準。Yahoo 不提供盤前盤後的每分鐘成交量，這兩段成交量會是 0（圖上有說明）。已提交（26e2160），附前後端測試。",
       "items": [
-        {"ref": "GET /api/price/live", "change": "new", "note": "新的網址，網站從這裡拿即時報價；是整個即時模式的資料來源。"},
-        {"ref": "backend/app/api/price.py", "change": "new", "note": "掛上即時股價網址，把查詢錯誤轉成清楚的回應。"},
-        {"ref": "backend/app/services/live_price_service.py", "change": "new", "note": "實際向 Yahoo 抓今天每分鐘的價格與成交量，並快取一小段時間，避免多人同時看時一直重抓。"},
-        {"ref": "backend/app/models/schemas.py", "change": "changed", "note": "新增即時報價的資料格式，讓網站知道會收到什麼。"},
-        {"ref": "backend/app/main.py", "change": "changed", "note": "把新的即時股價網址接上主伺服器。"},
-        {"ref": "frontend/hooks/useLivePrice.ts", "change": "new", "note": "開啟即時模式時定期向伺服器要新報價，開盤時更新快、休市時放慢。"},
-        {"ref": "frontend/lib/live-price.ts", "change": "new", "note": "即時圖用的時間計算：圖表顯示多長、時間用交易所當地時間顯示。"},
-        {"ref": "frontend/components/analysis/LivePriceChart.tsx", "change": "new", "note": "畫出目前股價、今天每分鐘的走勢與成交量，並自動更新。"},
-        {"ref": "frontend/components/analysis/PriceChart.tsx", "change": "changed", "note": "價格區加上切換到「即時」模式的入口。"},
-        {"ref": "frontend/app/analysis/results/page.tsx", "change": "changed", "note": "結果頁把股票代號與市場傳給即時圖使用。"},
-        {"ref": "frontend/lib/api.ts", "change": "changed", "note": "新增向主伺服器要即時報價的呼叫。"},
-        {"ref": "frontend/lib/types.ts", "change": "changed", "note": "新增即時報價的資料格式定義。"}
-      ]
-    },
-    {
-      "title": "清快取腳本更新",
-      "request": "整理清除快取腳本",
-      "summary": "clean_cache.sh 改成分層選項：預設清建置與暫存、--app 另清股價與 Redis 快取、--deep 連安裝套件一起刪。",
-      "items": [
-        {"ref": "clean_cache.sh", "change": "changed", "note": "加入 --app、--deep 等選項，可依需要清得更徹底。"}
+        {
+          "ref": "backend/app/services/live_price_service.py",
+          "change": "changed",
+          "note": "向 Yahoo 多要盤前與盤後的資料，把每分鐘分成盤前、盤中、盤後，並判斷現在是哪個時段；這是畫面能顯示盤前盤後的資料來源。"
+        },
+        {
+          "ref": "GET /api/price/live",
+          "change": "changed",
+          "note": "回傳的即時報價多了目前時段與各時段的起訖時間；盤前盤後時價格是延長交易的最新價。"
+        },
+        {
+          "ref": "backend/app/models/schemas.py",
+          "change": "changed",
+          "note": "即時報價的格式加上時段資訊，讓網站知道哪一段是盤前、盤後。"
+        },
+        {
+          "ref": "frontend/components/analysis/LivePriceChart.tsx",
+          "change": "changed",
+          "note": "走勢圖旁加上時段標籤，價格卡會顯示「盤前價／盤後價」，狀態分成盤前交易中、盤中、盤後交易中、休市，成交量圖用底色標出盤前盤後。"
+        },
+        {
+          "ref": "frontend/lib/live-price.ts",
+          "change": "changed",
+          "note": "新增判斷某個時刻屬於哪個時段的小計算，成交量圖靠它替盤前盤後上色。"
+        },
+        {
+          "ref": "frontend/lib/types.ts",
+          "change": "changed",
+          "note": "即時報價的資料定義加上時段欄位，與主伺服器的新格式一致。"
+        },
+        {
+          "ref": "frontend/hooks/useLivePrice.ts",
+          "change": "changed",
+          "note": "盤前與盤後也算開市，所以這兩個時段同樣每 10 秒更新一次。"
+        },
+        {
+          "ref": "frontend/lib/i18n/zh-TW.ts",
+          "change": "changed",
+          "note": "新增盤前、盤後相關的中文文字，以及成交量限制的說明。"
+        },
+        {
+          "ref": "frontend/lib/i18n/en.ts",
+          "change": "changed",
+          "note": "新增盤前、盤後相關的英文文字，以及成交量限制的說明。"
+        }
       ]
     }
   ]
