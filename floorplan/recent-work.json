@@ -1,44 +1,46 @@
 {
   "tasks": [
     {
-      "title": "辯論只留最終輪",
-      "request": "為什麼辯論 10、15 次，卻只有辯論 5 次？辯論結果只保留最終辯論結果。",
-      "summary": "10 和 15 是發言次數而非輪數，已修正進度文字。報告中五位辯論者現在只顯示最後一輪發言，完整辯論過程仍供 AI 內部閱讀。已提交（633456b），測試全數通過；舊報告不受影響。",
+      "title": "移除信心度提示句",
+      "request": "報告中沒有可解析的信心度數值這句可以刪除",
+      "summary": "結論橫幅在抓不到信心度時，不再顯示提示句，只保留結論與分析師數量；中英文介面文字裡不再使用的字串也一併刪除。尚未提交。",
       "items": [
         {
-          "ref": "tradingagents/agents/researchers/bull_researcher.py",
+          "ref": "frontend/components/analysis/VerdictBanner.tsx",
           "change": "changed",
-          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
-        },
-        {
-          "ref": "tradingagents/agents/researchers/bear_researcher.py",
-          "change": "changed",
-          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
-        },
-        {
-          "ref": "tradingagents/agents/risk_mgmt/aggresive_debator.py",
-          "change": "changed",
-          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
-        },
-        {
-          "ref": "tradingagents/agents/risk_mgmt/conservative_debator.py",
-          "change": "changed",
-          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
-        },
-        {
-          "ref": "tradingagents/agents/risk_mgmt/neutral_debator.py",
-          "change": "changed",
-          "note": "報告裡只保留這位辯論者最後一輪的發言，不再把每一輪都累加上去；完整的來回過程仍留給其他辯論者與經理閱讀。"
-        },
-        {
-          "ref": "tradingagents/agents/utils/debate_history.py",
-          "change": "changed",
-          "note": "移除了「依輪次累加發言」的功能，因為報告不再需要每一輪的內容；濃縮長辯論紀錄的功能不變。"
+          "note": "沒有信心度時直接不顯示那一行，不再出現「報告中沒有可解析的信心度數值」。"
         },
         {
           "ref": "frontend/lib/i18n/zh-TW.ts",
           "change": "changed",
-          "note": "進度文字從「第 10 / 10 輪發言」改成「第 10 / 10 次發言」。10 和 15 其實是發言次數（5 輪 × 2 人、5 輪 × 3 人），原本的寫法讓人誤以為辯論了 10、15 輪。"
+          "note": "刪除不再使用的提示句文字。"
+        },
+        {
+          "ref": "frontend/lib/i18n/en.ts",
+          "change": "changed",
+          "note": "同步刪除英文版不再使用的提示句文字。"
+        }
+      ]
+    },
+    {
+      "title": "強化分析師與辯論原則",
+      "request": "優化分析師報告結構，並讓研究員與交易員共用辯論與決策原則",
+      "summary": "新增分析師共用原則與辯論共用原則，並調整技術面分析師的提示與報告結構。已提交。",
+      "items": [
+        {
+          "ref": "tradingagents/agents/utils/prompts.py",
+          "change": "changed",
+          "note": "新增分析師與辯論者共用的原則文字，讓各角色遵守同一套寫法與判斷標準。"
+        },
+        {
+          "ref": "tradingagents/agents/analysts/market_analyst.py",
+          "change": "changed",
+          "note": "技術面分析師改用新的共用原則與報告結構。"
+        },
+        {
+          "ref": "backend/app/services/pdf_generator.py",
+          "change": "changed",
+          "note": "PDF 報告新增封面與內頁的版面樣式。"
         }
       ]
     }

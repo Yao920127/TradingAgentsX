@@ -589,7 +589,6 @@ export const en = {
     // Verdict banner
     verdict: {
       label: "Final Call",
-      noConfidence: "No parsable confidence value in the report",
       confidence: "Confidence",
       analystCount: "Analysts",
       analystCountUnit: "",

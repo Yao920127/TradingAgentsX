@@ -448,7 +448,6 @@ export const zhTW = {
     // Verdict banner
     verdict: {
       label: "最終判斷",
-      noConfidence: "報告中沒有可解析的信心度數值",
       confidence: "信心度",
       analystCount: "分析師",
       analystCountUnit: "位",

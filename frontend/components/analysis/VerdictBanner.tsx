@@ -93,9 +93,7 @@ export function VerdictBanner({
           </div>
 
           <div className="min-w-0 space-y-2.5 text-sm">
-            {confidence == null ? (
-              <p className="text-muted-foreground">{v.noConfidence}</p>
-            ) : (
+            {confidence != null && (
               <div className="flex items-center gap-3">
                 <span className="text-muted-foreground shrink-0">{v.confidence}</span>
                 <div className="h-1.5 w-24 sm:w-32 overflow-hidden rounded-full bg-foreground/10">
