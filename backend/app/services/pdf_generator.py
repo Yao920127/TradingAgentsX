@@ -35,6 +35,24 @@ plt.rcParams['axes.unicode_minus'] = False
 from fpdf import FPDF # type: ignore
 
 # ============================================
+# DESIGN TOKENS (navy / gold / cream memo style)
+# ============================================
+NAVY = (11, 37, 69)
+NAVY_SOFT = (22, 52, 92)
+GOLD = (201, 165, 92)
+GOLD_TEXT = (160, 130, 66)
+CREAM = (249, 247, 242)
+ROW_ALT = (242, 241, 237)
+RULE_GRAY = (217, 217, 217)
+INK = (26, 32, 48)
+MUTED = (136, 140, 150)
+ICE = (170, 186, 214)
+WHITE = (255, 255, 255)
+PAGE_W, PAGE_H = 210.0, 297.0
+ZH_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
+
+# ============================================
 # PDF LABELS FOR INTERNATIONALIZATION
 # ============================================
 PDF_LABELS = {
@@ -71,6 +89,16 @@ PDF_LABELS = {
         'neutral_analyst': 'Neutral Analyst',
         'risk_manager': 'Risk Manager',
         'trader': 'Trader',
+        'cover_kicker': 'INVESTMENT ANALYSIS REPORT',
+        'brand_tagline': 'Multi-Agent AI Trading Analysis',
+        'meta_ticker': 'TICKER',
+        'meta_date': 'ANALYSIS DATE',
+        'meta_deep': 'DEEP-THINK MODEL',
+        'meta_quick': 'QUICK-THINK MODEL',
+        'cover_box_label': 'ABOUT THIS REPORT',
+        'section': 'SECTION',
+        'disclaimer': 'AI-generated analysis for reference only. Not investment advice.',
+        'header_right': 'Analysis Report',
     },
     'zh-TW': {
         'cover_title': 'TradingAgentsX 分析報告',
@@ -105,6 +133,16 @@ PDF_LABELS = {
         'neutral_analyst': '中立分析師',
         'risk_manager': '風險經理',
         'trader': '交易員',
+        'cover_kicker': '投資分析報告',
+        'brand_tagline': '多代理人 AI 交易分析',
+        'meta_ticker': '股票代號',
+        'meta_date': '分析日期',
+        'meta_deep': '深度思維模型',
+        'meta_quick': '快速思維模型',
+        'cover_box_label': '關於本報告',
+        'section': '第',
+        'disclaimer': 'AI 生成分析，僅供參考，不構成投資建議。',
+        'header_right': '分析報告',
     },
 }
 
@@ -164,21 +202,69 @@ def get_model_display_name(model_id: str | None) -> str | None:
 # CUSTOM FPDF CLASS WITH AUTO PAGE NUMBERING
 # ============================================
 class _ReportPDF(FPDF):
-    """Custom FPDF with page number footer (skips cover + TOC pages)"""
+    """FPDF with memo-style running header/footer.
+
+    Page kind is passed as add_page(kind=...):
+      'cover' / 'divider' -> full-bleed pages, no header/footer
+      'content'           -> cream header band + footer with page number
+    """
 
     def __init__(self, font_name: str, cover_toc_pages: int = 2, **kwargs):
         super().__init__(orientation='P', unit='mm', format='A4', **kwargs)
         self._fn = font_name
         self._cover_toc_pages = cover_toc_pages
+        self.header_left = 'TRADINGAGENTSX'
+        self.header_right = ''
+        self.footer_note = ''
+        self._pending_kind = 'content'
+        self._kinds: dict = {}
+
+    def add_page(self, *args, kind: str = 'content', **kwargs):
+        # footer() of the page being closed still sees its own kind via _kinds
+        self._pending_kind = kind
+        super().add_page(*args, **kwargs)
+
+    def header(self):
+        self._kinds[self.page] = self._pending_kind
+        if self._pending_kind != 'content':
+            return
+        self.set_fill_color(*CREAM)
+        self.rect(0, 0, PAGE_W, 16, 'F')
+        self.set_draw_color(*GOLD)
+        self.set_line_width(0.3)
+        self.line(0, 16, PAGE_W, 16)
+        self.set_line_width(0.8)
+        self.line(self.l_margin, 16, self.l_margin + 13, 16)
+        self.set_line_width(0.2)
+
+        self.set_font(self._fn, size=8.5)
+        self.set_text_color(*NAVY)
+        self.set_xy(self.l_margin, 6)
+        self.set_char_spacing(0.8)
+        self.cell(self.epw / 2, 5, self.header_left)
+        self.set_char_spacing(0)
+        self.set_text_color(*MUTED)
+        self.set_xy(self.l_margin + self.epw / 2, 6)
+        self.cell(self.epw / 2, 5, self.header_right, align='R')
+        self.set_text_color(*INK)
+        self.set_y(26)
 
     def footer(self):
+        if self._kinds.get(self.page, 'content') != 'content':
+            return
+        self.set_draw_color(*RULE_GRAY)
+        self.set_line_width(0.2)
+        self.line(self.l_margin, PAGE_H - 14, PAGE_W - self.r_margin, PAGE_H - 14)
+        self.set_font(self._fn, size=7.5)
+        self.set_text_color(*MUTED)
+        self.set_xy(self.l_margin, PAGE_H - 12)
+        self.cell(self.epw - 20, 5, self.footer_note)
         content_page = self.page - self._cover_toc_pages
         if content_page > 0:
-            self.set_y(-15)
-            self.set_font(self._fn, size=9)
-            self.set_text_color(128, 128, 128)
-            self.cell(0, 10, f'- {content_page} -', align='C')
-            self.set_text_color(0, 0, 0)
+            self.set_text_color(*NAVY)
+            self.set_xy(PAGE_W - self.r_margin - 20, PAGE_H - 12)
+            self.cell(20, 5, f'{content_page:02d}', align='R')
+        self.set_text_color(*INK)
 
 
 # ============================================
@@ -240,7 +326,8 @@ class PDFGenerator:
     def _new_pdf(self) -> _ReportPDF:
         """Create a fresh PDF instance with fonts registered"""
         pdf = _ReportPDF(font_name=self._font_name)
-        pdf.set_margins(15, 15, 15)
+        pdf.set_margins(18, 26, 18)
+        pdf.set_auto_page_break(True, margin=22)
         if self._font_regular and self._font_name != 'Helvetica':
             pdf.add_font(self._font_name, '', self._font_regular)
             pdf.add_font(self._font_name, 'B', self._font_bold)
@@ -474,15 +561,18 @@ class PDFGenerator:
             return
 
         pdf.set_font(fn, size=9)
-        pdf.set_text_color(51, 51, 51)
+        pdf.set_text_color(*INK)
+        pdf.set_draw_color(*RULE_GRAY)
+        pdf.set_fill_color(*WHITE)  # un-striped rows inherit the current fill colour
+        pdf.set_line_width(0.2)
 
         try:
             from fpdf.table import FontFace # type: ignore
+            from fpdf.enums import TableCellFillMode # type: ignore
 
             headings_style = FontFace(
-                emphasis="B",            # bold via emphasis flag
-                fill_color=(232, 234, 237),
-                color=(30, 30, 30),
+                fill_color=NAVY,
+                color=WHITE,
             )
 
             with pdf.table(
@@ -492,6 +582,9 @@ class PDFGenerator:
                 borders_layout="ALL",
                 first_row_as_headings=True,
                 headings_style=headings_style,
+                cell_fill_color=ROW_ALT,
+                cell_fill_mode=TableCellFillMode.EVEN_ROWS,
+                padding=1.6,
                 text_align="LEFT",
                 wrapmode="CHAR",  # character-level wrap — required for CJK text # type: ignore
             ) as table:
@@ -510,13 +603,13 @@ class PDFGenerator:
             for row_idx, row_data in enumerate(table_data):
                 row_data_padded = (list(row_data) + [''] * num_cols)[:num_cols]
                 if row_idx == 0:
-                    pdf.set_font(fn, 'B', size=9)
-                    self._set_color(pdf, '#e8eaed', is_text=False)
-                    pdf.set_text_color(30, 30, 30)
+                    pdf.set_font(fn, size=9)
+                    pdf.set_fill_color(*NAVY)
+                    pdf.set_text_color(*WHITE)
                 else:
                     pdf.set_font(fn, size=9)
-                    pdf.set_text_color(51, 51, 51)
-                    pdf.set_fill_color(255, 255, 255)
+                    pdf.set_text_color(*INK)
+                    pdf.set_fill_color(*(ROW_ALT if row_idx % 2 == 0 else WHITE))
                 for cell_text in row_data_padded:
                     text = self._clean_markdown(str(cell_text))
                     text = self._replace_emojis(text)
@@ -525,12 +618,12 @@ class PDFGenerator:
                         while len(text) > 1 and pdf.get_string_width(text + '..') > avail:
                             text = text[:-1]
                         text = text + '..'
-                    pdf.cell(col_w, 7, text, border=1, fill=(row_idx == 0), align='L')
+                    pdf.cell(col_w, 7, text, border=1, fill=True, align='L')
                 pdf.ln()
 
-        pdf.set_text_color(0, 0, 0)
-        pdf.set_fill_color(255, 255, 255)
-        pdf.ln(3)
+        pdf.set_text_color(*INK)
+        pdf.set_fill_color(*WHITE)
+        pdf.ln(4)
 
     def _add_section_line(self, pdf: FPDF, line: str):
         """Render a single line of markdown text with appropriate formatting"""
@@ -557,24 +650,29 @@ class PDFGenerator:
         if text.startswith('### '):
             content = self._clean_markdown(text[4:])
             pdf.set_font(fn, 'B', size=11)
-            self._set_color(pdf, '#374151')
+            pdf.set_text_color(*NAVY_SOFT)
             pdf.multi_cell(w, 6, content, align='L')
             pdf.ln(1)
-            self._set_color(pdf, '#333333')
+            pdf.set_text_color(*INK)
         elif text.startswith('## '):
             content = self._clean_markdown(text[3:])
+            pdf.ln(2)
             pdf.set_font(fn, 'B', size=13)
-            self._set_color(pdf, '#1e3a5f')
+            pdf.set_text_color(*NAVY)
             pdf.multi_cell(w, 7, content, align='L')
             pdf.ln(2)
-            self._set_color(pdf, '#333333')
+            pdf.set_text_color(*INK)
         elif text.startswith('# '):
             content = self._clean_markdown(text[2:])
-            pdf.set_font(fn, 'B', size=15)
-            self._set_color(pdf, '#1e3a5f')
-            pdf.multi_cell(w, 8, content, align='L')
             pdf.ln(3)
-            self._set_color(pdf, '#333333')
+            pdf.set_font(fn, 'B', size=15)
+            pdf.set_text_color(*NAVY)
+            pdf.multi_cell(w, 8, content, align='L')
+            y = pdf.get_y()
+            pdf.set_draw_color(*RULE_GRAY)
+            pdf.line(pdf.l_margin, y, pdf.l_margin + pdf.epw, y)
+            pdf.ln(3)
+            pdf.set_text_color(*INK)
         elif (text.startswith('- ') or text.startswith('* ') or
               text.startswith('· ') or text.startswith('\u2022 ') or
               (len(text) > 1 and text[0] == '\u2022')):
@@ -659,7 +757,7 @@ class PDFGenerator:
         fig, (ax1, ax2) = plt.subplots(
             2, 1, figsize=(10, 6),
             gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
-        fig.patch.set_facecolor('white') # type: ignore
+        fig.patch.set_facecolor('#F9F7F2') # type: ignore
 
         width = 0.8
         for i in range(len(dates)):
@@ -673,9 +771,12 @@ class PDFGenerator:
             ax1.add_patch(rect)
 
         ax1.set_ylabel('Price ($)', fontsize=10)
-        ax1.set_title(f'{ticker} Heikin Ashi Chart', fontsize=12, fontweight='bold')
-        ax1.grid(True, alpha=0.3)
-        ax1.set_facecolor('#fafafa')
+        ax1.set_title(f'{ticker} Heikin Ashi Chart', fontsize=12, fontweight='bold', color='#0B2545')
+        ax1.grid(True, alpha=0.3, color='#C9A55C')
+        for ax in (ax1, ax2):
+            for spine in ax.spines.values():
+                spine.set_color('#D9D9D9')
+        ax1.set_facecolor('#FFFFFF')
 
         vol_colors = ['#22c55e' if ha_closes[i] >= ha_opens[i] else '#ef4444'
                       for i in range(len(dates))]
@@ -683,7 +784,7 @@ class PDFGenerator:
         ax2.set_ylabel('Volume', fontsize=10)
         ax2.set_xlabel('Trading Days', fontsize=10)
         ax2.grid(True, alpha=0.3)
-        ax2.set_facecolor('#fafafa')
+        ax2.set_facecolor('#FFFFFF')
         ax2.yaxis.set_major_formatter(plt.FuncFormatter( # type: ignore
             lambda x, p: f'{x/1e6:.1f}M' if x >= 1e6 else f'{x/1e3:.0f}K' if x >= 1e3 else f'{x:.0f}'))
 
@@ -703,176 +804,208 @@ class PDFGenerator:
         plt.tight_layout()
         buf = io.BytesIO()
         plt.savefig(buf, format='png', dpi=150, bbox_inches='tight',
-                    facecolor='white', edgecolor='none')
+                    facecolor='#F9F7F2', edgecolor='none')
         plt.close(fig)
         buf.seek(0)
         return buf.getvalue()
 
     # ------------------------------------------------------------------
-    # Page builders
+    # Page builders (navy / gold / cream memo style)
     # ------------------------------------------------------------------
 
-    def _build_cover_page(self, pdf: FPDF, ticker: str, analysis_date: str, language: str,
+    def _spaced_text(self, pdf: FPDF, x: float, y: float, w: float, text: str,
+                     size: float, color: tuple, spacing: float = 1.0, align: str = 'L'):
+        """Small letter-spaced label."""
+        pdf.set_font(self._fn(), size=size)
+        pdf.set_text_color(*color)
+        pdf.set_char_spacing(spacing)
+        pdf.set_xy(x, y)
+        pdf.cell(w, size * 0.5, text, align=align)
+        pdf.set_char_spacing(0)
+
+    @staticmethod
+    def _gold_rule(pdf: FPDF, x: float, y: float, length: float = 14, weight: float = 0.5):
+        pdf.set_draw_color(*GOLD)
+        pdf.set_line_width(weight)
+        pdf.line(x, y, x + length, y)
+        pdf.set_line_width(0.2)
+
+    def _title_block(self, pdf: FPDF, kicker: str, title: str):
+        """Gold short rule + gold kicker + navy title + hairline (content-page heading)."""
+        pdf.set_x(pdf.l_margin)
+        y = pdf.get_y()
+        self._gold_rule(pdf, pdf.l_margin, y)
+        self._spaced_text(pdf, pdf.l_margin, y + 2.5, pdf.epw, kicker, 8.5, GOLD_TEXT, 0.8)
+        pdf.set_xy(pdf.l_margin, y + 8)
+        pdf.set_font(self._fn(), size=22)
+        pdf.set_text_color(*NAVY)
+        pdf.multi_cell(pdf.epw, 11, title, align='L', wrapmode='CHAR',  # type: ignore
+                       new_x='LMARGIN', new_y='NEXT')
+        pdf.ln(1)
+        pdf.set_draw_color(*RULE_GRAY)
+        pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
+        pdf.ln(5)
+        pdf.set_text_color(*INK)
+
+    def _sub_heading(self, pdf: FPDF, text: str):
+        pdf.set_x(pdf.l_margin)
+        pdf.set_font(self._fn(), size=13)
+        pdf.set_text_color(*NAVY)
+        pdf.cell(0, 8, text, new_x='LMARGIN', new_y='NEXT')
+        y = pdf.get_y()
+        pdf.set_draw_color(*RULE_GRAY)
+        pdf.line(pdf.l_margin, y, pdf.l_margin + pdf.epw, y)
+        self._gold_rule(pdf, pdf.l_margin, y, 14, 0.6)
+        pdf.ln(3)
+        pdf.set_text_color(*INK)
+
+    def _build_cover_page(self, pdf: _ReportPDF, ticker: str, analysis_date: str, language: str,
                           deep_think_llm: str = None, quick_think_llm: str = None, # type: ignore
-                          company_name: str = None): # type: ignore
-        """Cover page: company full name (ticker fallback), date, TradingAgentsX branding"""
+                          company_name: str = None, tagline: str = None): # type: ignore
+        """Navy hero + cream metadata area, mirroring an IC-memo cover."""
         fn = self._fn()
-        pdf.add_page()
+        pdf.header_right = f"{ticker}  ·  {get_pdf_label('header_right', language)}  ·  {analysis_date}"
+        pdf.footer_note = get_pdf_label('disclaimer', language)
+        pdf.set_auto_page_break(False)
+        pdf.add_page(kind='cover')
 
-        # Vertical center — push down ~80mm
-        pdf.ln(60)
+        hero_h = 190
+        pdf.set_fill_color(*NAVY)
+        pdf.rect(0, 0, PAGE_W, hero_h, 'F')
+        pdf.set_fill_color(*CREAM)
+        pdf.rect(0, hero_h, PAGE_W, PAGE_H - hero_h, 'F')
+        pdf.set_fill_color(*GOLD)
+        pdf.rect(0, 0, 38, 2.6, 'F')
+        pdf.rect(0, 0, 1.6, 35, 'F')
+        pdf.set_draw_color(*GOLD)
+        pdf.set_line_width(0.8)
+        pdf.line(0, hero_h, PAGE_W, hero_h)
+        pdf.set_line_width(0.2)
 
+        # Brand block (top-left)
+        self._spaced_text(pdf, 18, 18, 120, 'TRADINGAGENTSX', 11, WHITE, 1.4)
+        self._spaced_text(pdf, 18, 25, 120, get_pdf_label('brand_tagline', language), 7.5, ICE, 0.3)
+
+        # Kicker + title
+        self._spaced_text(pdf, 18, 96, 170, get_pdf_label('cover_kicker', language), 9, GOLD, 1.0)
+        self._gold_rule(pdf, 18, 104, 18, 0.5)
+
+        pdf.set_xy(18, 110)
+        pdf.set_text_color(*WHITE)
         has_company_name = bool(company_name) and company_name.strip().upper() != ticker.strip().upper()
-        self._set_color(pdf, '#1a1a1a')
         if has_company_name:
-            # Company full name — wraps over multiple lines; ticker shown beneath
-            pdf.set_font(fn, '', size=34)
-            pdf.multi_cell(0, 16, company_name.strip(), align='C', wrapmode='WORD', # type: ignore
+            pdf.set_font(fn, size=30)
+            pdf.multi_cell(174, 14, company_name.strip(), align='L', wrapmode='CHAR',  # type: ignore
                            new_x='LMARGIN', new_y='NEXT')
-            pdf.set_font(fn, size=20)
-            self._set_color(pdf, '#555555')
-            pdf.cell(0, 14, ticker, align='C', new_x='LMARGIN', new_y='NEXT')
+            pdf.set_font(fn, size=18)
+            pdf.set_text_color(*ICE)
+            pdf.cell(0, 11, ticker, new_x='LMARGIN', new_y='NEXT')
         else:
-            # Ticker — large, letter-spaced, regular weight
-            spaced_ticker = '  '.join(ticker)
-            pdf.set_font(fn, '', size=48)
-            pdf.cell(0, 20, spaced_ticker, align='C', new_x='LMARGIN', new_y='NEXT')
+            pdf.set_font(fn, size=44)
+            pdf.cell(0, 20, ticker, new_x='LMARGIN', new_y='NEXT')
+        pdf.set_font(fn, size=11)
+        pdf.set_text_color(*ICE)
+        pdf.set_x(18)
+        pdf.multi_cell(174, 7, tagline or get_pdf_label('cover_subtitle', language),
+                       align='L', wrapmode='CHAR', new_x='LMARGIN', new_y='NEXT')  # type: ignore
 
-        # Date
-        pdf.set_font(fn, size=16)
-        self._set_color(pdf, '#555555')
-        pdf.cell(0, 10, analysis_date, align='C', new_x='LMARGIN', new_y='NEXT')
+        # Metadata columns on cream
+        deep_name = get_model_display_name(deep_think_llm) or '—'
+        quick_name = get_model_display_name(quick_think_llm) or '—'
+        columns = [
+            (get_pdf_label('meta_ticker', language), ticker),
+            (get_pdf_label('meta_date', language), analysis_date),
+            (get_pdf_label('meta_deep', language), deep_name),
+            (get_pdf_label('meta_quick', language), quick_name),
+        ]
+        col_w = 174 / 4
+        for idx, (label, value) in enumerate(columns):
+            x = 18 + idx * col_w
+            self._spaced_text(pdf, x, 207, col_w - 3, label, 7, GOLD_TEXT, 0.5)
+            self._gold_rule(pdf, x, 213, 8, 0.4)
+            pdf.set_xy(x, 216)
+            pdf.set_font(fn, size=10.5)
+            pdf.set_text_color(*NAVY)
+            pdf.multi_cell(col_w - 4, 5.5, value, align='L', wrapmode='CHAR')  # type: ignore
 
-        pdf.ln(20)
+        # Bottom callout box
+        box_y, box_h = 252, 24
+        pdf.set_draw_color(*GOLD)
+        pdf.set_line_width(0.4)
+        pdf.rect(18, box_y, 174, box_h)
+        pdf.set_line_width(0.2)
+        self._spaced_text(pdf, 23, box_y + 4, 160, get_pdf_label('cover_box_label', language), 7, GOLD_TEXT, 0.5)
+        pdf.set_xy(23, box_y + 10)
+        pdf.set_font(fn, size=10)
+        pdf.set_text_color(*NAVY)
+        pdf.multi_cell(164, 5.2, f"{get_pdf_label('cover_title', language)} — "
+                                 f"{get_pdf_label('cover_subtitle', language)}",
+                       align='L', wrapmode='CHAR')  # type: ignore
 
-        # Brand lines
-        pdf.set_font(fn, size=13)
-        self._set_color(pdf, '#888888')
-        pdf.cell(0, 8, get_pdf_label('cover_title', language), align='C', new_x='LMARGIN', new_y='NEXT')
-        pdf.cell(0, 8, get_pdf_label('cover_subtitle', language), align='C', new_x='LMARGIN', new_y='NEXT')
+        pdf.set_font(fn, size=7)
+        pdf.set_text_color(*MUTED)
+        pdf.set_xy(0, 283)
+        pdf.cell(PAGE_W, 4, get_pdf_label('disclaimer', language), align='C')
 
-        # Model info (Deep / Quick)
-        deep_name = get_model_display_name(deep_think_llm)
-        quick_name = get_model_display_name(quick_think_llm)
-        if deep_name or quick_name:
-            pdf.ln(10)
-            pdf.set_font(fn, size=10)
-            self._set_color(pdf, '#aaaaaa')
-            if language == 'zh-TW':
-                if deep_name and quick_name and deep_name != quick_name:
-                    model_line = f'深度思維：{deep_name}　快速思維：{quick_name}'
-                elif deep_name:
-                    model_line = f'模型：{deep_name}'
-                else:
-                    model_line = f'模型：{quick_name}'
-            else:
-                if deep_name and quick_name and deep_name != quick_name:
-                    model_line = f'Deep: {deep_name}  |  Quick: {quick_name}'
-                elif deep_name:
-                    model_line = f'Model: {deep_name}'
-                else:
-                    model_line = f'Model: {quick_name}'
-            pdf.multi_cell(0, 6, model_line, align='C', wrapmode='CHAR') # type: ignore
+        pdf.set_auto_page_break(True, margin=22)
+        pdf.set_text_color(*INK)
 
-        pdf.set_text_color(0, 0, 0)
-
-    def _build_toc_page(self, pdf: FPDF, reports: list, has_chart: bool,
+    def _build_toc_page(self, pdf: _ReportPDF, reports: list, has_chart: bool,
                         teams: list, language: str):
         """Table of contents page"""
         fn = self._fn()
-        pdf.add_page()
-
-        # TOC title — centered, regular weight (matches 0311 style)
-        pdf.set_font(fn, '', size=26)
-        self._set_color(pdf, '#1e3a5f')
-        pdf.cell(0, 14, get_pdf_label('toc_title', language), align='C', new_x='LMARGIN', new_y='NEXT')
-
-        # Horizontal rule under title
-        pdf.set_draw_color(44, 62, 80)
-        pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
-        pdf.ln(8)
+        pdf.add_page(kind='content')
+        self._title_block(pdf, get_pdf_label('report_content', language).upper(),
+                          get_pdf_label('toc_title', language))
 
         report_analyst_names = [r.get('analyst_name', '') for r in reports]
 
-        # Report Content header — with underline
-        pdf.set_font(fn, '', size=12)
-        self._set_color(pdf, '#2c3e50')
-        pdf.cell(0, 7, get_pdf_label('report_content', language), new_x='LMARGIN', new_y='NEXT')
-        pdf.set_draw_color(180, 180, 180)
-        pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
-        pdf.ln(2)
+        def entry(text: str):
+            pdf.set_x(pdf.l_margin + 3)
+            pdf.set_font(fn, size=10.5)
+            pdf.set_text_color(*GOLD_TEXT)
+            pdf.cell(5, 6.5, '•')
+            pdf.set_text_color(*INK)
+            pdf.cell(0, 6.5, text, new_x='LMARGIN', new_y='NEXT')
 
-        # Chart entry
         if has_chart:
-            pdf.set_font(fn, '', size=11)
-            self._set_color(pdf, '#555555')
-            pdf.cell(16, 6, '')  # indent
-            pdf.cell(0, 6, get_pdf_label('price_chart', language),
-                     new_x='LMARGIN', new_y='NEXT')
+            entry(get_pdf_label('price_chart', language))
 
-        if teams:
-            for team in teams:
-                team_count = sum(1 for m in team['members'] if m in report_analyst_names)
-                if team_count == 0:
-                    continue
+        for team in teams or []:
+            team_count = sum(1 for m in team['members'] if m in report_analyst_names)
+            if team_count == 0:
+                continue
+            pdf.ln(5)
+            members_label = get_pdf_label('members', language)
+            self._sub_heading(pdf, f"{team['name']} ({team_count} {members_label})")
+            for member in team['members']:
+                if member in report_analyst_names:
+                    entry(member)
 
-                pdf.ln(4)
-                # Team header — regular weight with underline (matches 0311)
-                pdf.set_font(fn, '', size=14)
-                self._set_color(pdf, '#2c3e50')
-                members_label = get_pdf_label('members', language)
-                pdf.cell(0, 8, f"{team['name']} ({team_count} {members_label})",
-                         new_x='LMARGIN', new_y='NEXT')
-                pdf.set_draw_color(180, 180, 180)
-                pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
-                pdf.ln(2)
+        pdf.set_text_color(*INK)
 
-                pdf.set_font(fn, '', size=11)
-                self._set_color(pdf, '#555555')
-                for member in team['members']:
-                    if member in report_analyst_names:
-                        pdf.cell(16, 6, '')  # indent
-                        pdf.cell(0, 6, f'- {member}', new_x='LMARGIN', new_y='NEXT')
-
-        pdf.set_text_color(0, 0, 0)
-
-    def _build_chart_page(self, pdf: FPDF, ticker: str, price_data: list,
+    def _build_chart_page(self, pdf: _ReportPDF, ticker: str, price_data: list,
                           price_stats: dict, language: str):
         """Price chart + statistics page"""
         fn = self._fn()
-        pdf.add_page()
+        pdf.add_page(kind='content')
+        self._title_block(pdf, ticker, get_pdf_label('price_chart', language))
 
-        # Section title — centered, large, regular weight (matches 0311 style)
-        pdf.set_font(fn, '', size=22)
-        self._set_color(pdf, '#1e3a5f')
-        pdf.cell(0, 12, get_pdf_label('price_chart', language),
-                 align='C', new_x='LMARGIN', new_y='NEXT')
-        pdf.ln(4)
-
-        # Chart image
         if price_data and len(price_data) >= 5:
             try:
                 chart_bytes = self._generate_price_chart(price_data, ticker)
                 if chart_bytes:
                     chart_buf = io.BytesIO(chart_bytes)
                     pdf.image(chart_buf, w=pdf.epw, h=pdf.epw * 0.6)
-                    pdf.ln(5)
+                    pdf.ln(6)
             except Exception as e:
                 print(f'Chart generation failed: {e}')
                 pdf.set_font(fn, size=10)
                 pdf.cell(0, 6, get_pdf_label('chart_failed', language),
                          new_x='LMARGIN', new_y='NEXT')
 
-        # Price statistics table
         if price_stats:
-            pdf.set_font(fn, '', size=14)
-            self._set_color(pdf, '#2c3e50')
-            pdf.cell(0, 8, get_pdf_label('price_stats', language),
-                     new_x='LMARGIN', new_y='NEXT')
-            # Underline under section header (matches 0311 style)
-            pdf.set_draw_color(180, 180, 180)
-            pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
-            pdf.ln(4)
+            self._sub_heading(pdf, get_pdf_label('price_stats', language))
 
             growth_rate = price_stats.get('growth_rate', 0)
             growth_text = f'+{growth_rate:.2f}%' if growth_rate >= 0 else f'{growth_rate:.2f}%'
@@ -890,61 +1023,52 @@ class PDFGenerator:
             ]
             self._add_table(pdf, stats_rows)
 
-        pdf.set_text_color(0, 0, 0)
+        pdf.set_text_color(*INK)
 
-    def _build_team_separator_page(self, pdf: FPDF, team_name: str,
-                                   member_count: int, language: str):
-        """Team separator page — large centred team name"""
+    def _build_team_separator_page(self, pdf: _ReportPDF, team_name: str,
+                                   member_count: int, language: str, index: int = 0):
+        """Full-bleed navy section divider"""
         fn = self._fn()
-        pdf.add_page()
-        pdf.ln(80)
+        pdf.set_auto_page_break(False)
+        pdf.add_page(kind='divider')
+        pdf.set_fill_color(*NAVY)
+        pdf.rect(0, 0, PAGE_W, PAGE_H, 'F')
+        pdf.set_fill_color(*GOLD)
+        pdf.rect(0, 0, 52, 2.6, 'F')
 
-        # Team name — spaced letters for Chinese
-        if language == 'zh-TW':
-            spaced_name = ' '.join(team_name)
-        else:
-            spaced_name = team_name
+        num = ROMAN[index % len(ROMAN)]
+        label = (f"{get_pdf_label('section', language)} {num}" if language == 'en'
+                 else f"第{ZH_NUM[index % len(ZH_NUM)]}部分")
+        self._spaced_text(pdf, 18, 156, 170, label, 9, GOLD, 1.0)
+        self._gold_rule(pdf, 18, 163, 14, 0.5)
 
-        # Regular weight, lighter color (matches 0311 style)
-        pdf.set_font(fn, '', size=34)
-        self._set_color(pdf, '#4a6fa5')
-        pdf.cell(0, 18, spaced_name, align='C', new_x='LMARGIN', new_y='NEXT')
+        pdf.set_xy(18, 168)
+        pdf.set_font(fn, size=34)
+        pdf.set_text_color(*WHITE)
+        pdf.multi_cell(174, 16, team_name, align='L', wrapmode='CHAR',  # type: ignore
+                       new_x='LMARGIN', new_y='NEXT')
+        pdf.set_x(18)
+        pdf.set_font(fn, size=13)
+        pdf.set_text_color(*ICE)
+        pdf.cell(0, 9, f"{member_count} {get_pdf_label('members', language)}",
+                 new_x='LMARGIN', new_y='NEXT')
 
-        # Member count
-        members_label = get_pdf_label('members', language)
-        pdf.set_font(fn, '', size=16)
-        self._set_color(pdf, '#9aa5b4')
-        pdf.cell(0, 12, f'({member_count} {members_label})',
-                 align='C', new_x='LMARGIN', new_y='NEXT')
+        pdf.set_font(fn, size=7)
+        pdf.set_text_color(*ICE)
+        pdf.set_xy(0, 284)
+        pdf.cell(PAGE_W, 4, get_pdf_label('disclaimer', language), align='C')
 
-        pdf.set_text_color(0, 0, 0)
+        pdf.set_auto_page_break(True, margin=22)
+        pdf.set_text_color(*INK)
 
-    def _build_analyst_section(self, pdf: FPDF, analyst_name: str,
+    def _build_analyst_section(self, pdf: _ReportPDF, analyst_name: str,
                                 ticker: str, analysis_date: str,
                                 report_content: str):
         """Analyst report page"""
-        fn = self._fn()
-        pdf.add_page()
+        pdf.add_page(kind='content')
+        self._title_block(pdf, f'{ticker}  ·  {analysis_date}', analyst_name)
+        pdf.set_text_color(*INK)
 
-        # Analyst name — centered, regular weight, large (matches 0311 style)
-        pdf.set_font(fn, '', size=26)
-        self._set_color(pdf, '#1e3a5f')
-        pdf.cell(0, 13, analyst_name, align='C', new_x='LMARGIN', new_y='NEXT')
-
-        # Subtitle — centered
-        pdf.set_font(fn, '', size=11)
-        self._set_color(pdf, '#888888')
-        pdf.cell(0, 7, f'{ticker} | {analysis_date}',
-                 align='C', new_x='LMARGIN', new_y='NEXT')
-
-        # Divider
-        pdf.set_draw_color(44, 62, 80)
-        pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
-        pdf.ln(4)
-
-        pdf.set_text_color(51, 51, 51)
-
-        # Process content
         content = self._replace_emojis(report_content)
         content = self._merge_soft_newlines(content)
         lines = content.split('\n')
@@ -958,7 +1082,6 @@ class PDFGenerator:
                 i += 1
                 continue
 
-            # Detect markdown table
             if '|' in line_stripped and not line_stripped.startswith('#'):
                 table_data, end_idx = self._parse_markdown_table(lines, i)
                 if table_data and len(table_data) > 1:
@@ -970,7 +1093,7 @@ class PDFGenerator:
             self._add_section_line(pdf, line)
             i += 1
 
-        pdf.set_text_color(0, 0, 0)
+        pdf.set_text_color(*INK)
 
     # ------------------------------------------------------------------
     # Public API
@@ -1056,6 +1179,7 @@ class PDFGenerator:
             self._build_chart_page(pdf, ticker, price_data, price_stats, language)
 
         # Team separator + analyst sections
+        section_idx = 0
         for team in TEAMS:
             team_reports = []
             for member_name in team['members']:
@@ -1069,7 +1193,8 @@ class PDFGenerator:
                 continue
 
             self._build_team_separator_page(
-                pdf, team['name'], len(team_reports), language)
+                pdf, team['name'], len(team_reports), language, index=section_idx)
+            section_idx += 1
 
             for report in team_reports:
                 self._build_analyst_section(
@@ -1106,24 +1231,9 @@ class PDFGenerator:
             PDF file content as bytes
         """
         pdf = self._new_pdf()
-        pdf._cover_toc_pages = 0  # All pages get page numbers
+        pdf._cover_toc_pages = 1  # cover only; content pages numbered from 01
 
-        fn = self._fn()
-
-        # Cover
-        pdf.add_page()
-        pdf.ln(50)
-        pdf.set_font(fn, 'B', size=36)
-        self._set_color(pdf, '#1a1a1a')
-        pdf.cell(0, 16, '  '.join(ticker), align='C', new_x='LMARGIN', new_y='NEXT')
-        pdf.set_font(fn, size=14)
-        self._set_color(pdf, '#555555')
-        pdf.cell(0, 8, analysis_date, align='C', new_x='LMARGIN', new_y='NEXT')
-        pdf.ln(10)
-        pdf.set_font(fn, 'B', size=16)
-        self._set_color(pdf, '#2c3e50')
-        pdf.cell(0, 10, analyst_name, align='C', new_x='LMARGIN', new_y='NEXT')
-        pdf.set_text_color(0, 0, 0)
+        self._build_cover_page(pdf, ticker, analysis_date, 'zh-TW', tagline=analyst_name)
 
         # Chart + stats page
         if price_data and price_stats and len(price_data) >= 5:
