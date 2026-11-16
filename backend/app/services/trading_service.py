@@ -406,9 +406,9 @@ class TradingService:
             "claude-sonnet-5-5",
             "claude-haiku-5-5",
             # Google
+            "gemini-4-carbon",
             "gemini-4-argon",
-            "gemini-3.8-flash",
-            "gemini-3.6-flash",
+            "gemini-4-hydrogen",
             # Grok
             "grok-4.7",
             "grok-4.6",

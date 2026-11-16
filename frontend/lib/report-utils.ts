@@ -79,9 +79,9 @@ const MODEL_DISPLAY_NAMES: Record<string, string> = {
   "claude-haiku-5-5": "Claude Haiku 5.5",
 
   // Google Gemini
+  "gemini-4-carbon": "Gemini 4 Carbon",
   "gemini-4-argon": "Gemini 4 Argon",
-  "gemini-3.8-flash": "Gemini 3.8 Flash",
-  "gemini-3.6-flash": "Gemini 3.6 Flash",
+  "gemini-4-hydrogen": "Gemini 4 Hydrogen",
   
   // OpenAI
   "gpt-6-astra": "GPT-6 Astra",

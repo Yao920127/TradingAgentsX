@@ -618,22 +618,22 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Google */}
+                          <SelectItem value="gemini-4-carbon">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
+                              <span>Gemini 4 Carbon</span>
+                            </div>
+                          </SelectItem>
                           <SelectItem value="gemini-4-argon">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
                               <span>Gemini 4 Argon</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="gemini-3.8-flash">
+                          <SelectItem value="gemini-4-hydrogen">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
-                              <span>Gemini 3.8 Flash</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="gemini-3.6-flash">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
-                              <span>Gemini 3.6 Flash</span>
+                              <span>Gemini 4 Hydrogen</span>
                             </div>
                           </SelectItem>
 
@@ -799,22 +799,22 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Google */}
+                          <SelectItem value="gemini-4-carbon">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
+                              <span>Gemini 4 Carbon</span>
+                            </div>
+                          </SelectItem>
                           <SelectItem value="gemini-4-argon">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
                               <span>Gemini 4 Argon</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="gemini-3.8-flash">
+                          <SelectItem value="gemini-4-hydrogen">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
-                              <span>Gemini 3.8 Flash</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="gemini-3.6-flash">
-                            <div className="flex items-center gap-2">
-                              <Image src="/logos/gemini-color.svg" alt="Gemini" width={16} height={16} className="shrink-0" />
-                              <span>Gemini 3.6 Flash</span>
+                              <span>Gemini 4 Hydrogen</span>
                             </div>
                           </SelectItem>
 
