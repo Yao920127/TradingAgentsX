@@ -969,7 +969,7 @@
 }
 
 /* ========================================
-   CUSTOM CURSOR — dot + trailing ring
+   CUSTOM CURSOR — single dot
    Elements are injected by CustomCursor.tsx, which adds `.has-custom-cursor`
    to <html> only on fine-pointer, hover-capable, motion-allowed devices.
    ======================================== */
@@ -980,8 +980,7 @@
   cursor: none !important;
 }
 
-.cursor-dot,
-.cursor-ring {
+.cursor-dot {
   position: fixed;
   top: 0;
   left: 0;
@@ -993,8 +992,7 @@
   will-change: transform;
 }
 
-.cursor-active .cursor-dot,
-.cursor-active .cursor-ring {
+.cursor-active .cursor-dot {
   opacity: 1;
 }
 
@@ -1018,33 +1016,3 @@
   background: #06b6d4;
 }
 
-/* Trailing ring — eases behind the dot, expands & tints cyan over hot spots. */
-.cursor-ring {
-  width: 34px;
-  height: 34px;
-  border: 1.5px solid rgba(37, 99, 235, 0.5);
-  background: rgba(56, 189, 248, 0);
-  transition:
-    opacity 0.25s ease,
-    width 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.22s ease,
-    background 0.22s ease;
-}
-
-.dark .cursor-ring {
-  border-color: rgba(96, 165, 250, 0.55);
-}
-
-.cursor-ring.is-hover {
-  width: 56px;
-  height: 56px;
-  border-color: rgba(6, 182, 212, 0.7);
-  background: rgba(56, 189, 248, 0.12);
-}
-
-.cursor-ring.is-down {
-  width: 24px;
-  height: 24px;
-  border-color: rgba(20, 184, 166, 0.7);
-}

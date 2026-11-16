@@ -9,7 +9,6 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { SyncInitializer } from "@/components/providers/SyncInitializer";
 import { CustomCursor } from "@/components/CustomCursor";
-import { SplashCursorBackground } from "@/components/theme/SplashCursorBackground";
 import { SoftAuroraBackground } from "@/components/theme/SoftAuroraBackground";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -144,7 +143,6 @@ export default function RootLayout({
             <AuthProvider>
               <SyncInitializer />
               <CustomCursor />
-              <SplashCursorBackground />
               <AnalysisProvider>
                 <div className="flex flex-col min-h-screen gradient-page-bg relative isolate">
                   <SoftAuroraBackground />
