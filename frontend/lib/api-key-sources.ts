@@ -18,7 +18,7 @@ export const API_KEY_SOURCES = {
     url: "https://www.alibabacloud.com/help/en/model-studio/get-api-key",
     site: "Alibaba Cloud Model Studio",
   },
-  tauric_api_key: { url: "https://api.tauric.ai", site: "Tauric" },
+  tauric_api_key: { url: "https://tauric.ai", site: "Tauric" },
   alpha_vantage_api_key: { url: "https://www.alphavantage.co/support/#api-key", site: "Alpha Vantage" },
   finmind_api_key: { url: "https://finmindtrade.com/", site: "FinMind" },
   finnhub_api_key: { url: "https://finnhub.io/register", site: "Finnhub" },
