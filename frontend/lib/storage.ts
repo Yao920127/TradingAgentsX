@@ -21,6 +21,7 @@ export interface ApiSettings {
   grok_api_key: string;
   deepseek_api_key: string;
   qwen_api_key: string;
+  tauric_api_key: string;
   finmind_api_key: string;  // 台灣股市資料 API
 
   // News & social data sources (optional)
@@ -53,6 +54,7 @@ export const DEFAULT_API_SETTINGS: ApiSettings = {
   grok_api_key: "",
   deepseek_api_key: "",
   qwen_api_key: "",
+  tauric_api_key: "",
   finmind_api_key: "",
   finnhub_api_key: "",
   marketaux_api_key: "",

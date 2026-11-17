@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",  // Required for Tailwind
               "img-src 'self' data: blob: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.openai.com https://api.anthropic.com https://api.x.ai https://api.deepseek.com https://dashscope-intl.aliyuncs.com https://generativelanguage.googleapis.com https://*.alphavantage.co https://api.finmindtrade.com",
+              "connect-src 'self' https://api.openai.com https://api.anthropic.com https://api.x.ai https://api.deepseek.com https://api.tauric.ai https://dashscope-intl.aliyuncs.com https://generativelanguage.googleapis.com https://*.alphavantage.co https://api.finmindtrade.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

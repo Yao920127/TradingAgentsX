@@ -245,6 +245,7 @@ class ValidateKeysRequest(BaseModel):
     grok_api_key: Optional[str] = Field(None, min_length=0)
     deepseek_api_key: Optional[str] = Field(None, min_length=0)
     qwen_api_key: Optional[str] = Field(None, min_length=0)
+    tauric_api_key: Optional[str] = Field(None, min_length=0)
     custom_base_url: Optional[str] = Field(None, min_length=0)
     custom_api_key: Optional[str] = Field(None, min_length=0)
     alpha_vantage_api_key: Optional[str] = Field(None, min_length=0)

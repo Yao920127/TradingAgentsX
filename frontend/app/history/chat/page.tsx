@@ -75,6 +75,9 @@ const AVAILABLE_MODELS = [
   { id: "qwen3.8-flash", name: "Qwen3.8-Flash", provider: "qwen", logo: "/logos/qwen-color.svg" },
   { id: "qwen3.7-plus", name: "Qwen3.7-Plus", provider: "qwen", logo: "/logos/qwen-color.svg" },
 
+  // Tauric
+  { id: "/tauric", name: "Trading-R1", provider: "tauric", logo: "/logos/tauric.svg" },
+
   // Custom
   { id: "custom", name: "Other (自訂模型)", provider: "custom", logo: null },
 ];
@@ -195,6 +198,7 @@ function HistoryChatContent() {
         grok: { key: settings.grok_api_key, defaultModel: "grok-4.7" },
         deepseek: { key: settings.deepseek_api_key, defaultModel: "deepseek-flash" },
         qwen: { key: settings.qwen_api_key, defaultModel: "qwen3.8-flash" },
+        tauric: { key: settings.tauric_api_key, defaultModel: "/tauric" },
       };
 
       const activeModelId = selectedModelId === "custom" ? customModel.trim() : selectedModelId;

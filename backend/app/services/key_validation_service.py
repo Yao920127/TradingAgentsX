@@ -48,6 +48,7 @@ _OPENAI_COMPATIBLE_FIELDS: Dict[str, Tuple[str, str]] = {
     "grok_api_key": ("Grok (xAI)", "https://api.x.ai/v1"),
     "deepseek_api_key": ("DeepSeek", "https://api.deepseek.com/v1"),
     "qwen_api_key": ("Qwen (Alibaba)", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"),
+    "tauric_api_key": ("Trading-R1 (Tauric)", "https://api.tauric.ai"),
 }
 
 

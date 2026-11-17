@@ -102,6 +102,8 @@ class TradingAgentsXGraph:
                 return os.getenv("XAI_API_KEY", "")
             elif model.startswith("deepseek-"):
                 return os.getenv("DEEPSEEK_API_KEY", "")
+            elif model.startswith("/tauric"):
+                return os.getenv("TAURIC_API_KEY", "")
             elif model.startswith("qwen"):
                 return os.getenv("DASHSCOPE_API_KEY", "")
             else:

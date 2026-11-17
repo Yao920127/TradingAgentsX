@@ -697,6 +697,14 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                             </div>
                           </SelectItem>
 
+                          {/* Tauric */}
+                          <SelectItem value="/tauric">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/tauric.svg" alt="Tauric" width={16} height={16} className="shrink-0" />
+                              <span>Trading-R1</span>
+                            </div>
+                          </SelectItem>
+
                           {/* Custom Model */}
                           <SelectItem value="custom">
                             {t.form.otherCustomModel}
@@ -876,6 +884,14 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                             <div className="flex items-center gap-2">
                               <Image src="/logos/qwen-color.svg" alt="Qwen" width={16} height={16} className="shrink-0" />
                               <span>Qwen3.7-Plus</span>
+                            </div>
+                          </SelectItem>
+
+                          {/* Tauric */}
+                          <SelectItem value="/tauric">
+                            <div className="flex items-center gap-2">
+                              <Image src="/logos/tauric.svg" alt="Tauric" width={16} height={16} className="shrink-0" />
+                              <span>Trading-R1</span>
                             </div>
                           </SelectItem>
 

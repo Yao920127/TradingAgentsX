@@ -89,6 +89,7 @@ export const en = {
     grokDesc: "For Grok models",
     deepseekDesc: "For DeepSeek models",
     qwenDesc: "For Qwen models",
+    tauricDesc: "For Trading-R1 (Tauric) model",
     customBaseUrl: "Custom Base URL",
     customBaseUrlDesc:
       "If set, this will override the default endpoint for all models",

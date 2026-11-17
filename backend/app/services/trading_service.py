@@ -417,6 +417,8 @@ class TradingService:
             # DeepSeek
             "deepseek-v4-pro",
             "deepseek-flash",
+            # Tauric
+            "/tauric",
             # Qwen
             "qwen3.8-max",
             "qwen3.8-flash",

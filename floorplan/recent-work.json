@@ -1,46 +1,64 @@
 {
   "tasks": [
     {
-      "title": "移除信心度提示句",
-      "request": "報告中沒有可解析的信心度數值這句可以刪除",
-      "summary": "結論橫幅在抓不到信心度時，不再顯示提示句，只保留結論與分析師數量；中英文介面文字裡不再使用的字串也一併刪除。尚未提交。",
+      "title": "新增 Trading-R1 模型",
+      "request": "模型新增一家 Trading-R1（model 為 /tauric，Base URL 為 https://api.tauric.ai），不用顯示到主頁，並加上 tauric logo",
+      "summary": "新增 Tauric 這家模型供應商：分析表單與歷史聊天頁的下拉選單都能選 Trading-R1，設定視窗多一個 Tauric 金鑰欄位，伺服器與終端機版也認得它。主頁的供應商卡片沒有動。另外刪除了不再使用的 assets/、llm_logo/ 圖片資料夾，以及已移除的游標元件。尚未提交。",
       "items": [
         {
-          "ref": "frontend/components/analysis/VerdictBanner.tsx",
+          "ref": "frontend/components/analysis/AnalysisForm.tsx",
           "change": "changed",
-          "note": "沒有信心度時直接不顯示那一行，不再出現「報告中沒有可解析的信心度數值」。"
+          "note": "兩個模型下拉選單（深度思考與快速思考）都多了 Trading-R1，前面帶 Tauric 的圖示。"
         },
         {
-          "ref": "frontend/lib/i18n/zh-TW.ts",
+          "ref": "frontend/app/history/chat/page.tsx",
           "change": "changed",
-          "note": "刪除不再使用的提示句文字。"
+          "note": "歷史報告聊天頁的模型選單加入 Trading-R1；只設定 Tauric 金鑰時也能自動選用它。"
         },
         {
-          "ref": "frontend/lib/i18n/en.ts",
+          "ref": "frontend/components/analysis/ReportChat.tsx",
           "change": "changed",
-          "note": "同步刪除英文版不再使用的提示句文字。"
-        }
-      ]
-    },
-    {
-      "title": "強化分析師與辯論原則",
-      "request": "優化分析師報告結構，並讓研究員與交易員共用辯論與決策原則",
-      "summary": "新增分析師共用原則與辯論共用原則，並調整技術面分析師的提示與報告結構。已提交。",
-      "items": [
-        {
-          "ref": "tradingagents/agents/utils/prompts.py",
-          "change": "changed",
-          "note": "新增分析師與辯論者共用的原則文字，讓各角色遵守同一套寫法與判斷標準。"
+          "note": "報告內的問答視窗在有 Tauric 金鑰時，也能改用 Trading-R1 回答。"
         },
         {
-          "ref": "tradingagents/agents/analysts/market_analyst.py",
+          "ref": "frontend/components/settings/ApiSettingsDialog.tsx",
           "change": "changed",
-          "note": "技術面分析師改用新的共用原則與報告結構。"
+          "note": "設定視窗新增「Trading-R1 (Tauric) API Key」欄位，使用者才能填入自己的金鑰。"
         },
         {
-          "ref": "backend/app/services/pdf_generator.py",
+          "ref": "frontend/lib/api-helpers.ts",
           "change": "changed",
-          "note": "PDF 報告新增封面與內頁的版面樣式。"
+          "note": "只要選到 /tauric 開頭的模型，就自動改用 Tauric 的網址與金鑰。"
+        },
+        {
+          "ref": "frontend/lib/storage.ts",
+          "change": "changed",
+          "note": "瀏覽器保存的金鑰設定多了 Tauric 這一格。"
+        },
+        {
+          "ref": "frontend/next.config.ts",
+          "change": "changed",
+          "note": "把 api.tauric.ai 加進允許連線的網址，否則瀏覽器會擋掉呼叫。"
+        },
+        {
+          "ref": "backend/app/services/trading_service.py",
+          "change": "changed",
+          "note": "可用模型清單加入 /tauric。"
+        },
+        {
+          "ref": "backend/app/services/key_validation_service.py",
+          "change": "changed",
+          "note": "金鑰檢查多了 Tauric，使用者儲存設定時可以測試金鑰是否有效。"
+        },
+        {
+          "ref": "tradingagents/graph/trading_graph.py",
+          "change": "changed",
+          "note": "選到 /tauric 模型時，伺服器改讀 TAURIC_API_KEY 這個環境變數。"
+        },
+        {
+          "ref": "tui/constants.py",
+          "change": "changed",
+          "note": "終端機版的供應商與模型選項也加入 Tauric / Trading-R1。"
         }
       ]
     }

@@ -68,6 +68,7 @@ const formSchema = z.object({
   grok_api_key: z.string().optional().or(z.literal("")),
   deepseek_api_key: z.string().optional().or(z.literal("")),
   qwen_api_key: z.string().optional().or(z.literal("")),
+  tauric_api_key: z.string().optional().or(z.literal("")),
   
   // Custom endpoint
   custom_base_url: z.string().optional().or(z.literal("")),
@@ -176,6 +177,7 @@ export function ApiSettingsDialog() {
           grok_api_key: values.grok_api_key || undefined,
           deepseek_api_key: values.deepseek_api_key || undefined,
           qwen_api_key: values.qwen_api_key || undefined,
+          tauric_api_key: values.tauric_api_key || undefined,
           custom_base_url: values.custom_base_url || undefined,
           custom_api_key: values.custom_api_key || undefined,
           alpha_vantage_api_key: values.alpha_vantage_api_key || undefined,
@@ -422,6 +424,25 @@ export function ApiSettingsDialog() {
                     <FormDescription>
                       {t.settings.qwenDesc}
                       <ApiKeyHelpLink field="qwen_api_key" />
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Trading-R1 (Tauric) API Key */}
+              <FormField
+                control={form.control}
+                name="tauric_api_key"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Trading-R1 (Tauric) API Key</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="sk-..." {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      {t.settings.tauricDesc}
+                      <ApiKeyHelpLink field="tauric_api_key" />
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

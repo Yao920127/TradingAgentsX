@@ -657,6 +657,7 @@ export const zhTW = {
     grokDesc: "用於 Grok 模型",
     deepseekDesc: "用於 DeepSeek 模型",
     qwenDesc: "用於 Qwen 模型",
+    tauricDesc: "用於 Trading-R1（Tauric）模型",
     customBaseUrl: "自訂 Base URL",
     customBaseUrlDesc: "若設定此項，將覆蓋所有模型的預設端點",
     customApiKey: "自訂端點 API Key",

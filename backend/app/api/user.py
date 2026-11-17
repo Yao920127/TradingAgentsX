@@ -95,6 +95,7 @@ class SettingsUpdate(BaseModel):
     grok_api_key: str = ""
     deepseek_api_key: str = ""
     qwen_api_key: str = ""
+    tauric_api_key: str = ""
     finmind_api_key: str = ""
     finnhub_api_key: str = ""
     marketaux_api_key: str = ""

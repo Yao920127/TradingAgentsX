@@ -55,6 +55,7 @@ LLM_PROVIDERS = [
     ("Grok", "https://api.x.ai/v1"),
     ("DeepSeek", "https://api.deepseek.com/v1"),
     ("Qwen", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"),
+    ("Tauric", "https://api.tauric.ai"),
 ]
 
 
@@ -94,6 +95,9 @@ MODEL_OPTIONS = {
         ("Qwen3.8-Max", "qwen3.8-max"),
         ("Qwen3.8-Flash", "qwen3.8-flash"),
         ("Qwen3.7-Plus", "qwen3.7-plus"),
+    ],
+    "Tauric": [
+        ("Trading-R1", "/tauric"),
     ],
 }
 
@@ -143,6 +147,7 @@ PROVIDER_API_KEY_MAP = {
     "grok": "XAI_API_KEY",
     "deepseek": "DEEPSEEK_API_KEY",
     "qwen": "DASHSCOPE_API_KEY",
+    "tauric": "TAURIC_API_KEY",
 }
 
 
@@ -161,6 +166,8 @@ def infer_provider_from_model(model_name: str) -> str:
         return "deepseek"
     elif "qwen" in model_lower:
         return "qwen"
+    elif "tauric" in model_lower:
+        return "tauric"
     return "openai"  # 預設
 
 

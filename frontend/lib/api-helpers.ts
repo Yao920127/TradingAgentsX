@@ -39,6 +39,11 @@ export function getBaseUrlForModel(model: string, customBaseUrl?: string): strin
     return "https://dashscope-intl.aliyuncs.com/compatible-mode/v1";
   }
 
+  // Trading-R1 (Tauric) - always use Tauric API
+  if (model.startsWith("/tauric")) {
+    return "https://api.tauric.ai";
+  }
+
   // For "custom" or unknown models, use custom_base_url if provided
   if (customBaseUrl && customBaseUrl.trim() !== "") {
     return customBaseUrl;
@@ -84,6 +89,11 @@ export function getApiKeyForModel(
   // Qwen models - always use Qwen API key
   if (model.startsWith("qwen")) {
     return settings.qwen_api_key || "";
+  }
+
+  // Trading-R1 (Tauric) - always use Tauric API key
+  if (model.startsWith("/tauric")) {
+    return settings.tauric_api_key || "";
   }
 
   // For "custom" or unknown models, use custom_api_key if provided

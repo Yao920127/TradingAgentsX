@@ -190,6 +190,7 @@ export interface ValidateKeysRequest {
   grok_api_key?: string;
   deepseek_api_key?: string;
   qwen_api_key?: string;
+  tauric_api_key?: string;
   custom_base_url?: string;
   custom_api_key?: string;
   alpha_vantage_api_key?: string;

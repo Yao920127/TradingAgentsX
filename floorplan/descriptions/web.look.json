@@ -56,17 +56,9 @@
       "name": "極光背景特效",
       "description": "在背景畫出緩慢流動的極光光暈。"
     },
-    "frontend/components/SplashCursor.jsx": {
-      "name": "游標流體特效",
-      "description": "滑鼠移動時在背景留下彩色流體拖尾。"
-    },
     "frontend/components/theme/SoftAuroraBackground.tsx": {
       "name": "極光背景外殼",
       "description": "依主題決定是否顯示極光背景。"
-    },
-    "frontend/components/theme/SplashCursorBackground.tsx": {
-      "name": "流體特效外殼",
-      "description": "依主題決定是否顯示游標流體特效。"
     },
     "frontend/components/theme/ThemeProvider.tsx": {
       "name": "深淺色主題",
