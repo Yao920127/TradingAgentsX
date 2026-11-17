@@ -41,7 +41,7 @@ export function getBaseUrlForModel(model: string, customBaseUrl?: string): strin
 
   // Trading-R1 (Tauric) - always use Tauric API
   if (model.startsWith("tauric")) {
-    return "https://api.tauric.ai";
+    return "https://api.tauric.ai/v1";
   }
 
   // For "custom" or unknown models, use custom_base_url if provided

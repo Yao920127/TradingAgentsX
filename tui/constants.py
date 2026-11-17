@@ -55,7 +55,7 @@ LLM_PROVIDERS = [
     ("Grok", "https://api.x.ai/v1"),
     ("DeepSeek", "https://api.deepseek.com/v1"),
     ("Qwen", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"),
-    ("Tauric", "https://api.tauric.ai"),
+    ("Tauric", "https://api.tauric.ai/v1"),
 ]
 
 
