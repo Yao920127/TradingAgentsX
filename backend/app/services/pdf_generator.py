@@ -184,7 +184,7 @@ _MODEL_DISPLAY_NAMES: dict[str, str] = {
     "deepseek-flash": "DeepSeek-V4.1-Flash",
     
     # Tauric
-    "/tauric": "Trading-R1",
+    "tauric": "Trading-R1",
     # Qwen
     "qwen3.8-max": "Qwen3.8-Max",
     "qwen3.8-flash": "Qwen3.8-Flash",

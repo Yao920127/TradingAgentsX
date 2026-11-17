@@ -97,7 +97,7 @@ MODEL_OPTIONS = {
         ("Qwen3.7-Plus", "qwen3.7-plus"),
     ],
     "Tauric": [
-        ("Trading-R1", "/tauric"),
+        ("Trading-R1", "tauric"),
     ],
 }
 

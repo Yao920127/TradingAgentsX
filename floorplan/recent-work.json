@@ -2,7 +2,7 @@
   "tasks": [
     {
       "title": "新增 Trading-R1 模型",
-      "request": "模型新增一家 Trading-R1（model 為 /tauric，Base URL 為 https://api.tauric.ai），不用顯示到主頁，並加上 tauric logo",
+      "request": "模型新增一家 Trading-R1（model 為 tauric，Base URL 為 https://api.tauric.ai），不用顯示到主頁，並加上 tauric logo",
       "summary": "新增 Tauric 這家模型供應商：分析表單與歷史聊天頁的下拉選單都能選 Trading-R1，設定視窗多一個 Tauric 金鑰欄位，伺服器與終端機版也認得它。主頁的供應商卡片沒有動。另外刪除了不再使用的 assets/、llm_logo/ 圖片資料夾，以及已移除的游標元件。尚未提交。",
       "items": [
         {
@@ -28,7 +28,7 @@
         {
           "ref": "frontend/lib/api-helpers.ts",
           "change": "changed",
-          "note": "只要選到 /tauric 開頭的模型，就自動改用 Tauric 的網址與金鑰。"
+          "note": "只要選到 tauric 開頭的模型，就自動改用 Tauric 的網址與金鑰。"
         },
         {
           "ref": "frontend/lib/storage.ts",
@@ -43,7 +43,7 @@
         {
           "ref": "backend/app/services/trading_service.py",
           "change": "changed",
-          "note": "可用模型清單加入 /tauric。"
+          "note": "可用模型清單加入 tauric。"
         },
         {
           "ref": "backend/app/services/key_validation_service.py",
@@ -53,7 +53,7 @@
         {
           "ref": "tradingagents/graph/trading_graph.py",
           "change": "changed",
-          "note": "選到 /tauric 模型時，伺服器改讀 TAURIC_API_KEY 這個環境變數。"
+          "note": "選到 tauric 模型時，伺服器改讀 TAURIC_API_KEY 這個環境變數。"
         },
         {
           "ref": "tui/constants.py",

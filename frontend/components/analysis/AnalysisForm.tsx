@@ -698,7 +698,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Tauric */}
-                          <SelectItem value="/tauric">
+                          <SelectItem value="tauric">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/tauric.svg" alt="Tauric" width={16} height={16} className="shrink-0" />
                               <span>Trading-R1</span>
@@ -888,7 +888,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                           </SelectItem>
 
                           {/* Tauric */}
-                          <SelectItem value="/tauric">
+                          <SelectItem value="tauric">
                             <div className="flex items-center gap-2">
                               <Image src="/logos/tauric.svg" alt="Tauric" width={16} height={16} className="shrink-0" />
                               <span>Trading-R1</span>

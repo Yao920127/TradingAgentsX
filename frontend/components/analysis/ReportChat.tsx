@@ -82,7 +82,7 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
         { key: settings.grok_api_key, model: "grok-4.5", prefix: "grok-" },
         { key: settings.deepseek_api_key, model: "deepseek-flash", prefix: "deepseek-" },
         { key: settings.qwen_api_key, model: "qwen3.7-plus", prefix: "qwen" },
-        { key: settings.tauric_api_key, model: "/tauric", prefix: "/tauric" },
+        { key: settings.tauric_api_key, model: "tauric", prefix: "tauric" },
       ];
 
       for (const provider of providers) {

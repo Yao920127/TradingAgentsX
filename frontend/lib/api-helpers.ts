@@ -40,7 +40,7 @@ export function getBaseUrlForModel(model: string, customBaseUrl?: string): strin
   }
 
   // Trading-R1 (Tauric) - always use Tauric API
-  if (model.startsWith("/tauric")) {
+  if (model.startsWith("tauric")) {
     return "https://api.tauric.ai";
   }
 
@@ -92,7 +92,7 @@ export function getApiKeyForModel(
   }
 
   // Trading-R1 (Tauric) - always use Tauric API key
-  if (model.startsWith("/tauric")) {
+  if (model.startsWith("tauric")) {
     return settings.tauric_api_key || "";
   }
 
