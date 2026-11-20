@@ -9,6 +9,7 @@ from tradingagents.agents.utils.agent_states import (
     RiskDebateState,
 )
 from tradingagents.dataflows.interface import route_to_vendor
+from tradingagents.dataflows.finmind_common import get_yfinance_ticker, is_taiwan_stock
 
 
 
@@ -65,10 +66,13 @@ class Propagator:
         # 2) 若仍為裸代碼，退回 yfinance 的 longName/shortName。
         #    yfinance 通常在 IPO 當天即有資料，可避免下游 agent 因缺公司名而
         #    從代碼字母「猜」成另一家公司（例如 SKHY 被誤認為 Sky Harbour / SKYH）。
+        #    台股必須加 .TW/.TWO 後綴：裸代碼（如 2330）在 yfinance 會對應到
+        #    東證同代碼的公司（For-side.com），導致 agent 誤判分析標的。
         if actual_company_name == ticker:
             try:
                 import yfinance as yf
-                info = yf.Ticker(ticker).info or {}
+                yf_symbol = get_yfinance_ticker(ticker) if is_taiwan_stock(ticker) else ticker
+                info = yf.Ticker(yf_symbol).info or {}
                 yf_name = info.get("longName") or info.get("shortName")
                 if yf_name:
                     actual_company_name = yf_name

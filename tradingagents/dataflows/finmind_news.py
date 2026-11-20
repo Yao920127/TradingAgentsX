@@ -13,9 +13,12 @@ API 文檔：https://finmind.github.io/
 """
 
 import json
+import os
 from datetime import datetime, timedelta
 from typing import Optional
+
 import pandas as pd
+import requests
 
 from .finmind_common import (
     _make_api_request,
@@ -30,6 +33,56 @@ from .jina_reader import attach_content
 
 # 台股新聞前幾則以 Jina Reader 補上全文（FinMind 新聞沒有內文欄位）
 JINA_TOP_N = 3
+
+# TaiwanStockNews 每次請求只回傳 start_date「當天」的新聞（end_date 無效），
+# 因此需從 end_date 往回逐日查詢。最多往回查幾天、湊滿幾則就停止。
+NEWS_LOOKBACK_DAYS = 7
+NEWS_LIMIT = 20
+FINMIND_DATA_URL = "https://api.finmindtrade.com/api/v4/data"
+NEWS_REQUEST_TIMEOUT = 30
+
+
+def _request_news_for_day(ticker: str, day: str) -> list:
+    """查詢單日 TaiwanStockNews；失敗時回傳空列表並記錄，不中斷其他日期。"""
+    token = os.getenv("FINMIND_API_TOKEN") or os.getenv("FINMIND_API_KEY")
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    params = {"dataset": "TaiwanStockNews", "data_id": ticker, "start_date": day}
+    try:
+        response = requests.get(FINMIND_DATA_URL, headers=headers, params=params, timeout=NEWS_REQUEST_TIMEOUT)
+        response.raise_for_status()
+        return response.json().get("data") or []
+    except (requests.RequestException, ValueError) as e:
+        print(f"警告：獲取 {ticker} 在 {day} 的新聞失敗：{e}")
+        return []
+
+
+def _fetch_daily_news(ticker: str, start_date: str, end_date: str) -> list:
+    """從 end_date 往回逐日抓新聞（不早於 start_date），依連結去重，最新的在前。"""
+    first_day = datetime.strptime(format_date(start_date), "%Y-%m-%d")
+    day = datetime.strptime(format_date(end_date), "%Y-%m-%d")
+    seen_links = set()
+    items = []
+
+    for _ in range(NEWS_LOOKBACK_DAYS):
+        if day < first_day or len(items) >= NEWS_LIMIT:
+            break
+        for raw in _request_news_for_day(ticker, day.strftime("%Y-%m-%d")):
+            link = raw.get("link", "")
+            dedupe_key = link or raw.get("title", "")
+            if dedupe_key in seen_links:
+                continue
+            seen_links.add(dedupe_key)
+            items.append({
+                "title": raw.get("title", "無標題"),
+                "date": raw.get("date", "")[:10],
+                "type": "news",
+                "summary": "",  # TaiwanStockNews 沒有 description 欄位
+                "link": link,
+                "source": raw.get("source", "FinMind"),
+            })
+        day -= timedelta(days=1)
+
+    return items[:NEWS_LIMIT]
 
 
 def get_news(
@@ -63,47 +116,8 @@ def get_news(
     """
     ticker = normalize_stock_id(ticker)
     
-    news_items = []
-    
     # 1. 獲取真正的新聞（TaiwanStockNews）
-    # 注意：TaiwanStockNews 只支援 start_date，不支援 end_date
-    try:
-        import requests
-        import os
-        
-        url = "https://api.finmindtrade.com/api/v4/data"
-        token = os.getenv("FINMIND_API_TOKEN") or os.getenv("FINMIND_API_KEY")
-        headers = {"Authorization": f"Bearer {token}"} if token else {}
-        params = {
-            "dataset": "TaiwanStockNews",
-            "data_id": ticker,
-            "start_date": start_date,
-        }
-        
-        response = requests.get(url, headers=headers, params=params, timeout=30)
-        response.raise_for_status()
-        news_response = response.json()
-        
-        if "data" in news_response and news_response["data"]:
-            # 過濾日期範圍內的新聞
-            filtered_news = []
-            for item in news_response["data"]:
-                news_date = item.get("date", "")[:10]  # 只取日期部分
-                if news_date and start_date <= news_date <= end_date:
-                    filtered_news.append(item)
-            
-            # 取最近 20 筆新聞
-            for item in filtered_news[-20:]:
-                news_items.append({
-                    "title": item.get("title", "無標題"),
-                    "date": item.get("date", "")[:10],  # 只保留日期部分
-                    "type": "news",
-                    "summary": "",  # TaiwanStockNews 沒有 description 欄位
-                    "link": item.get("link", ""),
-                    "source": item.get("source", "FinMind")
-                })
-    except FinMindError as e:
-        print(f"獲取新聞時發生錯誤: {e}")
+    news_items = _fetch_daily_news(ticker, start_date, end_date)
     
     # 2. 如果沒有新聞或新聞太少，補充其他資訊
     if len(news_items) < 5:

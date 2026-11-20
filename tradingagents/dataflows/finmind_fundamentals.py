@@ -34,6 +34,12 @@ from .finmind_common import (
 )
 
 
+# FinMind 財報期間口徑：損益表為「單季」值，現金流量表為「年初至今累計」值。
+# 工具輸出必須標示，否則 LLM 會把單季損益表當成累計去相減，算出錯誤的單季數字。
+INCOME_PERIOD_BASIS = "單季數值（每一筆 date 為該季單季金額，非年初累計；EPS 亦為單季）"
+CASHFLOW_PERIOD_BASIS = "年初至今累計數值（每一筆 date 為當年 1 月至該季末累計；單季需與前一季相減，跨年不可相減）"
+
+
 def _convert_to_serializable(obj):
     """
     將 numpy/pandas 資料類型轉換為 Python 原生類型，
@@ -147,6 +153,7 @@ def get_income_statement(
                 result = {
                     "stock_id": ticker,
                     "report_type": "income_statement",
+                    "period_basis": INCOME_PERIOD_BASIS,
                     "data": pivot_df.to_dict(orient="records")
                 }
             except Exception:
@@ -154,6 +161,7 @@ def get_income_statement(
                 result = {
                     "stock_id": ticker,
                     "report_type": "income_statement",
+                    "period_basis": INCOME_PERIOD_BASIS,
                     "data": df.to_dict(orient="records")
                 }
             
@@ -329,12 +337,14 @@ def get_cashflow(
                 result = {
                     "stock_id": ticker,
                     "report_type": "cashflow",
+                    "period_basis": CASHFLOW_PERIOD_BASIS,
                     "data": pivot_df.to_dict(orient="records")
                 }
             except Exception:
                 result = {
                     "stock_id": ticker,
                     "report_type": "cashflow",
+                    "period_basis": CASHFLOW_PERIOD_BASIS,
                     "data": df.to_dict(orient="records")
                 }
             
@@ -562,6 +572,7 @@ def get_fundamentals(
             
             fundamentals["損益表摘要"] = {
                 "日期": latest_date,
+                "期間口徑": INCOME_PERIOD_BASIS,
                 "關鍵指標": key_items
             }
     except FinMindError:
