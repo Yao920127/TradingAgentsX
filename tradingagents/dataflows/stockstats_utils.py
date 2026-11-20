@@ -3,11 +3,11 @@ import threading
 import time
 import pandas as pd
 import polars as pl
-import yfinance as yf
 from stockstats import wrap
 from typing import Annotated, Callable
 import os
 from .config import get_config, DATA_DIR
+from .new_listing import download_daily
 
 logger = logging.getLogger(__name__)
 
@@ -132,14 +132,7 @@ class StockstatsUtils:
             )
 
             def _download() -> pd.DataFrame:
-                return yf.download(
-                    symbol,
-                    start=start_date_str,
-                    end=end_date_str,
-                    multi_level_index=False,
-                    progress=False,
-                    auto_adjust=False,
-                ).reset_index()  # type: ignore
+                return download_daily(symbol, start_date_str, end_date_str).reset_index()
 
             data_pd = load_price_csv_cached(data_file, _download)
             df = wrap(data_pd)

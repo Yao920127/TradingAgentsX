@@ -9,7 +9,7 @@
 #   ./clean_cache.sh -n         只列出會刪什麼，不實際刪除
 #
 # 不會碰：原始碼、.env、lock 檔（bun.lock / uv.lock）、分析結果與 PDF（results/、report/）、
-#         floorplan/、conda 環境、Redis 裡進行中的分析任務（task:*）
+#         floorplan/、.venv 虛擬環境、Redis 裡進行中的分析任務（task:*）
 # ========================================
 
 set -euo pipefail
@@ -168,5 +168,5 @@ if [ "$CLEAN_DEEP" -eq 1 ] && [ "$DRY_RUN" -eq 0 ]; then
   echo "💡 依賴已刪除，請重新安裝："
   echo "   bun install"
   echo "   (cd frontend && bun install)"
-  echo "   conda activate tradingagents && pip install -e ."
+  echo "   source scripts/ensure_venv.sh"
 fi

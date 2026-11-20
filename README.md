@@ -345,13 +345,11 @@ cd TradingAgentsX
 #### 2️⃣ 後端設置
 
 ```bash
-# 創建虛擬環境
-conda create -n tradingagents python=3.13
-conda activate tradingagents
+# 建立並啟用 uv 虛擬環境（.venv，名稱 tradingagents；找不到會自動建立並安裝依賴）
+source scripts/ensure_venv.sh
 
-# 安裝依賴
-pip install -e .
-pip install -r backend/requirements.txt
+# 之後新增或更新套件一律用 uv，例如：
+# uv pip install -e . -r backend/requirements.txt
 
 # 配置環境變數
 cp .env.example .env
@@ -380,11 +378,11 @@ bun run --cwd frontend dev
 
 #### 4️⃣ 終端機介面（TUI，選用）
 
-除了 Web 介面，也可以直接在終端機中執行分析。TUI 以 [Textual](https://github.com/Textualize/textual) 打造，`pip install -e .` 會一併安裝。
+除了 Web 介面，也可以直接在終端機中執行分析。TUI 以 [Textual](https://github.com/Textualize/textual) 打造，`uv pip install -e .` 會一併安裝。
 
 ```bash
 # 確保已完成後端設置並啟用虛擬環境
-conda activate tradingagents
+source scripts/ensure_venv.sh
 
 # 啟動 TUI
 python -m tui.main

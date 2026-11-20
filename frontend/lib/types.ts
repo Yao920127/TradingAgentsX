@@ -51,6 +51,10 @@ export interface PriceStats {
   end_date: string;
   start_price: number;
   end_price: number;
+  is_new_listing?: boolean; // 剛上市、日 K 不足時為 true，price_data 改為盤中 K 線
+  interval?: string;        // price_data 的 K 線週期，例如 1d、5m、30m、60m
+  listing_date?: string;
+  daily_bars?: number;
 }
 
 export interface AnalysisResponse {

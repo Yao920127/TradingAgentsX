@@ -95,6 +95,10 @@ class PriceStats(BaseModel):
     end_date: str
     start_price: float
     end_price: float
+    is_new_listing: bool = Field(False, description="True when daily bars are too few and intraday bars are used")
+    interval: str = Field("1d", description="Bar interval of price_data, e.g. 1d, 5m, 30m, 60m")
+    listing_date: Optional[str] = Field(None, description="First trading date, for new listings")
+    daily_bars: Optional[int] = Field(None, description="Number of daily bars available, for new listings")
 
 
 class AnalysisResponse(BaseModel):

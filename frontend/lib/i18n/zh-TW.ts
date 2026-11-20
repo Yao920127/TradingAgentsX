@@ -528,6 +528,7 @@ export const zhTW = {
       livePrice: "現價",
       change: "漲跌",
       previousClose: "昨收",
+      newListingNotice: "新上市股票：自 {date} 起僅 {days} 個交易日，日 K 不足以畫出走勢，改以 {interval} 盤中 K 線顯示",
       status: "狀態",
       marketOpen: "盤中",
       preMarketOpen: "盤前交易中",

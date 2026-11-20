@@ -345,13 +345,11 @@ cd TradingAgentsX
 #### 2️⃣ Backend Setup
 
 ```bash
-# Create a virtual environment
-conda create -n tradingagents python=3.13
-conda activate tradingagents
+# Create/activate the uv virtual environment (.venv, named tradingagents; created and installed if missing)
+source scripts/ensure_venv.sh
 
-# Install dependencies
-pip install -e .
-pip install -r backend/requirements.txt
+# Always use uv for package operations, e.g.:
+# uv pip install -e . -r backend/requirements.txt
 
 # Configure environment variables
 cp .env.example .env
@@ -380,11 +378,11 @@ Frontend application: http://localhost:3000
 
 #### 4️⃣ Terminal UI (TUI, optional)
 
-In addition to the web interface, you can run an analysis directly in your terminal. The TUI is built with [Textual](https://github.com/Textualize/textual) and is installed by `pip install -e .`.
+In addition to the web interface, you can run an analysis directly in your terminal. The TUI is built with [Textual](https://github.com/Textualize/textual) and is installed by `uv pip install -e .`.
 
 ```bash
 # Make sure the backend setup is done and the virtual environment is active
-conda activate tradingagents
+source scripts/ensure_venv.sh
 
 # Launch the TUI
 python -m tui.main

@@ -10,15 +10,21 @@ TradingAgentsX is a full-stack AI trading analysis platform. It orchestrates 12 
 
 ### Backend (Python 3.10+)
 
-```bash
-# Activate the existing conda environment (create if missing)
-conda activate tradingagents
-# If the environment doesn't exist yet:
-# conda create -n tradingagents python=3.13 && conda activate tradingagents
+All Python work uses **uv** in the project venv `.venv` (prompt name `tradingagents`). Never use `pip`, `conda`, or a global Python.
 
-# Install dependencies
-pip install -e .
-pip install -r backend/requirements.txt
+- Claude Code: the SessionStart hook in `.claude/settings.json` runs `scripts/ensure_venv.sh`, which creates `.venv` with uv if it is missing, installs dependencies when `pyproject.toml` / `backend/requirements.txt` change, and activates it for every Bash command. `python` already points at `.venv/bin/python`.
+- Terminal: `source scripts/ensure_venv.sh` (bash or zsh). VS Code activates `.venv` automatically via `.vscode/settings.json`.
+
+```bash
+# Create/activate the venv (idempotent)
+source scripts/ensure_venv.sh
+
+# Add or update packages — always through uv
+uv pip install <package>
+uv pip install -e . -r backend/requirements.txt
+
+# Tests
+python -m pytest tests -q
 
 # Run backend (port 8000)
 python -m backend
@@ -126,5 +132,6 @@ Copy `.env.example` to `.env` to get started.
 - **4-analyst parallel execution:** analysts run concurrently via LangGraph fan-out; do not introduce sequential dependencies between them.
 - **Redis TTL** for cached analysis results is 4 hours (extended from default 1 hour).
 - **Rate limiting:** Backend enforces 30 requests/60 seconds per IP via slowapi.
+- **New listings (recent IPOs):** `tradingagents/dataflows/new_listing.py` handles stocks with fewer than 20 daily bars. `get_stock_data` appends a listing summary (first-day open/close, VWAP) and intraday bars; `get_indicators` masks values computed from too few bars and falls back to intraday bars; the result chart (`PriceService.prepare_new_listing_chart`) uses intraday bars and sets `price_stats.is_new_listing`.
 - **Taiwan vs US stocks:** `market_type` parameter controls which data sources are used. FinMind is used for Taiwan (`tw`), Yahoo Finance + Alpha Vantage for US.
 - The `tradingagents/` package is installed as an editable package (`pip install -e .`); import as `from tradingagents.graph import ...`.

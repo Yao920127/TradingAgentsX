@@ -7,6 +7,14 @@ import time
 import logging
 from .stockstats_utils import NoPriceDataError, StockstatsUtils, load_price_csv_cached
 from .retry_utils import retry
+from .new_listing import (
+    build_new_listing_report,
+    download_daily,
+    fetch_intraday_bars,
+    indicator_min_bars,
+    is_new_listing,
+    pick_intraday_interval,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,15 +42,7 @@ def get_YFin_data_online(
 
     # 使用 yf.download() 獲取指定日期範圍的歷史數據
     try:
-        data = yf.download(
-            symbol.upper(),
-            start=start_date,
-            end=end_date,
-            multi_level_index=False,
-            progress=False,
-            auto_adjust=False,
-            timeout=30
-        )
+        data = download_daily(symbol.upper(), start_date, end_date)
     except Exception as e:
         raise Exception(f"從 Yahoo Finance 獲取 {symbol} 數據失敗: {e}")
 
@@ -70,7 +70,30 @@ def get_YFin_data_online(
     header += f"# 總記錄數：{len(data)}\n" # type: ignore
     header += f"# 數據檢索時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 
-    return header + csv_string
+    return header + csv_string + _new_listing_supplement(symbol, data, start_date, end_date) # type: ignore
+
+
+# 第一筆資料比查詢起日晚超過這個天數，才視為「在查詢區間內才上市」
+_LISTING_GAP_DAYS = 7
+
+
+def _new_listing_supplement(symbol: str, data, start_date: str, end_date: str) -> str:
+    """
+    剛上市的股票日 K 太少時，補上上市摘要與盤中 K 線。
+
+    只有在「查詢區間開始後才出現第一筆資料」時才觸發，
+    避免使用者本來就只查幾天的區間時被誤判為新股。
+    """
+    first_trade = data.index.min()
+    requested_start = datetime.strptime(start_date, "%Y-%m-%d")
+    listed_inside_window = (first_trade - requested_start).days > _LISTING_GAP_DAYS
+    if not (listed_inside_window and is_new_listing(len(data))):
+        return ""
+    try:
+        return "\n\n" + build_new_listing_report(symbol.upper(), data, end_date)
+    except Exception as e:
+        logger.warning(f"產生 {symbol} 新上市補充資料失敗：{e}")
+        return ""
 
 
 def get_stock_stats_indicators_window(
@@ -178,8 +201,25 @@ def get_stock_stats_indicators_window(
 
     # 優化：一次性獲取股票數據並計算所有日期的指標
     try:
-        indicator_data = _get_stock_stats_bulk(symbol, indicator, curr_date)
-        
+        indicator_data, daily_bars = _get_stock_stats_bulk(symbol, indicator, curr_date)
+
+        # 剛上市、日 K 不足：不要列出整串 N/A，直接改用盤中 K 線
+        if 0 < daily_bars < indicator_min_bars(indicator):
+            try:
+                body = _intraday_indicator_report(symbol, indicator, curr_date, daily_bars)
+            except Exception as intraday_err:
+                logger.warning(f"{symbol} 盤中 {indicator} 計算失敗：{intraday_err}")
+                body = (
+                    f"## {indicator}：日線資料不足\n"
+                    f"{symbol.upper()} 僅有 {daily_bars} 根日 K，{indicator} 無法計算，"
+                    "盤中資料也取得失敗，請在報告中標示為資料缺口。"
+                )
+            return (
+                body
+                + "\n\n"
+                + best_ind_params.get(indicator, "無可用描述。")
+            )
+
         # 生成我們需要的日期範圍
         current_dt = curr_date_dt
         date_values = []
@@ -289,15 +329,7 @@ def _get_stock_stats_bulk(
         # 使用重試機制下載數據
         @retry(max_attempts=3, backoff=2.0)
         def download_data():
-            return yf.download(
-                symbol,
-                start=start_date_str,
-                end=end_date_str,
-                multi_level_index=False,
-                progress=False,
-                auto_adjust=False,
-                timeout=30
-            ).reset_index()
+            return download_daily(symbol, start_date_str, end_date_str).reset_index()
 
         try:
             # 24 小時內的快取直接使用；寫入為原子操作且以鎖序列化平行呼叫
@@ -311,20 +343,79 @@ def _get_stock_stats_bulk(
     
     # 一次性計算所有行的指標
     df[indicator]  # 這會觸發 stockstats 計算指標
-    
+
+    # K 棒數不足時 stockstats 仍會算出 MACD=0、RSI=50 之類的假值，必須遮蔽
+    min_bars = indicator_min_bars(indicator)
+    insufficient = f"N/A：資料不足（{indicator} 至少需 {min_bars} 根 K 棒）"
+
     # 建立一個將日期字串映射到指標值的字典
     result_dict = {}
-    for _, row in df.iterrows():
+    for position, (_, row) in enumerate(df.iterrows()):
         date_str = row["Date"]
         indicator_value = row[indicator]
-        
-        # 處理 NaN/None 值
-        if pd.isna(indicator_value):
+
+        if position < min_bars - 1:
+            result_dict[date_str] = insufficient
+        elif pd.isna(indicator_value):
             result_dict[date_str] = "N/A"
         else:
             result_dict[date_str] = str(indicator_value)
-    
-    return result_dict
+
+    bars_until_curr_date = int((df["Date"] <= curr_date).sum())
+    return result_dict, bars_until_curr_date
+
+
+# 盤中指標最多列出幾根 K 棒的數值
+_MAX_INTRADAY_INDICATOR_ROWS = 40
+
+
+def _intraday_indicator_report(
+    symbol: str,
+    indicator: str,
+    curr_date: str,
+    daily_bars: int,
+) -> str:
+    """
+    日 K 不足以計算指標時，改以盤中 K 線計算並說明限制。
+    回傳不含指標說明的報告主體。
+    """
+    from stockstats import wrap
+    import pandas as pd
+
+    min_bars = indicator_min_bars(indicator)
+    lines = [
+        f"## {indicator}：日線資料不足",
+        f"{symbol.upper()} 截至 {curr_date} 僅有 {daily_bars} 根日 K，"
+        f"{indicator} 至少需要 {min_bars} 根，日線數值無法計算（不可視為 0 或中性）。",
+    ]
+
+    curr_dt = datetime.strptime(curr_date, "%Y-%m-%d")
+    listing_start = (curr_dt - relativedelta(days=max(daily_bars, 1) * 2 + 7)).strftime("%Y-%m-%d")
+    interval = pick_intraday_interval(daily_bars)
+    intraday = fetch_intraday_bars(symbol, listing_start, curr_date, interval)
+    if intraday is None or len(intraday.frame) < min_bars:
+        bars = 0 if intraday is None else len(intraday.frame)
+        lines.append(
+            f"盤中 {interval} K 線也只有 {bars} 根，不足以計算 {indicator}，請在報告中標示為資料缺口。"
+        )
+        return "\n".join(lines)
+
+    frame = intraday.frame.rename(columns=str.lower).set_index("date")
+    values = wrap(frame)[indicator]
+    rows = []
+    for position, (timestamp, value) in enumerate(values.items()):
+        if position < min_bars - 1 or pd.isna(value):
+            continue
+        rows.append(f"{timestamp.strftime('%Y-%m-%d %H:%M')}: {float(value):.4f}")
+    rows = rows[-_MAX_INTRADAY_INDICATOR_ROWS:]
+
+    lines.append("")
+    lines.append(
+        f"## 改以 {interval} 盤中 K 線計算的 {indicator}（共 {len(intraday.frame)} 根，"
+        f"列出最新 {len(rows)} 筆；僅反映短線動能，不代表日線趨勢）"
+    )
+    lines.extend(reversed(rows))
+    return "\n".join(lines)
 
 
 

@@ -145,6 +145,7 @@ You are a senior technical analyst with 15+ years of experience in US and Taiwan
 • Use get_stock_data to obtain historical price data — always request at least 1 year of data (start_date = trade_date minus 365 days)
 • Use get_indicators to calculate technical indicators (set look_back_days to 50 or 200 for moving averages)
 • Only cite indicator values that the tools returned; if an indicator is unavailable, say so
+• **New listings (recent IPO)**: if get_stock_data marks the stock as a new listing, daily indicators (50/200-day MA, MACD, RSI, Bollinger) cannot be computed — never read 0, 50 or a value equal to the close as a signal. Analyze instead: first-day open/close and range since listing, session VWAP, intraday trend and volume distribution from the intraday bars, and the intraday indicators get_indicators returns (label them clearly as short-term only). Treat key levels as first-day high/low and VWAP. State that the trend is not yet established and lower the confidence of any trade plan
 
 【Report Structure】
 1. Market Overview (60-80 words): trend direction, momentum, and the most important signal
@@ -178,6 +179,7 @@ You are a senior technical analyst with 15+ years of experience in US and Taiwan
 • 使用 get_stock_data 取得歷史價格資料 — 務必取得至少 1 年的資料（start_date = 交易日期減 365 天）
 • 使用 get_indicators 計算技術指標（均線請設定 look_back_days 為 50 或 200）
 • 只引用工具實際回傳的指標數值；取不到的指標請說明資料缺口
+• **新上市（剛 IPO）股票**：若 get_stock_data 標示為新上市，日線指標（50/200 日均線、MACD、RSI、布林通道）無法計算，顯示為 0、50 或等於收盤價的數值一律不得解讀為訊號。改為分析：首日開收與上市以來高低區間、各交易日 VWAP、盤中 K 線的走勢與量能分布，以及 get_indicators 回傳的盤中指標（須註明僅反映短線）。關鍵價位以首日高低點與 VWAP 為主；明確說明趨勢尚未成形，並降低操作計畫的信心程度
 
 【報告架構】
 1. 市場概況（約 80-120 字）：趨勢方向、動能強弱與最關鍵的訊號

@@ -11,16 +11,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip (cached layer)
-RUN pip install --no-cache-dir --upgrade pip
+# All Python package operations use uv (pinned version, copied from the official image)
+COPY --from=ghcr.io/astral-sh/uv:0.12.15 /uv /usr/local/bin/uv
+ENV UV_SYSTEM_PYTHON=1 \
+    UV_NO_CACHE=1 \
+    UV_COMPILE_BYTECODE=1
 
 # OPTIMIZATION: Install heavy/stable dependencies first (better layer caching)
 # These packages rarely change and take longest to install
-RUN pip install --no-cache-dir --prefer-binary \
-    torch --index-url https://download.pytorch.org/whl/cpu || true
+RUN uv pip install --index-url https://download.pytorch.org/whl/cpu torch || true
 
 # Install ML/NLP packages that are large but stable
-RUN pip install --no-cache-dir --prefer-binary \
+RUN uv pip install \
     sentence-transformers \
     chromadb \
     langchain-openai \
@@ -30,7 +32,7 @@ RUN pip install --no-cache-dir --prefer-binary \
     langgraph
 
 # Install data processing packages
-RUN pip install --no-cache-dir --prefer-binary \
+RUN uv pip install \
     polars \
     pyarrow \
     pandas \
@@ -39,7 +41,7 @@ RUN pip install --no-cache-dir --prefer-binary \
 
 # Copy and install remaining requirements
 COPY backend/requirements.txt .
-RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
+RUN uv pip install -r requirements.txt
 
 # Production stage
 FROM python:3.11-slim

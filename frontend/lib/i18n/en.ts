@@ -670,6 +670,7 @@ export const en = {
       livePrice: "Price",
       change: "Change",
       previousClose: "Prev Close",
+      newListingNotice: "New listing: only {days} trading day(s) since {date}. Daily bars are too few to chart, so {interval} intraday bars are shown",
       status: "Status",
       marketOpen: "Market open",
       preMarketOpen: "Pre-market trading",

@@ -290,7 +290,16 @@ class TradingService:
                         except Exception as filter_err:
                             logger.warning(f"Could not filter price data to 1-year window: {filter_err}")
 
-                        if price_df is not None and not price_df.is_empty():
+                        new_listing_chart = (
+                            PriceService.prepare_new_listing_chart(ticker, price_df, analysis_date)
+                            if price_df is not None and not price_df.is_empty()
+                            else None
+                        )
+                        if new_listing_chart is not None:
+                            # 剛上市、日 K 不足：改用盤中 K 線，否則圖表只有一個點畫不出來
+                            price_data, price_stats = new_listing_chart
+                            logger.info(f"{ticker} 為新上市股票，價格圖改用 {price_stats['interval']} 盤中 K 線")
+                        elif price_df is not None and not price_df.is_empty():
                             price_data = PriceService.prepare_chart_data(price_df)
                             price_stats = PriceService.calculate_stats(price_df)
                             if price_data:

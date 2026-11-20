@@ -88,11 +88,30 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
     return num.toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  // 格式化日期（只顯示月-日）
+  // 新上市股票的 price_data 是盤中 K 線，Date 格式為 YYYY-MM-DDTHH:mm（交易所當地時間）
+  const isIntraday = Boolean(priceStats.is_new_listing) || priceData.some((d) => d.Date.includes("T"));
+
+  // 格式化座標軸日期：日 K 只顯示月/日，盤中 K 顯示月/日 時:分。
+  // 直接切字串，避免 new Date() 依瀏覽器時區位移交易所時間
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return `${date.getMonth() + 1}/${date.getDate()}`;
+    const month = Number(dateStr.slice(5, 7));
+    const day = Number(dateStr.slice(8, 10));
+    const time = dateStr.slice(11, 16);
+    return isIntraday && time ? `${month}/${day} ${time}` : `${month}/${day}`;
   };
+
+  // Tooltip 用的完整日期
+  const formatFullDate = (dateStr: string) => dateStr.replace("T", " ");
+
+  // 資料點太少（例如只有 1 根日 K）時折線畫不出來，改顯示資料點
+  const lineDot = priceData.length <= 2 ? { r: 4 } : false;
+
+  const newListingNotice = priceStats.is_new_listing
+    ? t.results.priceSection.newListingNotice
+        .replace("{date}", priceStats.listing_date ?? priceStats.start_date)
+        .replace("{days}", String(priceStats.daily_bars ?? 1))
+        .replace("{interval}", priceStats.interval ?? "")
+    : null;
 
   // Get the close field to use (prefer Adj Close)
   const getCloseValue = (data: PriceData) => {
@@ -153,6 +172,12 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
           </div>
         </div>
 
+        {!isLive && newListingNotice && (
+          <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200">
+            {newListingNotice}
+          </p>
+        )}
+
         {/* 統計資訊（歷史模式；即時模式的統計在 LivePriceChart 內） */}
         {!isLive && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
@@ -211,7 +236,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                       
                       return (
                         <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
-                          <p className="text-sm font-semibold mb-2">{labels.date}: {data.Date}</p>
+                          <p className="text-sm font-semibold mb-2">{labels.date}: {formatFullDate(data.Date)}</p>
                           <div className="space-y-1 text-sm">
                             {hasAdjClose && (
                               <p className="text-blue-600 font-medium">
@@ -234,7 +259,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                   stroke="#93c5fd" 
                   strokeWidth={2}
                   name={labels.adjClosePrice} 
-                  dot={false}
+                  dot={lineDot}
                 />
               </LineChart>
             ) : (
@@ -266,7 +291,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                       
                       return (
                         <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
-                          <p className="text-sm font-semibold mb-2">{labels.date}: {data.Date}</p>
+                          <p className="text-sm font-semibold mb-2">{labels.date}: {formatFullDate(data.Date)}</p>
                           
                           {/* 原始價格 - Adj Close 為主 */}
                           <div className="mb-2 pb-2 border-b border-border">
@@ -337,7 +362,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                   value !== undefined ? value.toLocaleString() : '-', 
                   labels.volume
                 ]}
-                labelFormatter={(label) => `${labels.date}: ${label}`}
+                labelFormatter={(label) => `${labels.date}: ${formatFullDate(String(label))}`}
               />
               <Bar dataKey="Volume" fill="#93c5fd" name={labels.volume} />
             </BarChart>

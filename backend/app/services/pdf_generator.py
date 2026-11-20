@@ -784,7 +784,8 @@ class PDFGenerator:
                       for i in range(len(dates))]
         ax2.bar(dates, volumes, width=width, color=vol_colors, alpha=0.7)
         ax2.set_ylabel('Volume', fontsize=10)
-        ax2.set_xlabel('Trading Days', fontsize=10)
+        is_intraday = 'T' in str(price_data[0].get('Date', ''))
+        ax2.set_xlabel('Intraday Bars' if is_intraday else 'Trading Days', fontsize=10)
         ax2.grid(True, alpha=0.3)
         ax2.set_facecolor('#FFFFFF')
         ax2.yaxis.set_major_formatter(plt.FuncFormatter( # type: ignore
@@ -797,7 +798,11 @@ class PDFGenerator:
                 if idx < len(ha_data):
                     date_str = ha_data[idx].get('Date', '')
                     if date_str and len(date_str) >= 10:
-                        labels.append(date_str[5:10])
+                        # 盤中 K 線（新上市股票）的 Date 為 YYYY-MM-DDTHH:MM，標上時間
+                        label = date_str[5:10]
+                        if 'T' in date_str and len(date_str) >= 16:
+                            label = f"{label} {date_str[11:16]}"
+                        labels.append(label)
                         positions.append(idx)
             if positions and labels:
                 ax2.set_xticks(positions)

@@ -4,14 +4,91 @@ Price data service for loading and processing stock price data
 import polars as pl # type: ignore
 import pandas as pd # type: ignore
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import logging
+
+from tradingagents.dataflows.new_listing import (
+    download_daily,
+    fetch_intraday_bars,
+    is_new_listing,
+    pick_intraday_interval,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class PriceService:
     """Service for loading and processing price data from data_cache"""
+
+    @staticmethod
+    def _resolve_yf_ticker(ticker: str) -> str:
+        """台股代碼（4-6 位數字）轉成 Yahoo Finance 格式（.TW / .TWO），其他原樣回傳。"""
+        clean_ticker = ticker.replace(".TW", "").replace(".TWO", "").strip()
+        if not (clean_ticker.isdigit() and 4 <= len(clean_ticker) <= 6):
+            return ticker
+        try:
+            from tradingagents.dataflows.finmind_common import get_yfinance_ticker
+            yf_ticker = get_yfinance_ticker(clean_ticker)
+            logger.info(f"台股代碼 {ticker} 轉換為 Yahoo Finance 格式: {yf_ticker}")
+            return yf_ticker
+        except ImportError:
+            logger.info(f"無法導入 FinMind，預設使用上市後綴: {clean_ticker}.TW")
+        except Exception as e:
+            logger.warning(f"獲取市場類型失敗，嘗試 .TW: {e}")
+        return f"{clean_ticker}.TW"
+
+    @staticmethod
+    def prepare_new_listing_chart(
+        ticker: str,
+        daily_df: pl.DataFrame,
+        analysis_date: str,
+    ) -> Optional[Tuple[List[Dict[str, Any]], Dict[str, Any]]]:
+        """
+        新上市股票（日 K 不足）改以盤中 K 線畫圖。
+
+        Returns:
+            (price_data, price_stats)；不是新上市股票或盤中資料取不到時回傳 None。
+        """
+        if daily_df is None or not is_new_listing(daily_df.height):
+            return None
+
+        listing_date = daily_df.row(0, named=True)["Date"].strftime("%Y-%m-%d")
+        interval = pick_intraday_interval(daily_df.height)
+        intraday = fetch_intraday_bars(
+            PriceService._resolve_yf_ticker(ticker), listing_date, analysis_date, interval
+        )
+        if intraday is None or len(intraday.frame) < 2:
+            return None
+
+        frame = intraday.frame
+        price_data = [
+            {
+                "Date": row.Date.strftime("%Y-%m-%dT%H:%M"),
+                "Open": round(float(row.Open), 2),
+                "High": round(float(row.High), 2),
+                "Low": round(float(row.Low), 2),
+                "Close": round(float(row.Close), 2),
+                "Volume": int(row.Volume),
+            }
+            for row in frame.itertuples(index=False)
+        ]
+
+        first, last = frame.iloc[0], frame.iloc[-1]
+        start_price = float(first["Open"])
+        end_price = float(last["Close"])
+        price_stats = {
+            "growth_rate": round((end_price - start_price) / start_price * 100, 2),
+            "duration_days": int((last["Date"].normalize() - first["Date"].normalize()).days),
+            "start_date": first["Date"].strftime("%Y-%m-%d %H:%M"),
+            "end_date": last["Date"].strftime("%Y-%m-%d %H:%M"),
+            "start_price": round(start_price, 2),
+            "end_price": round(end_price, 2),
+            "is_new_listing": True,
+            "interval": interval,
+            "listing_date": listing_date,
+            "daily_bars": daily_df.height,
+        }
+        return price_data, price_stats
     
     @staticmethod
     def load_price_data(ticker: str, data_cache_dir: str) -> Optional[pl.DataFrame]:
@@ -102,40 +179,18 @@ class PriceService:
         end_date = datetime.now()
         start_date = end_date - timedelta(days=365 * 15)  # 15 years of data
         
-        # 處理台股代碼
-        yf_ticker = ticker
+        yf_ticker = PriceService._resolve_yf_ticker(ticker)
         original_ticker = ticker
-        
-        # 檢查是否為台股代碼（4-6位數字）
-        clean_ticker = ticker.replace(".TW", "").replace(".TWO", "").strip()
-        if clean_ticker.isdigit() and 4 <= len(clean_ticker) <= 6:
-            # 嘗試從傳入的 market_type 判斷（如果有的話）
-            # 否則使用 FinMind API 判斷
-            try:
-                from tradingagents.dataflows.finmind_common import get_yfinance_ticker
-                yf_ticker = get_yfinance_ticker(clean_ticker)
-                logger.info(f"台股代碼 {ticker} 轉換為 Yahoo Finance 格式: {yf_ticker}")
-            except ImportError:
-                # 如果無法導入 FinMind，預設使用 .TW
-                yf_ticker = f"{clean_ticker}.TW"
-                logger.info(f"無法導入 FinMind，預設使用上市後綴: {yf_ticker}")
-            except Exception as e:
-                logger.warning(f"獲取市場類型失敗，嘗試 .TW: {e}")
-                yf_ticker = f"{clean_ticker}.TW"
-        
+
         for attempt in range(1, max_retries + 1):
             try:
                 logger.info(f"嘗試從 Yahoo Finance 獲取 {yf_ticker} 數據（第 {attempt} 次嘗試）...")
                 
-                # Download data with timeout
-                data = yf.download(
+                # Download data with timeout（新上市股票長區間查無資料時會改抓近期日 K）
+                data = download_daily(
                     yf_ticker,
-                    start=start_date.strftime("%Y-%m-%d"),
-                    end=end_date.strftime("%Y-%m-%d"),
-                    multi_level_index=False,
-                    progress=False,
-                    auto_adjust=False,
-                    timeout=30
+                    start_date.strftime("%Y-%m-%d"),
+                    end_date.strftime("%Y-%m-%d"),
                 )
                 
                 if data.empty: # type: ignore
