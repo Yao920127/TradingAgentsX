@@ -85,9 +85,9 @@ export function FullReport({ sections }: FullReportProps) {
 
   return (
     // No `overflow-hidden` here: an overflow ancestor would break the sticky nav below.
-    <section className="rounded-2xl border border-border bg-card shadow-sm">
+    <section className="rounded-2xl border border-border bg-card ">
       {/* Sticky section nav — offsets clear the sticky site header. */}
-      <div className="sticky top-15 z-20 rounded-t-2xl border-b border-border/70 bg-card/95 backdrop-blur-md md:top-18">
+      <div className="sticky top-15 z-20 rounded-t-2xl border-b border-border/70 bg-card/95 md:top-18">
         <div className="flex flex-col gap-2 px-4 py-3 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex shrink-0 items-center gap-2">
             <FileText className="h-4 w-4 text-muted-foreground" />

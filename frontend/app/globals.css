@@ -1,29 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Nunito:ital,wght@0,700;0,800;0,900;1,700&display=swap');
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Design tokens — Cohere-inspired system (see /DESIGN.md)
+ * Source of truth for colour, type, radius. Semantic tokens (--background,
+ * --primary …) are what shadcn components read; brand tokens (--deep-green …)
+ * are exposed as Tailwind utilities (bg-deep-green, text-slate, border-hairline …).
+ */
 @theme inline {
+  /* Semantic colours */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'DM Sans', var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: 'Nunito', var(--font-geist-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -40,143 +30,180 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Brand colours (static; same in both themes) */
+  --color-cohere-black: #000000;
+  --color-ink: #212121;
+  --color-near-black: #17171c;
+  --color-deep-green: #003c33;
+  --color-dark-navy: #071829;
+  --color-soft-stone: #eeece7;
+  --color-pale-green: #edfce9;
+  --color-pale-blue: #f1f5ff;
+  --color-hairline: #d9d9dd;
+  --color-border-light: #e5e7eb;
+  --color-card-border: #f2f2f2;
+  --color-muted-slate: #93939f;
+  --color-slate: #75758a;
+  --color-body-muted: #616161;
+  --color-action-blue: #1863dc;
+  --color-focus-blue: #4c6ee6;
+  --color-coral: #ff7759;
+  --color-coral-soft: #ffad9b;
+  --color-form-focus: #9b60aa;
+
+  /* Fonts: CohereText / Unica77 / CohereMono are proprietary → documented fallbacks */
+  --font-sans: 'Unica77 Cohere Web', var(--font-inter), Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'CohereText', var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'CohereMono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Radius scale: xs 4 · sm 8 · md 16 · lg 22 · xl 30 · pill 32 */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+  --radius-pill: 32px;
+
+  /* Display type scale (size / line-height / tracking) */
+  --text-hero: 6rem;
+  --text-hero--line-height: 1;
+  --text-hero--letter-spacing: -1.92px;
+  --text-product: 4.5rem;
+  --text-product--line-height: 1;
+  --text-product--letter-spacing: -1.44px;
+  --text-section: 3.75rem;
+  --text-section--line-height: 1;
+  --text-section--letter-spacing: -1.2px;
+  --text-heading: 3rem;
+  --text-heading--line-height: 1.2;
+  --text-heading--letter-spacing: -0.48px;
+  --text-card-title: 2rem;
+  --text-card-title--line-height: 1.2;
+  --text-card-title--letter-spacing: -0.32px;
+  --text-feature: 1.5rem;
+  --text-feature--line-height: 1.3;
 }
 
 :root {
-  /* Modern gradient light — blue-slate fintech */
-  --radius: 0.875rem;
-  --clay-radius-card: 1.25rem;
-  --clay-radius-outer: 1.75rem;
-  --clay-radius-btn: 0.875rem;
+  --radius: 8px;
+  --section-space: 80px;
 
-  --background: #F8FAFC;
-  --foreground: #0F172A;
-  --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
-  --primary: #2563EB;
-  --primary-foreground: #FFFFFF;
-  --secondary: #EFF6FF;
-  --secondary-foreground: #1D4ED8;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --accent: #0EA5E9;
-  --accent-foreground: #FFFFFF;
-  --destructive: #EF4444;
-  --border: #E2E8F0;
-  --input: #EFF6FF;
-  --ring: #2563EB;
-  --chart-1: #2563EB;
-  --chart-2: #0EA5E9;
-  --chart-3: #10B981;
-  --chart-4: #F59E0B;
-  --chart-5: #F43F5E;
-  --sidebar: #EFF6FF;
-  --sidebar-foreground: #0F172A;
-  --sidebar-primary: #2563EB;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #DBEAFE;
-  --sidebar-accent-foreground: #1D4ED8;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #2563EB;
+  --background: #ffffff;
+  --foreground: #212121;
+  --card: #ffffff;
+  --card-foreground: #212121;
+  --popover: #ffffff;
+  --popover-foreground: #212121;
+  --primary: #17171c;
+  --primary-foreground: #ffffff;
+  --secondary: #eeece7;
+  --secondary-foreground: #212121;
+  --muted: #f6f5f2;
+  --muted-foreground: #616161;
+  --accent: #edfce9;
+  --accent-foreground: #003c33;
+  --destructive: #b30000;
+  --border: #d9d9dd;
+  --input: #d9d9dd;
+  --ring: #4c6ee6;
+  --chart-1: #003c33;
+  --chart-2: #1863dc;
+  --chart-3: #ff7759;
+  --chart-4: #75758a;
+  --chart-5: #b30000;
+  --sidebar: #f6f5f2;
+  --sidebar-foreground: #212121;
+  --sidebar-primary: #17171c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eeece7;
+  --sidebar-accent-foreground: #212121;
+  --sidebar-border: #d9d9dd;
+  --sidebar-ring: #4c6ee6;
 }
 
 .dark {
-  /* Modern gradient dark — deep navy fintech */
-  --background: #0A0F1E;
-  --foreground: #E2E8F0;
-  --card: #111827;
-  --card-foreground: #E2E8F0;
-  --popover: #111827;
-  --popover-foreground: #E2E8F0;
-  --primary: #3B82F6;
-  --primary-foreground: #FFFFFF;
-  --secondary: #1E293B;
-  --secondary-foreground: #93C5FD;
-  --muted: #1E2A4A;
-  --muted-foreground: #94A3B8;
-  --accent: #0EA5E9;
-  --accent-foreground: #FFFFFF;
-  --destructive: #F87171;
-  --border: rgba(148, 163, 184, 0.15);
-  --input: rgba(59, 130, 246, 0.1);
-  --ring: #3B82F6;
-  --chart-1: #3B82F6;
-  --chart-2: #0EA5E9;
-  --chart-3: #34D399;
-  --chart-4: #FCD34D;
-  --chart-5: #FB7185;
-  --sidebar: #111827;
-  --sidebar-foreground: #E2E8F0;
-  --sidebar-primary: #3B82F6;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #93C5FD;
-  --sidebar-border: rgba(148, 163, 184, 0.15);
-  --sidebar-ring: #3B82F6;
+  /* Near-black canvas, deep green accent; primary CTA inverts to white */
+  --background: #0b0b0f;
+  --foreground: #f2f2f4;
+  --card: #17171c;
+  --card-foreground: #f2f2f4;
+  --popover: #17171c;
+  --popover-foreground: #f2f2f4;
+  --primary: #ffffff;
+  --primary-foreground: #17171c;
+  --secondary: #212126;
+  --secondary-foreground: #f2f2f4;
+  --muted: #1c1c22;
+  --muted-foreground: #a4a4b0;
+  --accent: #003c33;
+  --accent-foreground: #edfce9;
+  --destructive: #ff6b6b;
+  --border: rgba(255, 255, 255, 0.14);
+  --input: rgba(255, 255, 255, 0.18);
+  --ring: #4c6ee6;
+  --chart-1: #3ddbb4;
+  --chart-2: #6d9bff;
+  --chart-3: #ff7759;
+  --chart-4: #93939f;
+  --chart-5: #ff6b6b;
+  --sidebar: #17171c;
+  --sidebar-foreground: #f2f2f4;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #17171c;
+  --sidebar-accent: #212126;
+  --sidebar-accent-foreground: #f2f2f4;
+  --sidebar-border: rgba(255, 255, 255, 0.14);
+  --sidebar-ring: #4c6ee6;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    background-color: var(--background);
+  }
   body {
     color: var(--foreground);
-    background: linear-gradient(135deg, #EEF2FF 0%, #F8FAFC 45%, #FDF2F8 100%);
-    background-attachment: fixed;
+    background-color: var(--background);
+    font-family: var(--font-sans);
     min-height: 100dvh;
   }
-
-  .dark body {
-    background: linear-gradient(135deg, #0C1220 0%, #060912 50%, #0D0A1C 100%);
-    background-attachment: fixed;
+  /* Display headings: tight, light-weight, carved */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
   }
 
   /* iOS PWA Safe Area Support */
-  html {
-    background-color: var(--background);
-    background: linear-gradient(135deg, #EEF2FF 0%, #F8FAFC 45%, #FDF2F8 100%);
-    background-attachment: fixed;
-  }
-
-  html.dark {
-    background: linear-gradient(135deg, #0C1220 0%, #060912 50%, #0D0A1C 100%);
-  }
-
-  /* PWA standalone mode adjustments */
   @supports (padding-top: env(safe-area-inset-top)) {
-    /* Header safe area */
-    .pwa-safe-header {
-      padding-top: env(safe-area-inset-top);
-    }
-
-    /* Footer/bottom safe area */
-    .pwa-safe-footer {
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    /* Full page safe area */
+    .pwa-safe-header { padding-top: env(safe-area-inset-top); }
+    .pwa-safe-footer { padding-bottom: env(safe-area-inset-bottom); }
     .pwa-safe-page {
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
     }
   }
 
-  /* iOS Safari standalone mode detection */
   @media all and (display-mode: standalone) {
-    body {
-      /* Prevent rubber-banding on iOS */
-      overscroll-behavior-y: none;
-    }
+    body { overscroll-behavior-y: none; }
   }
 }
 
-/* Safari mobile touch fixes */
 @layer base {
   /* Fix for Safari iOS touch events on buttons and interactive elements */
   button,
@@ -353,16 +380,11 @@
 
 /* Enhanced hover effects */
 .hover-lift {
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: border-color 0.2s ease;
 }
 
 .hover-lift:hover {
-  transform: translateY(-8px);
-  box-shadow:
-    0 20px 25px -5px rgb(0 0 0 / 0.1),
-    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border-color: var(--foreground);
 }
 
 /* Gradient shimmer effect */
@@ -372,587 +394,87 @@
 }
 
 /* ========================================
-   GRADIENT UTILITIES
+   SURFACE UTILITIES — flat, bordered (no gradients / drop shadows)
+   Legacy class names kept so existing components inherit the new look.
    ======================================== */
 
-/* Gradient Backgrounds — blue-cyan (light) / blue-teal (dark) */
-.gradient-bg-primary {
-  background: linear-gradient(135deg, #60A5FA 0%, #22D3EE 100%);
-}
+.gradient-bg-primary { background: var(--chart-1); }
+.gradient-bg-radial { background: none; }
+.gradient-page-bg { background-color: var(--background); min-height: 100vh; }
 
-.dark .gradient-bg-primary {
-  background: linear-gradient(135deg, #60A5FA 0%, #2DD4BF 100%);
-}
-
-.gradient-bg-radial {
-  background:
-    radial-gradient(
-      ellipse 60% 50% at top right,
-      rgba(59, 130, 246, 0.12),
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 50% 40% at bottom left,
-      rgba(20, 184, 166, 0.08),
-      transparent 60%
-    );
-}
-
-.dark .gradient-bg-radial {
-  background:
-    radial-gradient(
-      ellipse 60% 50% at top right,
-      rgba(37, 99, 235, 0.2),
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 50% 40% at bottom left,
-      rgba(13, 148, 136, 0.14),
-      transparent 60%
-    );
-}
-
-/* Gradient Page Backgrounds — blue-cyan (light) / blue-teal (dark) */
-.gradient-page-bg {
-  background-color: #F8FAFC;
-  background-image:
-    radial-gradient(ellipse 70% 50% at 5% 10%, rgba(59, 130, 246, 0.10) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 95% 90%, rgba(20, 184, 166, 0.07) 0%, transparent 55%);
-  min-height: 100vh;
-}
-
-.dark .gradient-page-bg {
-  background-color: #0A0F1E;
-  background-image:
-    radial-gradient(ellipse 70% 50% at 5% 10%, rgba(37, 99, 235, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 95% 90%, rgba(13, 148, 136, 0.14) 0%, transparent 55%);
-  min-height: 100vh;
-}
-
-/* Gradient Text — ocean (light) / ocean vivid (dark) */
+/* Solid text — Cohere does not use gradient text */
 .gradient-text-primary {
-  background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 40%, #06b6d4 70%, #2dd4bf 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.dark .gradient-text-primary {
-  background: linear-gradient(135deg, #38bdf8 0%, #22d3ee 40%, #2dd4bf 70%, #34d399 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Gradient Overlays */
-.gradient-overlay {
-  position: relative;
-}
-
-.gradient-overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(37, 99, 235, 0.06),
-    rgba(14, 165, 233, 0.06)
-  );
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-.dark .gradient-overlay::before {
-  background: linear-gradient(
-    135deg,
-    rgba(37, 99, 235, 0.12),
-    rgba(14, 165, 233, 0.08)
-  );
-}
-
-/* Gradient Shine Effect */
-.gradient-shine {
-  position: relative;
-  overflow: hidden;
-}
-
-.gradient-shine::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 70%
-  );
-  transform: translateX(-100%) translateY(-100%);
-  transition: transform 0.6s;
-}
-
-.gradient-shine:hover::after {
-  transform: translateX(100%) translateY(100%);
-}
-
-.dark .gradient-shine::after {
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 70%
-  );
-}
-
-/* Enhanced Card Gradients — blue-slate fintech */
-.gradient-card {
-  background: linear-gradient(
-    160deg,
-    rgba(239, 246, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.98) 100%
-  );
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.06),
-    0 8px 24px rgba(37, 99, 235, 0.06);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.25s ease;
-}
-
-.gradient-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.08),
-    0 16px 40px rgba(37, 99, 235, 0.12);
-}
-
-.dark .gradient-card {
-  background: linear-gradient(
-    160deg,
-    rgba(17, 24, 39, 0.97) 0%,
-    rgba(30, 41, 59, 0.95) 100%
-  );
-  border-color: rgba(148, 163, 184, 0.12);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.3),
-    0 8px 24px rgba(0, 0, 0, 0.25);
-}
-
-.dark .gradient-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.4),
-    0 16px 40px rgba(59, 130, 246, 0.15);
-}
-
-/* ========================================
-   SURFACE UTILITIES (formerly Claymorphism)
-   ======================================== */
-
-
-/* Surface card */
-.clay-card {
-  background: rgba(255, 255, 255, 0.97);
-  border-radius: var(--clay-radius-card, 1.25rem);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.06),
-    0 8px 24px rgba(37, 99, 235, 0.06);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.25s ease;
-}
-
-.clay-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.08),
-    0 12px 32px rgba(37, 99, 235, 0.12);
-}
-
-.dark .clay-card {
-  background: rgba(17, 24, 39, 0.95);
-  border-color: rgba(148, 163, 184, 0.12);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.3),
-    0 8px 24px rgba(0, 0, 0, 0.25);
-}
-
-.dark .clay-card:hover {
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.4),
-    0 16px 40px rgba(59, 130, 246, 0.15);
-}
-
-/* Glassmorphism */
-.glass {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow:
-    0 4px 16px rgba(37, 99, 235, 0.06),
-    0 16px 40px rgba(37, 99, 235, 0.08);
-}
-
-.dark .glass {
-  background: rgba(17, 24, 39, 0.85);
-  border-color: rgba(148, 163, 184, 0.12);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.3),
-    0 16px 40px rgba(0, 0, 0, 0.35);
-}
-
-.glass-gradient {
-  background: linear-gradient(160deg, rgba(255,255,255,0.96) 0%, rgba(239,246,255,0.96) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow:
-    0 2px 8px rgba(37, 99, 235, 0.06),
-    0 12px 32px rgba(37, 99, 235, 0.08);
-}
-
-.dark .glass-gradient {
-  background: linear-gradient(160deg, rgba(17,24,39,0.96) 0%, rgba(30,41,59,0.96) 100%);
-  border-color: rgba(148, 163, 184, 0.12);
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    0 12px 32px rgba(0, 0, 0, 0.35);
-}
-
-.glass-hover {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.25s ease;
-}
-
-.glass-hover:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow:
-    0 2px 8px rgba(37, 99, 235, 0.08),
-    0 16px 40px rgba(37, 99, 235, 0.14);
-}
-
-.dark .glass-hover:hover {
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.4),
-    0 16px 40px rgba(59, 130, 246, 0.18);
-}
-
-/* ========================================
-   PRIMARY BUTTON
-   ======================================== */
-
-/* Ocean gradient button — light: blue→cyan→teal / dark: sky→teal vivid */
-.clay-btn-primary {
-  background: linear-gradient(160deg, #3b82f6 0%, #06b6d4 60%, #2dd4bf 100%);
-  border-radius: var(--clay-radius-btn, 0.875rem);
-  border: 1px solid rgba(14, 116, 144, 0.4);
-  box-shadow:
-    0 2px 8px rgba(6, 182, 212, 0.3),
-    0 1px 0 rgba(14, 116, 144, 0.5);
-  color: #ffffff;
-  font-weight: 700;
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.15s ease;
-}
-
-.clay-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 24px rgba(6, 182, 212, 0.4),
-    0 2px 0 rgba(14, 116, 144, 0.5);
-}
-
-.clay-btn-primary:active {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 1px 4px rgba(6, 182, 212, 0.25);
-}
-
-.dark .clay-btn-primary {
-  background: linear-gradient(160deg, #38bdf8 0%, #22d3ee 50%, #2dd4bf 100%);
-  border-color: rgba(45, 212, 191, 0.4);
-  box-shadow:
-    0 2px 8px rgba(45, 212, 191, 0.25),
-    0 1px 0 rgba(15, 118, 110, 0.5);
-}
-
-.dark .clay-btn-primary:hover {
-  box-shadow:
-    0 8px 24px rgba(45, 212, 191, 0.35),
-    0 2px 0 rgba(15, 118, 110, 0.5);
-}
-
-.dark .clay-btn-primary:active {
-  box-shadow: 0 1px 4px rgba(45, 212, 191, 0.25);
-}
-
-/* Clay spring bounce keyframe */
-@keyframes cta-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-}
-
-.animate-cta-pulse {
-  animation: cta-pulse 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-}
-
-/* Clay heading font */
-.clay-heading {
-  font-family: 'Nunito', var(--font-geist-sans), sans-serif;
-  font-weight: 900;
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-weight: 400;
   letter-spacing: -0.02em;
 }
 
-/* ========================================
-   IMMERSIVE PORTAL HERO
-   Sticky viewport that zooms a portal toward
-   the viewer as the user scrolls.
-   Driven by a single CSS var --p (0 → 1) set in JS.
-   ======================================== */
+.gradient-overlay { position: relative; }
+.gradient-shine { position: relative; overflow: hidden; }
 
-.portal-section {
-  position: relative;
-  /* Extra height = scroll distance the brand travels (zooms in) while pinned */
-  height: 200vh;
+.gradient-card,
+.clay-card,
+.glass,
+.glass-gradient {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
-.portal-stage {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  isolation: isolate;
+.glass-hover,
+.gradient-card,
+.clay-card {
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-/* Ambient backdrop — soft brand glow + faint star dust */
-.portal-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(37, 99, 235, 0.16), transparent 62%),
-    radial-gradient(ellipse 45% 40% at 18% 22%, rgba(6, 182, 212, 0.10), transparent 60%),
-    radial-gradient(ellipse 50% 45% at 82% 80%, rgba(45, 212, 191, 0.12), transparent 60%);
-  transform: scale(calc(1 + var(--p, 0) * 0.6));
-  opacity: calc(1 - var(--p, 0) * 0.35);
+.glass-hover:hover,
+.gradient-card:hover,
+.clay-card:hover {
+  border-color: var(--foreground);
 }
 
-.dark .portal-backdrop {
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(59, 130, 246, 0.28), transparent 62%),
-    radial-gradient(ellipse 45% 40% at 18% 22%, rgba(6, 182, 212, 0.18), transparent 60%),
-    radial-gradient(ellipse 50% 45% at 82% 80%, rgba(45, 212, 191, 0.18), transparent 60%);
+/* Primary CTA: near-black pill */
+.clay-btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+.clay-btn-primary:hover { opacity: 0.88; }
+
+.clay-heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
 }
 
-.portal-stars {
-  position: absolute;
-  inset: -20%;
-  z-index: 0;
-  background-image:
-    radial-gradient(1.5px 1.5px at 20% 30%, rgba(59, 130, 246, 0.55), transparent),
-    radial-gradient(1.5px 1.5px at 75% 25%, rgba(45, 212, 191, 0.5), transparent),
-    radial-gradient(1px 1px at 50% 60%, rgba(6, 182, 212, 0.5), transparent),
-    radial-gradient(1.5px 1.5px at 85% 70%, rgba(56, 189, 248, 0.5), transparent),
-    radial-gradient(1px 1px at 12% 78%, rgba(52, 211, 153, 0.45), transparent),
-    radial-gradient(1.5px 1.5px at 35% 15%, rgba(56, 189, 248, 0.45), transparent);
-  background-repeat: repeat;
-  background-size: 50% 50%;
-  opacity: calc(0.4 + var(--p, 0) * 0.6);
-  transform: scale(calc(1 + var(--p, 0) * 2.4));
-  animation: portalTwinkle 6s ease-in-out infinite alternate;
-}
-
-@keyframes portalTwinkle {
-  from { opacity: 0.35; }
-  to { opacity: 0.7; }
-}
-
-/* Logo lives in the intro — soft glow halo, no hard ring, separated from text */
-.portal-logo-halo {
-  position: relative;
-  display: inline-flex;
-  margin-bottom: 1.75rem;
-}
-
-@media (min-width: 640px) {
-  .portal-logo-halo { margin-bottom: 2.25rem; }
-}
-
-.portal-logo-halo::before {
-  content: "";
-  position: absolute;
-  inset: -34%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.4) 0%, rgba(37, 99, 235, 0.18) 45%, transparent 72%);
-  filter: blur(22px);
-  z-index: -1;
-  animation: portalPulse 4.5s ease-in-out infinite;
-}
-
-.portal-logo-img {
-  width: clamp(72px, 20vw, 112px);
-  height: auto;
-  border-radius: 28%;
-  box-shadow:
-    0 8px 0 rgba(30, 64, 175, 0.28),
-    0 16px 40px rgba(37, 99, 235, 0.32);
-}
-
-@keyframes portalPulse {
-  0%, 100% { transform: scale(1); opacity: 0.92; }
-  50% { transform: scale(1.08); opacity: 1; }
-}
-
-/* Intro copy — clean vertical stack (logo separated above title), fades as you dive in */
-.portal-intro {
-  position: absolute;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 0 1.5rem;
-  pointer-events: none;
-  /* Fades across the whole pinned range so the dive ends exactly as the
-     content below scrolls in — no empty gap, no hard seam. */
-  opacity: calc(1 - var(--p, 0) * 1.15);
-  transform: scale(calc(1 + var(--p, 0) * 2.1));
-}
-
-.portal-intro .pointer-events-auto { pointer-events: auto; }
-
-/* Scroll cue */
-.portal-cue {
-  position: absolute;
-  left: 50%;
-  bottom: 2.2rem;
-  z-index: 3;
-  transform: translateX(-50%);
-  opacity: calc(1 - var(--p, 0) * 4);
-  animation: portalCue 1.8s ease-in-out infinite;
-}
-
-@keyframes portalCue {
-  0%, 100% { transform: translate(-50%, 0); }
-  50% { transform: translate(-50%, 10px); }
-}
-
-/* Living trading canvas — agent constellation + flowing price waves.
-   Sits above the ambient backdrop/stars, below the intro copy. Fades a touch
-   as you dive in so the brand stays the focus. */
-.portal-canvas {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: calc(0.9 - var(--p, 0) * 0.5);
+/* Display type utilities */
+.type-mono-label {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.28px;
+  text-transform: uppercase;
 }
 
 /* ========================================
-   INTERACTIVE CARDS
-   Cursor-tracking spotlight + subtle 3D tilt.
-   Driven by CSS vars set in InteractiveCard.tsx (no React re-render).
+   REVEAL MOTION — calm fade + small rise, once
    ======================================== */
-.interactive-card {
-  --mx: 50%;
-  --my: 50%;
-  --rx: 0deg;
-  --ry: 0deg;
-  position: relative;
-  height: 100%;
-  border-radius: var(--radius);
-  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
-  transform-style: preserve-3d;
-  transition: transform 0.25s ease;
-}
+.interactive-card { height: 100%; }
 
-/* Spotlight glow that follows the pointer — brand blue/cyan, light & dark. */
-.interactive-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  border-radius: inherit;
-  background: radial-gradient(
-    220px circle at var(--mx) var(--my),
-    rgba(56, 189, 248, 0.18),
-    rgba(37, 99, 235, 0.08) 40%,
-    transparent 70%
-  );
+.reveal-init {
   opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+  transform: translateY(16px);
 }
-
-.dark .interactive-card::after {
-  background: radial-gradient(
-    220px circle at var(--mx) var(--my),
-    rgba(56, 189, 248, 0.22),
-    rgba(45, 212, 191, 0.12) 40%,
-    transparent 70%
-  );
-}
-
-.interactive-card:hover::after {
-  opacity: 1;
-}
-
-/* Scroll-triggered staggered entrance (inner wrapper so it never collides with
-   the outer tilt transform). Hidden before paint via .reveal-init; .is-in
-   animates it home. Static/visible by default when JS or motion is unavailable. */
-.ic-reveal {
-  height: 100%;
-  will-change: transform, opacity;
-}
-
-.ic-reveal.reveal-init {
-  opacity: 0;
-  transform: translateY(40px) scale(0.92);
-}
-
-.ic-reveal.reveal-init.is-in {
+.reveal-init.is-in {
   opacity: 1;
   transform: none;
-  transition:
-    opacity 0.6s ease-out,
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.interactive-card:hover {
-  z-index: 2;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .interactive-card {
-    transform: none !important;
-    transition: none;
-  }
-  .portal-canvas { display: none; }
-}
-
-/* Section depth motion — continuously scroll-linked in JS (see ScrollReveal).
-   Defaults keep content fully visible when JS/motion is unavailable. */
-.scroll-reveal {
-  opacity: 1;
-  transform-origin: center center;
-  will-change: opacity, transform;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scroll-reveal {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .portal-section { height: auto; }
-  .portal-stage { position: relative; height: auto; min-height: 100vh; padding: 6rem 0; }
-  .portal-intro { position: relative; opacity: 1; transform: none; }
+  .reveal-init { opacity: 1 !important; transform: none !important; }
 }
 
 /* Infinite decorative loops elsewhere in the app — stop them outright under
@@ -961,58 +483,7 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-heartbeat,
   .gradient-shimmer,
-  .animate-cta-pulse,
-  .portal-cue,
-  .portal-stars {
+  .animate-cta-pulse {
     animation: none !important;
   }
 }
-
-/* ========================================
-   CUSTOM CURSOR — single dot
-   Elements are injected by CustomCursor.tsx, which adds `.has-custom-cursor`
-   to <html> only on fine-pointer, hover-capable, motion-allowed devices.
-   ======================================== */
-
-/* Hide the native arrow only while our cursor is on screen (text caret stays). */
-.has-custom-cursor.cursor-active,
-.has-custom-cursor.cursor-active * {
-  cursor: none !important;
-}
-
-.cursor-dot {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 2147483647;
-  pointer-events: none;
-  border-radius: 9999px;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  will-change: transform;
-}
-
-.cursor-active .cursor-dot {
-  opacity: 1;
-}
-
-/* Solid centre dot — brand blue with a soft glow, tracks exactly. */
-.cursor-dot {
-  width: 7px;
-  height: 7px;
-  background: #2563eb;
-  box-shadow: 0 0 10px rgba(37, 99, 235, 0.7);
-  transition: opacity 0.25s ease, width 0.2s ease, height 0.2s ease, background 0.2s ease;
-}
-
-.dark .cursor-dot {
-  background: #60a5fa;
-  box-shadow: 0 0 10px rgba(96, 165, 250, 0.8);
-}
-
-.cursor-dot.is-hover {
-  width: 5px;
-  height: 5px;
-  background: #06b6d4;
-}
-

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -8,10 +8,14 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { AuthProvider } from "@/contexts/auth-context";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { SyncInitializer } from "@/components/providers/SyncInitializer";
-import { CustomCursor } from "@/components/CustomCursor";
-import { SoftAuroraBackground } from "@/components/theme/SoftAuroraBackground";
 
-const inter = Inter({ subsets: ["latin"] });
+// Documented fallbacks for the proprietary Unica77 (UI) / CohereText (display) faces.
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "TradingAgentsX - 多代理 LLM 金融交易",
@@ -86,7 +90,7 @@ export default function RootLayout({
           name="google-site-verification"
           content="rKjd_gPy-7vtsGRcwVzAbAIYyIwVM9ezyXZOoXkC1KA"
         />
-        <meta name="theme-color" content="#6B21A8" />
+        <meta name="theme-color" content="#17171c" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
@@ -137,15 +141,13 @@ export default function RootLayout({
           href="/icon-512-v8.png?t=20241220-v8"
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>
               <SyncInitializer />
-              <CustomCursor />
               <AnalysisProvider>
-                <div className="flex flex-col min-h-screen gradient-page-bg relative isolate">
-                  <SoftAuroraBackground />
+                <div className="flex flex-col min-h-screen bg-background relative isolate">
                   <Header />
                   <main className="flex-1">{children}</main>
                   <Footer />

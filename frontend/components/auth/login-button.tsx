@@ -57,7 +57,7 @@ export function LoginButton() {
   if (isLoading || loggingOut) {
     return (
       <Button variant="outline" size="sm" disabled>
-        <div className="w-4 h-4 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+        <div className="w-4 h-4 border-2 border-border border-t-foreground rounded-full animate-spin" />
         {loggingOut && <span className="ml-2 hidden sm:inline">{t.auth.loggingOut}</span>}
       </Button>
     );
@@ -84,7 +84,7 @@ export function LoginButton() {
             <span className="hidden sm:inline max-w-[100px] truncate">
               {user.name || user.email}
             </span>
-            <Cloud className="w-3 h-3 text-green-500" />
+            <Cloud className="w-3 h-3 text-deep-green dark:text-pale-green" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
@@ -93,12 +93,12 @@ export function LoginButton() {
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-green-600">
+          <DropdownMenuItem className="text-deep-green dark:text-pale-green">
             <Cloud className="w-4 h-4 mr-2" />
             {t.auth.cloudSyncEnabled}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+          <DropdownMenuItem onClick={handleLogout} className="text-destructive">
             <LogOut className="w-4 h-4 mr-2" />
             {t.auth.logout}
           </DropdownMenuItem>
@@ -116,7 +116,7 @@ export function LoginButton() {
     >
       <GoogleIcon />
       <span className="hidden sm:inline">{t.auth.login}</span>
-      <CloudOff className="w-3 h-3 text-slate-400 sm:hidden" />
+      <CloudOff className="w-3 h-3 text-muted-foreground sm:hidden" />
     </Button>
   );
 }
@@ -131,10 +131,10 @@ export function LoginPrompt() {
   if (isAuthenticated) return null;
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+    <div className="border border-border rounded-lg p-4 mb-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <CloudOff className="w-5 h-5 text-gray-400" />
+          <CloudOff className="w-5 h-5 text-muted-foreground" />
           <div>
             <p className="text-sm font-medium">{t.auth.usingLocalStorage}</p>
             <p className="text-xs text-muted-foreground">

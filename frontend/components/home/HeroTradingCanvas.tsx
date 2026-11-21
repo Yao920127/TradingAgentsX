@@ -11,8 +11,8 @@ import { useEffect, useRef } from "react";
  *   2. A couple of flowing price-line waves scrolling leftward, like a quiet ticker.
  *   3. A soft pointer-reactive parallax so the whole field leans toward the cursor.
  *
- * Colours are pulled straight from the existing brand palette (blue / sky /
- * cyan / teal / emerald) so it reads as the same product, just alive. Honors
+ * Colours come from the design tokens (pale green / white / soft coral) and are
+ * meant to sit on the deep-green console card. Honors
  * prefers-reduced-motion and pauses while the tab is hidden.
  */
 
@@ -25,13 +25,12 @@ type Node = {
   color: string;
 };
 
-// Brand palette (matches globals.css gradient tokens).
+// On the deep-green console: pale mint / white / coral accent (design-system tokens).
 const NODE_COLORS = [
-  "59, 130, 246", // blue-500
-  "56, 189, 248", // sky-400
-  "6, 182, 212", // cyan-500
-  "45, 212, 191", // teal-400
-  "52, 211, 153", // emerald-400
+  "237, 252, 233", // pale-green
+  "255, 255, 255", // white
+  "237, 252, 233",
+  "255, 173, 155", // coral-soft
 ];
 
 export function HeroTradingCanvas() {
@@ -108,9 +107,9 @@ export function HeroTradingCanvas() {
       const py = (eased.y - 0.5) * 36;
 
       // ── Flowing price waves (back layer) ──
-      drawWave(t * 0.012 + py * 0.01, height * 0.05, height * 0.62 + py * 0.4, "56, 189, 248", 0.28);
-      drawWave(t * 0.009 + 2, height * 0.07, height * 0.74 + py * 0.6, "45, 212, 191", 0.22);
-      drawWave(t * 0.015 + 4, height * 0.04, height * 0.5 + py * 0.3, "6, 182, 212", 0.16);
+      drawWave(t * 0.012 + py * 0.01, height * 0.05, height * 0.62 + py * 0.4, "237, 252, 233", 0.3);
+      drawWave(t * 0.009 + 2, height * 0.07, height * 0.74 + py * 0.6, "255, 255, 255", 0.2);
+      drawWave(t * 0.015 + 4, height * 0.04, height * 0.5 + py * 0.3, "255, 173, 155", 0.22);
 
       // ── Agent constellation ──
       ctx.save();
@@ -129,7 +128,7 @@ export function HeroTradingCanvas() {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(99, 153, 241, ${o})`;
+            ctx.strokeStyle = `rgba(237, 252, 233, ${o})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
@@ -149,10 +148,7 @@ export function HeroTradingCanvas() {
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${n.color}, ${twinkle})`;
-        ctx.shadowColor = `rgba(${n.color}, 0.8)`;
-        ctx.shadowBlur = 10;
         ctx.fill();
-        ctx.shadowBlur = 0;
       }
       ctx.restore();
 
@@ -187,5 +183,5 @@ export function HeroTradingCanvas() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="portal-canvas" aria-hidden />;
+  return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full pointer-events-none" aria-hidden />;
 }

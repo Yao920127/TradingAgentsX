@@ -84,7 +84,7 @@ function AuthCallbackContent() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center p-8 max-w-md">
-          <div className="text-red-500 text-5xl mb-4">⚠️</div>
+          <div className="text-destructive text-5xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold mb-2">登入失敗</h1>
           <p className="text-muted-foreground mb-4">{error}</p>
           <button

@@ -38,7 +38,7 @@ export function AnalystReport({ reports }: AnalystReportProps) {
   }
 
   return (
-    <Card className="shadow-lg hover-lift animate-scale-up">
+    <Card className="hover-lift animate-scale-up">
       <CardHeader>
         <CardTitle>{t.results.title}</CardTitle>
         <CardDescription>{t.home.professionalAgentsDesc}</CardDescription>
@@ -134,7 +134,7 @@ export function AnalystReport({ reports }: AnalystReportProps) {
 function ReportSection({ title, content, isDebateHistory = false }: { title: string; content: string; isDebateHistory?: boolean }) {
   const displayContent = isDebateHistory ? extractLastDebateRound(content) : content;
   return (
-    <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 dark:from-blue-900/10 dark:to-cyan-900/10 hover:shadow-md transition-shadow">
+    <div className="border rounded-lg p-4 transition-shadow">
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
       <MarkdownReport>{displayContent}</MarkdownReport>
     </div>

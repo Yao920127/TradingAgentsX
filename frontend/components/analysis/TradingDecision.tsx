@@ -14,12 +14,12 @@ interface TradingDecisionProps {
 export function TradingDecision({ result }: TradingDecisionProps) {
   if (result.status === "error") {
     return (
-      <Card className="border-red-500">
+      <Card className="border-destructive/30">
         <CardHeader>
-          <CardTitle className="text-red-600">分析錯誤</CardTitle>
+          <CardTitle className="text-destructive">分析錯誤</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-red-500">{result.error}</p>
+          <p className="text-destructive">{result.error}</p>
         </CardContent>
       </Card>
     );
@@ -32,16 +32,16 @@ export function TradingDecision({ result }: TradingDecisionProps) {
   const getActionBadge = (action: string) => {
     const actionLower = action.toLowerCase();
     if (actionLower.includes("buy")) {
-      return <Badge className="bg-green-600">買入</Badge>;
+      return <Badge className="bg-deep-green text-white dark:bg-pale-green dark:text-deep-green">買入</Badge>;
     } else if (actionLower.includes("sell")) {
-      return <Badge className="bg-red-600">賣出</Badge>;
+      return <Badge className="bg-destructive text-white">賣出</Badge>;
     } else {
-      return <Badge className="bg-yellow-600">持有</Badge>;
+      return <Badge className="bg-coral text-near-black">持有</Badge>;
     }
   };
 
   return (
-    <Card className="shadow-lg border-2 border-blue-500 hover-lift animate-scale-up">
+    <Card className="border-2 border-border hover-lift animate-scale-up">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>交易決策</CardTitle>
@@ -68,9 +68,9 @@ export function TradingDecision({ result }: TradingDecisionProps) {
           <div>
             <h4 className="font-semibold mb-2">信心度</h4>
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-blue-600"
+                  className="h-full bg-primary"
                   style={{ width: `${result.decision.confidence * 100}%` }}
                 />
               </div>
@@ -84,7 +84,7 @@ export function TradingDecision({ result }: TradingDecisionProps) {
         {result.decision.reasoning && (
           <div>
             <h4 className="font-semibold mb-2">理由</h4>
-            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+            <p className="text-sm text-foreground whitespace-pre-wrap">
               {result.decision.reasoning}
             </p>
           </div>

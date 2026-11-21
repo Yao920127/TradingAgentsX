@@ -231,7 +231,7 @@ export function ApiSettingsDialog() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300"
+          className="text-muted-foreground hover:bg-secondary hover:text-foreground "
           title={t.settings.title}
         >
           <Settings className="h-5 w-5" />
@@ -242,7 +242,7 @@ export function ApiSettingsDialog() {
           <DialogTitle>{t.settings.apiConfiguration}</DialogTitle>
           <DialogDescription>
             {t.settings.description}
-            <span className="block mt-1 text-xs text-green-600 dark:text-green-400">
+            <span className="block mt-1 text-xs text-deep-green dark:text-pale-green ">
               {t.settings.encryptionEnabled}
             </span>
           </DialogDescription>
@@ -251,7 +251,7 @@ export function ApiSettingsDialog() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-blue-800 dark:text-blue-300 text-sm">
+              <div className="bg-secondary border border-border rounded-lg p-3 text-deep-green dark:text-pale-green text-sm">
                 {t.settings.onlyFillNeeded}
               </div>
             </div>
@@ -502,7 +502,7 @@ export function ApiSettingsDialog() {
             </div>
 
             {saveSuccess && (
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 text-green-800 dark:text-green-300 text-sm">
+              <div className="bg-pale-green dark:bg-deep-green/40 border border-deep-green/30 dark:border-pale-green/30 rounded-lg p-3 text-deep-green dark:text-pale-green text-sm">
                 {t.settings.settingsSaved}
               </div>
             )}

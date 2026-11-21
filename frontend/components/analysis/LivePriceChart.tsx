@@ -37,11 +37,11 @@ import type {
   LiveSessionRange,
 } from "@/lib/types";
 
-const LIVE_LINE_COLOR = "#3b82f6";
+const LIVE_LINE_COLOR = "var(--chart-2)";
 const SESSION_COLORS: Record<LiveBarSession, string> = {
-  pre: "#f59e0b",
-  regular: "#93c5fd",
-  post: "#a78bfa",
+  pre: "var(--chart-3)",
+  regular: "var(--chart-2)",
+  post: "var(--chart-4)",
 };
 const SESSION_SHADE_OPACITY = 0.12;
 
@@ -109,7 +109,7 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
       ) : (
         <p className="text-sm text-muted-foreground">{hasError ? labels.liveError : labels.liveLoading}</p>
       )}
-      {quote && hasError && <p className="text-sm text-amber-600">{labels.liveError}</p>}
+      {quote && hasError && <p className="text-sm text-foreground">{labels.liveError}</p>}
 
       <div>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -212,8 +212,7 @@ function SessionLegend({ sessions, current, labels, marketType }: SessionLegendP
           <li
             key={`${range.session}-${range.start}`}
             aria-current={isCurrent ? "true" : undefined}
-            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${
-              isCurrent ? "border-foreground/40 font-semibold" : "border-border text-muted-foreground"
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${ isCurrent ? "border-foreground/40 font-semibold" : "border-border text-muted-foreground"
             }`}
           >
             <span
@@ -241,7 +240,7 @@ interface LiveStatsProps {
 
 function LiveStats({ quote, labels, marketType, formatPrice }: LiveStatsProps) {
   const isUp = (quote.change ?? 0) >= 0;
-  const changeColor = isUp ? "text-green-600" : "text-red-600";
+  const changeColor = isUp ? "text-deep-green dark:text-pale-green" : "text-destructive";
   const sign = isUp ? "+" : "";
   const changeText =
     quote.change != null && quote.change_percent != null
@@ -274,7 +273,7 @@ function LiveStats({ quote, labels, marketType, formatPrice }: LiveStatsProps) {
         <p className="text-sm font-semibold flex items-center gap-2">
           <span
             aria-hidden
-            className={`inline-block h-2 w-2 rounded-full ${quote.market_open ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}
+            className={`inline-block h-2 w-2 rounded-full ${quote.market_open ? "bg-deep-green dark:bg-pale-green animate-pulse" : "bg-gray-400"}`}
           />
           {marketStatusLabel(quote.session, labels)}
         </p>

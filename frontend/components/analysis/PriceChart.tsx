@@ -158,7 +158,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
               <TabsList>
                 <TabsTrigger value="history">{t.results.priceSection.history}</TabsTrigger>
                 <TabsTrigger value="live" className="gap-1.5">
-                  <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
+                  <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-destructive" />
                   {t.results.priceSection.live}
                 </TabsTrigger>
               </TabsList>
@@ -173,7 +173,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
         </div>
 
         {!isLive && newListingNotice && (
-          <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200">
+          <p className="mt-4 rounded-lg border border-coral/50 bg-coral/10 px-4 py-2 text-sm text-foreground ">
             {newListingNotice}
           </p>
         )}
@@ -181,9 +181,9 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
         {/* 統計資訊（歷史模式；即時模式的統計在 LivePriceChart 內） */}
         {!isLive && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+          <div className="bg-gradient-to-br p-4 rounded-lg border border-deep-green/30 dark:border-pale-green/30 ">
             <p className="text-sm text-muted-foreground">{labels.growth}</p>
-            <p className={`text-2xl font-bold ${priceStats.growth_rate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-2xl font-bold ${priceStats.growth_rate >= 0 ? 'text-deep-green dark:text-pale-green' : 'text-destructive'}`}>
               {priceStats.growth_rate >= 0 ? '+' : ''}{priceStats.growth_rate}%
             </p>
           </div>
@@ -196,7 +196,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
             <p className="text-lg font-semibold">${formatNumber(priceStats.start_price)}</p>
             <p className="text-xs text-muted-foreground">{priceStats.start_date}</p>
           </div>
-          <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
+          <div className="bg-gradient-to-br p-4 rounded-lg border border-coral/50 ">
             <p className="text-sm text-muted-foreground">{labels.endPrice}</p>
             <p className="text-lg font-semibold">${formatNumber(priceStats.end_price)}</p>
             <p className="text-xs text-muted-foreground">{priceStats.end_date}</p>
@@ -256,7 +256,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                 <Line 
                   type="monotone" 
                   dataKey={(data: PriceData) => getCloseValue(data)}
-                  stroke="#93c5fd" 
+                  stroke="var(--chart-2)" 
                   strokeWidth={2}
                   name={labels.adjClosePrice} 
                   dot={lineDot}
@@ -286,7 +286,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                       const hasAdjClose = adjClose !== undefined && adjClose !== null;
                       
                       // Trend color coding for the direction indicator
-                      const trendColor = isUp ? 'text-green-600' : isDown ? 'text-red-600' : 'text-gray-600';
+                      const trendColor = isUp ? 'text-deep-green dark:text-pale-green' : isDown ? 'text-destructive' : 'text-gray-600';
                       const direction = isUp ? labels.up : isDown ? labels.down : labels.noChange;
                       
                       return (
@@ -318,7 +318,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                               {labels.close}: ${formatNumber(data.HA_Close)}
                             </p>
                             <p className="text-pink-600">{labels.high}: ${formatNumber(data.HA_High)}</p>
-                            <p className="text-amber-600">{labels.low}: ${formatNumber(data.HA_Low)}</p>
+                            <p className="text-foreground">{labels.low}: ${formatNumber(data.HA_Low)}</p>
                             <p className={`text-sm mt-2 ${trendColor}`}>
                               {direction} ${formatNumber(Math.abs(data.HA_Close - data.HA_Open))}
                             </p>
@@ -364,7 +364,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                 ]}
                 labelFormatter={(label) => `${labels.date}: ${formatFullDate(String(label))}`}
               />
-              <Bar dataKey="Volume" fill="#93c5fd" name={labels.volume} />
+              <Bar dataKey="Volume" fill="var(--chart-4)" name={labels.volume} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -401,14 +401,14 @@ const HeikinAshiCandlestickShape: React.FC<HeikinAshiCandlestickShapeProps> = (p
   let strokeColor: string;
   
   if (isUp) {
-    fillColor = '#86efac'; // soft pastel green
-    strokeColor = '#22c55e'; // darker green
+    fillColor = 'var(--chart-1)'; // deep green (light) / mint (dark)
+    strokeColor = 'var(--chart-1)';
   } else if (isDown) {
-    fillColor = '#fca5a5'; // soft pastel pink/red
-    strokeColor = '#ef4444'; // darker red
+    fillColor = 'var(--chart-5)'; // error red
+    strokeColor = 'var(--chart-5)';
   } else {
-    fillColor = '#d1d5db'; // soft gray
-    strokeColor = '#6b7280'; // darker gray
+    fillColor = 'var(--chart-4)'; // slate
+    strokeColor = 'var(--chart-4)';
   }
   
   // 計算實際的 Y 坐標位置

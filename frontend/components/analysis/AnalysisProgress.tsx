@@ -88,21 +88,21 @@ export function AnalysisProgress({ detail, clockOffset, startedAt }: AnalysisPro
       {/* Header: title + elapsed */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg md:text-xl font-semibold text-foreground ">
             {t.progress.title}
           </h2>
           {detail && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {fill(t.progress.stepsDone, { done: doneCount, total: steps.length })}
             </p>
           )}
         </div>
         <div className="flex flex-col items-end shrink-0">
-          <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
             {t.progress.elapsed}
           </span>
-          <span className="text-2xl font-mono font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+          <span className="text-2xl font-mono font-semibold tabular-nums text-foreground ">
             {elapsed}
           </span>
         </div>
@@ -111,7 +111,7 @@ export function AnalysisProgress({ detail, clockOffset, startedAt }: AnalysisPro
       {/* Progress bar */}
       <div className="flex items-center gap-3">
         <div
-          className="relative h-2.5 flex-1 rounded-full bg-gray-200/70 dark:bg-white/10 overflow-hidden"
+          className="relative h-2.5 flex-1 rounded-full bg-muted overflow-hidden"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -126,30 +126,30 @@ export function AnalysisProgress({ detail, clockOffset, startedAt }: AnalysisPro
             <div className="h-full w-1/3 rounded-full gradient-bg-primary animate-pulse" />
           )}
         </div>
-        <span className="w-11 text-right text-sm font-mono tabular-nums text-gray-600 dark:text-gray-300">
+        <span className="w-11 text-right text-sm font-mono tabular-nums text-muted-foreground ">
           {detail ? `${percent}%` : "—"}
         </span>
       </div>
 
       {/* Current activity */}
-      <div className="rounded-2xl bg-blue-50/70 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-400/20 px-4 py-3 flex gap-3">
+      <div className="rounded-2xl bg-secondary border border-border px-4 py-3 flex gap-3">
         {detail?.finished ? (
-          <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-emerald-500" />
+          <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-deep-green dark:text-pale-green" />
         ) : (
-          <Loader2 className="h-5 w-5 mt-0.5 shrink-0 animate-spin text-blue-500" />
+          <Loader2 className="h-5 w-5 mt-0.5 shrink-0 animate-spin text-deep-green dark:text-pale-green" />
         )}
         <div className="min-w-0 text-sm">
           {!detail || (!detail.current_agent && !detail.finished) ? (
-            <p className="text-gray-700 dark:text-gray-200">{t.progress.initializing}</p>
+            <p className="text-foreground ">{t.progress.initializing}</p>
           ) : detail.finished ? (
-            <p className="text-gray-700 dark:text-gray-200">{t.progress.finalizing}</p>
+            <p className="text-foreground ">{t.progress.finalizing}</p>
           ) : (
             <>
-              <p className="text-gray-800 dark:text-gray-100">
+              <p className="text-foreground ">
                 <span className="font-semibold">{agentName(detail.current_agent!)}</span>{" "}
                 {t.progress.working}
                 {currentStep?.total_turns != null && (
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <span className="text-muted-foreground ">
                     {" · "}
                     {fill(t.progress.turn, {
                       done: Math.min((currentStep.turns_done ?? 0) + 1, currentStep.total_turns),
@@ -159,10 +159,10 @@ export function AnalysisProgress({ detail, clockOffset, startedAt }: AnalysisPro
                 )}
               </p>
               {detail.current_step && (
-                <p className="text-gray-600 dark:text-gray-400 mt-0.5">{stepDesc(detail.current_step)}</p>
+                <p className="text-muted-foreground mt-0.5">{stepDesc(detail.current_step)}</p>
               )}
               {detail.current_tools.length > 0 && (
-                <p className="text-blue-700 dark:text-blue-300 mt-1 flex items-center gap-1.5">
+                <p className="text-deep-green dark:text-pale-green mt-1 flex items-center gap-1.5">
                   <Database className="h-3.5 w-3.5 shrink-0" />
                   <span className="truncate">
                     {t.progress.fetchingData}
@@ -187,32 +187,32 @@ export function AnalysisProgress({ detail, clockOffset, startedAt }: AnalysisPro
                 key={step.key}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
-                  running && "bg-blue-50/60 dark:bg-blue-500/10"
+                  running && "bg-secondary "
                 )}
               >
                 {done ? (
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-deep-green dark:text-pale-green" />
                 ) : running ? (
-                  <Loader2 className="h-4 w-4 shrink-0 animate-spin text-blue-500" />
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin text-deep-green dark:text-pale-green" />
                 ) : (
-                  <Circle className="h-4 w-4 shrink-0 text-gray-300 dark:text-gray-600" />
+                  <Circle className="h-4 w-4 shrink-0 text-muted-foreground " />
                 )}
                 <span
                   className={cn(
                     "flex-1 min-w-0 truncate",
-                    done && "text-gray-700 dark:text-gray-300",
-                    running && "font-medium text-gray-900 dark:text-gray-100",
-                    !done && !running && "text-gray-400 dark:text-gray-500"
+                    done && "text-foreground ",
+                    running && "font-medium text-foreground ",
+                    !done && !running && "text-muted-foreground "
                   )}
                 >
                   {stepName(step.key)}
                   {step.total_turns != null && (done || running) && (
-                    <span className="ml-2 text-xs font-mono tabular-nums text-gray-500 dark:text-gray-400">
+                    <span className="ml-2 text-xs font-mono tabular-nums text-muted-foreground ">
                       {step.turns_done}/{step.total_turns}
                     </span>
                   )}
                 </span>
-                <span className="shrink-0 text-xs font-mono tabular-nums text-gray-500 dark:text-gray-400">
+                <span className="shrink-0 text-xs font-mono tabular-nums text-muted-foreground ">
                   {duration ?? ""}
                 </span>
               </li>

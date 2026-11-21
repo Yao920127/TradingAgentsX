@@ -154,22 +154,22 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl hover:from-blue-700 hover:to-cyan-700 animate-fade-in"
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground transition-all duration-300 hover:scale-110 animate-fade-in"
           aria-label={t.chat?.title || "Chat"}
         >
           <MessageCircle className="h-6 w-6" />
           <span className="absolute -top-1 -right-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-cyan-500" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-primary" />
           </span>
         </button>
       )}
 
       {/* Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[400px] h-[520px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-2xl animate-slide-up overflow-hidden">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[400px] h-[520px] rounded-2xl border border-border bg-card animate-slide-up overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
+          <div className="flex items-center justify-between px-4 py-3 text-primary-foreground">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
               <span className="font-semibold text-sm">
@@ -178,7 +178,7 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="rounded-full p-1 hover:bg-white/20 transition-colors"
+              className="rounded-full p-1 hover:bg-card transition-colors"
               aria-label={t.common?.close || "Close"}
             >
               <X className="h-4 w-4" />
@@ -189,7 +189,7 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
             {/* Empty state */}
             {messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 dark:text-gray-500 gap-3">
+              <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground gap-3">
                 <Bot className="h-10 w-10 opacity-50" />
                 <div>
                   <p className="text-sm font-medium">
@@ -210,10 +210,9 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
               >
                 {/* Avatar */}
                 <div
-                  className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white text-xs ${
-                    msg.role === "user"
-                      ? "bg-gradient-to-br from-blue-500 to-cyan-500"
-                      : "bg-gradient-to-br from-amber-500 to-orange-500"
+                  className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-primary-foreground text-xs ${ msg.role === "user"
+                      ? "  "
+                      : "  "
                   }`}
                 >
                   {msg.role === "user" ? (
@@ -225,10 +224,9 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
 
                 {/* Bubble */}
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-tr-sm"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm"
+                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${ msg.role === "user"
+                      ? "   text-primary-foreground rounded-tr-sm"
+                      : "bg-muted  text-foreground  rounded-tl-sm"
                   }`}
                 >
                   {msg.role === "assistant" ? (
@@ -247,11 +245,11 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
             {/* Loading indicator */}
             {isLoading && (
               <div className="flex gap-2">
-                <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-amber-500 to-orange-500 text-white text-xs">
+                <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-primary-foreground text-xs">
                   <Bot className="h-3.5 w-3.5" />
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground ">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     <span>{t.chat?.thinking || "Thinking..."}</span>
                   </div>
@@ -261,7 +259,7 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
 
             {/* Error message */}
             {error && (
-              <div className="flex items-start gap-2 text-red-500 text-xs bg-red-50 dark:bg-red-950/30 rounded-lg p-2">
+              <div className="flex items-start gap-2 text-destructive text-xs bg-coral-soft/20 dark:bg-destructive/15 rounded-lg p-2">
                 <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -271,7 +269,7 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
           </div>
 
           {/* Input Bar */}
-          <div className="border-t border-gray-200 dark:border-gray-700 px-3 py-3">
+          <div className="border-t border-border px-3 py-3">
             <div className="flex gap-2">
               <Input
                 ref={inputRef}
@@ -280,13 +278,13 @@ export function ReportChat({ reports, ticker, analysisDate }: ReportChatProps) {
                 onKeyDown={handleKeyDown}
                 placeholder={t.chat?.placeholder || "Ask about this report..."}
                 disabled={isLoading}
-                className="flex-1 text-sm rounded-full border-gray-200 dark:border-gray-700 focus-visible:ring-cyan-500"
+                className="flex-1 text-sm rounded-full border-border focus-visible:ring-ring"
               />
               <Button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
                 size="icon"
-                className="rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 h-9 w-9 flex-shrink-0"
+                className="rounded-full h-9 w-9 flex-shrink-0"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

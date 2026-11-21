@@ -24,6 +24,10 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+// Solid disc behind every flow icon so the white glyph is always visible.
+const ICON_DISC =
+  "inline-flex items-center justify-center rounded-full bg-deep-green text-white dark:bg-pale-green dark:text-deep-green";
+
 export function AgentFlowDiagram() {
   const { t } = useLanguage();
 
@@ -31,7 +35,7 @@ export function AgentFlowDiagram() {
     <div className="w-full max-w-7xl mx-auto space-y-6">
       {/* Data Sources Layer */}
       <div>
-        <h3 className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 mb-4">
+        <h3 className="text-center text-sm font-semibold text-muted-foreground mb-4">
           📥 {t.flowDiagram.layer1}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -67,35 +71,31 @@ export function AgentFlowDiagram() {
 
       {/* Analysts Layer - 4 agents */}
       <div>
-        <h3 className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 mb-4">
+        <h3 className="text-center text-sm font-semibold text-muted-foreground mb-4">
           🤖 {t.flowDiagram.layer2}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <AgentCard
             name={t.agents.market_analyst}
             icon={<BarChart3 className="w-5 h-5" />}
-            gradient="from-blue-500 to-cyan-500"
             description={t.flowDiagram.technicalAnalysis}
             tasks={[t.flowDiagram.rsiIndicator, t.flowDiagram.macdMomentum, t.flowDiagram.priceTrend]}
           />
           <AgentCard
             name={t.agents.social_analyst}
             icon={<MessageSquare className="w-5 h-5" />}
-            gradient="from-orange-500 to-red-500"
             description={t.flowDiagram.sentimentAnalysis}
             tasks={[t.flowDiagram.bullBearRatio, t.flowDiagram.discussionHeat, t.flowDiagram.investorConfidence]}
           />
           <AgentCard
             name={t.agents.news_analyst}
             icon={<Newspaper className="w-5 h-5" />}
-            gradient="from-green-500 to-emerald-500"
             description={t.flowDiagram.newsAnalysis}
             tasks={[t.flowDiagram.multiSourceNews, t.flowDiagram.fullTextReading, t.flowDiagram.eventAssessment]}
           />
           <AgentCard
             name={t.agents.fundamentals_analyst}
             icon={<DollarSign className="w-5 h-5" />}
-            gradient="from-amber-500 to-orange-500"
             description={t.flowDiagram.fundamentalsAnalysis}
             tasks={[t.flowDiagram.financialAnalysis, t.flowDiagram.valuationMetrics, t.flowDiagram.profitEvaluation]}
           />
@@ -110,7 +110,6 @@ export function AgentFlowDiagram() {
         <ManagerCard
           name={t.agents.report_summarizer}
           icon={<FileText className="w-6 h-6" />}
-          gradient="from-sky-500 to-teal-500"
           description={t.flowDiagram.summarizerDesc}
           tasks={[t.flowDiagram.keepKeyData, t.flowDiagram.structuredSummary, t.flowDiagram.saveTokens]}
         />
@@ -121,21 +120,19 @@ export function AgentFlowDiagram() {
 
       {/* Researchers Layer - 2 agents */}
       <div>
-        <h3 className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 mb-4">
+        <h3 className="text-center text-sm font-semibold text-muted-foreground mb-4">
           🔍 {t.flowDiagram.layer3}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
           <AgentCard
             name={t.agents.bull_researcher}
             icon={<TrendingUp className="w-5 h-5" />}
-            gradient="from-green-500 to-emerald-500"
             description={t.flowDiagram.bullishResearch}
             tasks={[t.flowDiagram.positiveFactors, t.flowDiagram.growthOpportunities, t.flowDiagram.buyReasons]}
           />
           <AgentCard
             name={t.agents.bear_researcher}
             icon={<TrendingDown className="w-5 h-5" />}
-            gradient="from-red-500 to-rose-500"
             description={t.flowDiagram.bearishResearch}
             tasks={[t.flowDiagram.negativeFactors, t.flowDiagram.riskAssessment, t.flowDiagram.sellReasons]}
           />
@@ -150,7 +147,6 @@ export function AgentFlowDiagram() {
         <ManagerCard
           name={t.flowDiagram.researchManager}
           icon={<Users className="w-6 h-6" />}
-          gradient="from-teal-500 to-cyan-600"
           description={t.flowDiagram.integrateViews}
           tasks={[t.flowDiagram.balanceArguments, t.flowDiagram.comprehensiveAdvice, t.flowDiagram.preliminaryStrategy]}
         />
@@ -161,28 +157,25 @@ export function AgentFlowDiagram() {
 
       {/* Risk Debators Layer - 3 agents */}
       <div>
-        <h3 className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 mb-4">
+        <h3 className="text-center text-sm font-semibold text-muted-foreground mb-4">
           ⚖️ {t.flowDiagram.layer4}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <AgentCard
             name={t.agents.aggressive_debator}
             icon={<ShieldAlert className="w-5 h-5" />}
-            gradient="from-red-500 to-orange-500"
             description={t.flowDiagram.highRiskReward}
             tasks={[t.flowDiagram.aggressiveStrategy, t.flowDiagram.maximizeReturns, t.flowDiagram.calculatedRisk]}
           />
           <AgentCard
             name={t.agents.neutral_debator}
             icon={<Shield className="w-5 h-5" />}
-            gradient="from-blue-500 to-sky-600"
             description={t.flowDiagram.balancedRisk}
             tasks={[t.flowDiagram.prudentStrategy, t.flowDiagram.riskBalance, t.flowDiagram.rationalDecision]}
           />
           <AgentCard
             name={t.agents.conservative_debator}
             icon={<ShieldCheck className="w-5 h-5" />}
-            gradient="from-green-500 to-teal-500"
             description={t.flowDiagram.lowRiskVol}
             tasks={[t.flowDiagram.conservativeStrategy, t.flowDiagram.capitalProtection, t.flowDiagram.riskReduction]}
           />
@@ -197,7 +190,6 @@ export function AgentFlowDiagram() {
         <ManagerCard
           name={t.flowDiagram.riskManager}
           icon={<Shield className="w-6 h-6" />}
-          gradient="from-red-500 to-pink-500"
           description={t.flowDiagram.integrateRisk}
           tasks={[t.flowDiagram.riskRating, t.flowDiagram.stopLossSettings, t.flowDiagram.finalRiskControl]}
         />
@@ -211,7 +203,6 @@ export function AgentFlowDiagram() {
         <TraderCard
           name={t.flowDiagram.trader}
           icon={<Target className="w-7 h-7" />}
-          gradient="from-blue-600 via-cyan-600 to-teal-600"
           description={t.flowDiagram.executeTrade}
           outputs={[t.flowDiagram.tradeSignal, t.flowDiagram.targetPrice, t.flowDiagram.tradeQuantity, t.flowDiagram.riskParams]}
         />
@@ -222,16 +213,16 @@ export function AgentFlowDiagram() {
 
       {/* Output Layer */}
       <div>
-        <h3 className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 mb-4">
+        <h3 className="text-center text-sm font-semibold text-muted-foreground mb-4">
           📊 {t.flowDiagram.finalOutput}
         </h3>
-        <Card className="bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-teal-500/10 dark:from-blue-600/20 dark:via-cyan-600/20 dark:to-teal-600/20 border-2 border-dashed border-blue-300 dark:border-blue-700 p-6">
+        <Card className="border-2 border-dashed border-border p-6">
           <div className="text-center mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg mb-3">
+            <div className={`${ICON_DISC} w-16 h-16 mb-3`}>
               <BarChart3 className="w-8 h-8" />
             </div>
             <h4 className="font-bold text-lg mb-2 gradient-text-primary">{t.flowDiagram.completeReportSet}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground ">
               {t.flowDiagram.comprehensiveSupport}
             </p>
           </div>
@@ -271,20 +262,20 @@ function DataSourceCard({
   color: "blue" | "orange" | "green" | "amber";
 }) {
   const colorClasses = {
-    blue: "from-blue-500 to-cyan-500 border-blue-300 dark:border-blue-700",
-    orange: "from-orange-500 to-red-500 border-orange-300 dark:border-orange-700",
-    green: "from-green-500 to-emerald-500 border-green-300 dark:border-green-700",
-    amber: "from-amber-500 to-orange-500 border-amber-300 dark:border-amber-700",
+    blue: "  border-border ",
+    orange: "  border-coral/50 ",
+    green: "  border-deep-green/30 dark:border-pale-green/30 ",
+    amber: "  border-coral/50 ",
   };
 
   return (
     <Card className={`p-3 hover-lift animate-slide-up border-2 ${colorClasses[color]}`}>
       <div className="flex flex-col items-center justify-center">
-        <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br ${colorClasses[color].split(' ')[0]} ${colorClasses[color].split(' ')[1]} text-white mb-2 shadow-lg`}>
+        <div className={`${ICON_DISC} w-10 h-10 mb-2`}>
           {icon}
         </div>
         <h4 className="font-semibold text-xs mb-0.5 text-center">{name}</h4>
-        <p className="text-xs text-gray-600 dark:text-gray-400 text-center">{description}</p>
+        <p className="text-xs text-muted-foreground text-center">{description}</p>
       </div>
     </Card>
   );
@@ -293,32 +284,29 @@ function DataSourceCard({
 function AgentCard({
   name,
   icon,
-  gradient,
   description,
   tasks,
 }: {
   name: string;
   icon: React.ReactNode;
-  gradient: string;
   description: string;
   tasks: string[];
 }) {
   return (
     <Card className="p-4 hover-lift animate-scale-up relative overflow-hidden group">
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
       
       <div className="relative z-10">
         <div className="text-center mb-3">
-          <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br ${gradient} text-white mb-2 shadow-lg`}>
+          <div className={`${ICON_DISC} w-10 h-10 mb-2`}>
             {icon}
           </div>
           <h4 className="font-bold text-sm mb-0.5">{name}</h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+          <p className="text-xs text-muted-foreground ">{description}</p>
         </div>
 
         <div className="space-y-0.5">
           {tasks.map((task, index) => (
-            <div key={index} className="flex items-start text-xs text-gray-600 dark:text-gray-400">
+            <div key={index} className="flex items-start text-xs text-muted-foreground ">
               <span className="mr-1">•</span>
               <span>{task}</span>
             </div>
@@ -332,29 +320,27 @@ function AgentCard({
 function ManagerCard({
   name,
   icon,
-  gradient,
   description,
   tasks,
 }: {
   name: string;
   icon: React.ReactNode;
-  gradient: string;
   description: string;
   tasks: string[];
 }) {
   return (
-    <Card className={`p-5 hover-lift relative overflow-hidden border-2 bg-gradient-to-br ${gradient} bg-opacity-5`}>
+    <Card className={`p-5 hover-lift relative overflow-hidden border-2 border-border`}>
       <div className="text-center mb-3">
-        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br ${gradient} text-white mb-2 shadow-xl`}>
+        <div className={`${ICON_DISC} w-12 h-12 mb-2`}>
           {icon}
         </div>
         <h4 className="font-bold text-base mb-1">{name}</h4>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
+        <p className="text-sm text-muted-foreground ">{description}</p>
       </div>
 
       <div className="space-y-1">
         {tasks.map((task, index) => (
-          <div key={index} className="flex items-start text-sm text-gray-700 dark:text-gray-300">
+          <div key={index} className="flex items-start text-sm text-foreground ">
             <span className="mr-2">✓</span>
             <span>{task}</span>
           </div>
@@ -367,34 +353,30 @@ function ManagerCard({
 function TraderCard({
   name,
   icon,
-  gradient,
   description,
   outputs,
 }: {
   name: string;
   icon: React.ReactNode;
-  gradient: string;
   description: string;
   outputs: string[];
 }) {
   return (
-    <Card className={`p-6 hover-lift relative overflow-hidden border-4 border-double bg-gradient-to-br ${gradient}`}>
-      <div className="absolute inset-0 bg-white dark:bg-gray-900 opacity-95" />
-      
-      <div className="relative z-10">
+    <Card className={`p-6 hover-lift relative overflow-hidden border-2 border-foreground`}>
+            <div className="relative z-10">
         <div className="text-center mb-4">
-          <div className={`inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br ${gradient} text-white mb-3 shadow-2xl animate-pulse-slow`}>
+          <div className={`${ICON_DISC} w-14 h-14 mb-3`}>
             {icon}
           </div>
           <h4 className="font-bold text-lg mb-1 gradient-text-primary">{name}</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">{description}</p>
+          <p className="text-sm text-muted-foreground font-medium">{description}</p>
         </div>
 
-        <div className="space-y-2 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg">
-          <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">最終輸出:</div>
+        <div className="space-y-2 bg-muted p-3 rounded-lg">
+          <div className="text-xs font-semibold text-foreground mb-2">最終輸出:</div>
           {outputs.map((output, index) => (
-            <div key={index} className="flex items-start text-sm font-medium text-gray-700 dark:text-gray-300">
-              <span className="mr-2 text-green-600 dark:text-green-400">▸</span>
+            <div key={index} className="flex items-start text-sm font-medium text-foreground ">
+              <span className="mr-2 text-deep-green dark:text-pale-green ">▸</span>
               <span>{output}</span>
             </div>
           ))}
@@ -406,17 +388,17 @@ function TraderCard({
 
 function FlowArrow({ label, color }: { label: string; color: string }) {
   const colorClasses = {
-    blue: "text-blue-500 dark:text-blue-400",
-    amber: "text-amber-500 dark:text-amber-400",
-    green: "text-green-500 dark:text-green-400",
-    orange: "text-orange-500 dark:text-orange-400",
-    red: "text-red-500 dark:text-red-400",
+    blue: "text-deep-green dark:text-pale-green ",
+    amber: "text-foreground ",
+    green: "text-deep-green dark:text-pale-green ",
+    orange: "text-foreground ",
+    red: "text-destructive ",
   };
 
   return (
     <div className="flex justify-center">
       <div className="flex flex-col items-center">
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">{label}</div>
+        <div className="text-xs text-muted-foreground mb-1 font-medium">{label}</div>
         <ArrowDown className={`w-7 h-7 ${colorClasses[color as keyof typeof colorClasses]} motion-safe:animate-pulse`} />
       </div>
     </div>
@@ -433,17 +415,17 @@ function ReportSection({
   color: "blue" | "green" | "red";
 }) {
   const colorClasses = {
-    blue: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800",
-    green: "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800",
-    red: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800",
+    blue: "bg-secondary  border-border ",
+    green: "bg-pale-green dark:bg-deep-green/40  border-deep-green/30 dark:border-pale-green/30 ",
+    red: "bg-coral-soft/20 dark:bg-destructive/15  border-destructive/30 ",
   };
 
   return (
     <div className={`p-3 rounded-lg border ${colorClasses[color]}`}>
-      <h5 className="font-semibold text-xs mb-2 text-gray-800 dark:text-gray-200">{title}</h5>
+      <h5 className="font-semibold text-xs mb-2 text-foreground ">{title}</h5>
       <div className="space-y-1">
         {items.map((item, index) => (
-          <div key={index} className="text-xs text-gray-600 dark:text-gray-400 flex items-start">
+          <div key={index} className="text-xs text-muted-foreground flex items-start">
             <span className="mr-1">•</span>
             <span>{item}</span>
           </div>

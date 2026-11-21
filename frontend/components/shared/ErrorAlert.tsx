@@ -37,37 +37,29 @@ export function ErrorAlert({ error }: ErrorAlertProps) {
   };
 
   return (
-    <Card className={`p-6 border-2 ${
-      isRateLimit 
-        ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700" 
-        : "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"
+    <Card className={`p-6 border-2 ${ isRateLimit ? "bg-coral/10  border-coral/50 " 
+        : "bg-coral-soft/20 dark:bg-destructive/15  border-destructive/30 "
     }`}>
       <div className="flex items-start gap-4">
-        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-          isRateLimit 
-            ? "bg-orange-100 dark:bg-orange-800" 
-            : "bg-red-100 dark:bg-red-800"
+        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${ isRateLimit ? "bg-coral/10 " 
+            : "bg-coral-soft/20 dark:bg-destructive/15 "
         }`}>
           {isRateLimit ? (
-            <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <Clock className="w-5 h-5 text-foreground " />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+            <AlertCircle className="w-5 h-5 text-destructive " />
           )}
         </div>
         
         <div className="flex-1">
-          <h3 className={`font-semibold text-lg mb-2 ${
-            isRateLimit 
-              ? "text-orange-900 dark:text-orange-200" 
-              : "text-red-900 dark:text-red-200"
+          <h3 className={`font-semibold text-lg mb-2 ${ isRateLimit ? "text-foreground " 
+              : "text-destructive "
           }`}>
             {isRateLimit ? "API 請求額度已達上限" : "錯誤"}
           </h3>
           
-          <p className={`mb-4 ${
-            isRateLimit 
-              ? "text-orange-800 dark:text-orange-300" 
-              : "text-red-800 dark:text-red-300"
+          <p className={`mb-4 ${ isRateLimit ? "text-foreground " 
+              : "text-destructive "
           }`}>
             {errorMessage}
           </p>
@@ -76,14 +68,14 @@ export function ErrorAlert({ error }: ErrorAlertProps) {
             <div className="space-y-3 mt-4">
               {/* Retry Information */}
               {retryAfter && (
-                <div className="flex items-start gap-2 bg-white/50 dark:bg-gray-900/50 p-3 rounded-lg">
-                  <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-2 bg-card p-3 rounded-lg">
+                  <Clock className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <p className="text-sm font-medium text-foreground ">
                       建議等待時間
                     </p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">
-                      請在 <span className="font-bold text-orange-600 dark:text-orange-400">
+                    <p className="text-sm text-foreground ">
+                      請在 <span className="font-bold text-foreground ">
                         {getRetryTimeDisplay(retryAfter)}
                       </span> 後重試
                     </p>
@@ -93,13 +85,13 @@ export function ErrorAlert({ error }: ErrorAlertProps) {
 
               {/* Quota Information */}
               {quotaLimit && (
-                <div className="flex items-start gap-2 bg-white/50 dark:bg-gray-900/50 p-3 rounded-lg">
-                  <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-2 bg-card p-3 rounded-lg">
+                  <TrendingUp className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <p className="text-sm font-medium text-foreground ">
                       每日額度限制
                     </p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                    <p className="text-sm text-foreground ">
                       當前計劃：每日 {quotaLimit} 次請求
                     </p>
                   </div>
@@ -107,11 +99,11 @@ export function ErrorAlert({ error }: ErrorAlertProps) {
               )}
 
               {/* Solutions */}
-              <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 p-4 rounded-lg mt-4">
-                <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">
+              <div className="bg-secondary border border-border p-4 rounded-lg mt-4">
+                <p className="text-sm font-semibold text-deep-green dark:text-pale-green mb-2">
                   💡 解決方案：
                 </p>
-                <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1.5 list-disc list-inside">
+                <ul className="text-sm text-deep-green dark:text-pale-green space-y-1.5 list-disc list-inside">
                   <li>等待額度重置（通常為每日重置）</li>
                   <li>升級至付費方案以獲得更高額度</li>
                   <li>減少分析師數量或研究深度以降低 API 呼叫次數</li>

@@ -148,7 +148,7 @@ export default function AnalysisPage() {
         <div className="text-center relative">
           <div className="absolute inset-0 gradient-bg-radial opacity-40 -z-10" />
           <h1 className="text-4xl font-bold mb-2 gradient-text-primary">{t.form.analysisTitle}</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground ">
             {t.form.analysisSubtitle}
           </p>
         </div>

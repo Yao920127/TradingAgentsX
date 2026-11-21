@@ -43,45 +43,45 @@ const TONE_THEME: Record<
 > = {
   bull: {
     icon: TrendingUp,
-    header: "bg-emerald-50/80 dark:bg-emerald-950/30",
-    label: "text-emerald-700 dark:text-emerald-400",
-    ring: "border-emerald-200/80 dark:border-emerald-900/60",
+    header: "bg-pale-green dark:bg-deep-green/40 ",
+    label: "text-deep-green dark:text-pale-green ",
+    ring: "border-deep-green/30 dark:border-pale-green/30 ",
   },
   bear: {
     icon: TrendingDown,
-    header: "bg-rose-50/80 dark:bg-rose-950/30",
-    label: "text-rose-700 dark:text-rose-400",
-    ring: "border-rose-200/80 dark:border-rose-900/60",
+    header: "bg-coral-soft/20 dark:bg-destructive/15 ",
+    label: "text-destructive ",
+    ring: "border-destructive/30 ",
   },
   aggressive: {
     icon: Zap,
-    header: "bg-rose-50/80 dark:bg-rose-950/30",
-    label: "text-rose-700 dark:text-rose-400",
-    ring: "border-rose-200/80 dark:border-rose-900/60",
+    header: "bg-coral-soft/20 dark:bg-destructive/15 ",
+    label: "text-destructive ",
+    ring: "border-destructive/30 ",
   },
   conservative: {
     icon: Shield,
-    header: "bg-emerald-50/80 dark:bg-emerald-950/30",
-    label: "text-emerald-700 dark:text-emerald-400",
-    ring: "border-emerald-200/80 dark:border-emerald-900/60",
+    header: "bg-pale-green dark:bg-deep-green/40 ",
+    label: "text-deep-green dark:text-pale-green ",
+    ring: "border-deep-green/30 dark:border-pale-green/30 ",
   },
   neutral: {
     icon: Scale,
-    header: "bg-blue-50/80 dark:bg-blue-950/30",
-    label: "text-blue-700 dark:text-blue-400",
-    ring: "border-blue-200/80 dark:border-blue-900/60",
+    header: "bg-secondary ",
+    label: "text-deep-green dark:text-pale-green ",
+    ring: "border-border ",
   },
   investmentPlan: {
     icon: ClipboardCheck,
-    header: "bg-cyan-50/80 dark:bg-cyan-950/30",
-    label: "text-cyan-700 dark:text-cyan-400",
-    ring: "border-cyan-200/80 dark:border-cyan-900/60",
+    header: "bg-secondary ",
+    label: "text-deep-green dark:text-pale-green ",
+    ring: "border-border ",
   },
   riskDecision: {
     icon: Gavel,
-    header: "bg-amber-50/80 dark:bg-amber-950/30",
-    label: "text-amber-700 dark:text-amber-400",
-    ring: "border-amber-200/80 dark:border-amber-900/60",
+    header: "bg-coral/10 ",
+    label: "text-foreground ",
+    ring: "border-coral/50 ",
   },
 };
 
@@ -93,7 +93,7 @@ export function DebateCard({ tone, title, content }: DebateCardProps) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-xl border bg-card shadow-sm",
+        "flex h-full flex-col overflow-hidden rounded-xl border bg-card ",
         theme.ring,
         // Capped so every column stays comparable on screen; the full text opens in a dialog.
         "max-h-[26rem] lg:max-h-[32rem]",

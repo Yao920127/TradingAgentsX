@@ -27,21 +27,21 @@ const SIGNAL_THEME: Record<
 > = {
   buy: {
     panel:
-      "border-emerald-200/80 bg-emerald-50/70 dark:border-emerald-900/60 dark:bg-emerald-950/30",
-    text: "text-emerald-700 dark:text-emerald-400",
-    bar: "bg-emerald-600 dark:bg-emerald-500",
+      "border-deep-green/30 dark:border-pale-green/30 bg-pale-green dark:bg-deep-green/40  ",
+    text: "text-deep-green dark:text-pale-green ",
+    bar: "bg-deep-green dark:bg-pale-green ",
   },
   sell: {
     panel:
-      "border-rose-200/80 bg-rose-50/70 dark:border-rose-900/60 dark:bg-rose-950/30",
-    text: "text-rose-700 dark:text-rose-400",
-    bar: "bg-rose-600 dark:bg-rose-500",
+      "border-destructive/30 bg-coral-soft/20 dark:bg-destructive/15  ",
+    text: "text-destructive ",
+    bar: "bg-destructive ",
   },
   hold: {
     panel:
-      "border-amber-200/80 bg-amber-50/70 dark:border-amber-900/60 dark:bg-amber-950/30",
-    text: "text-amber-700 dark:text-amber-400",
-    bar: "bg-amber-500",
+      "border-coral/50 bg-coral/10  ",
+    text: "text-foreground ",
+    bar: "bg-coral",
   },
   unknown: {
     panel: "border-border bg-muted/40",
@@ -67,8 +67,8 @@ export function VerdictBanner({
     periodChange == null
       ? "text-muted-foreground"
       : periodChange >= 0
-        ? "text-emerald-600 dark:text-emerald-400"
-        : "text-rose-600 dark:text-rose-400";
+        ? "text-deep-green dark:text-pale-green "
+        : "text-destructive ";
 
   return (
     <section

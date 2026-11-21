@@ -924,7 +924,7 @@ export default function HistoryPage() {
             <h1 className="text-4xl font-bold mb-2 gradient-text-primary">
               {t.history.title}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-muted-foreground ">
               {t.history.noHistory.replace(
                 "尚無分析紀錄",
                 "瀏覽已儲存的分析報告",
@@ -951,7 +951,7 @@ export default function HistoryPage() {
                   className="py-2 sm:py-3 text-sm sm:text-base transition-all duration-300 hover:scale-105"
                 >
                   <span className="mr-1 sm:mr-2">{MARKET_LABELS[key].label}</span>
-                  <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-white/20 text-xs">
+                  <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-card text-xs">
                     {counts[key]}
                   </span>
                 </TabsTrigger>
@@ -982,18 +982,18 @@ export default function HistoryPage() {
                   {/* Report List */}
                   {loading ? (
                     <div className="text-center py-12">
-                      <RefreshCw className="h-8 w-8 animate-spin mx-auto text-gray-400" />
-                      <p className="text-gray-500 mt-4">{t.history.loading}</p>
+                      <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                      <p className="text-muted-foreground mt-4">{t.history.loading}</p>
                     </div>
                   ) : reports.length === 0 ? (
                     <Card className="animate-fade-in">
                       <CardContent className="py-12 text-center">
-                        <TrendingUp className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                        <p className="text-gray-500 dark:text-gray-400">
+                        <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <p className="text-muted-foreground ">
                           {t.history.noReportsFor}{" "}
                           {MARKET_LABELS[marketType].label}
                         </p>
-                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                        <p className="text-sm text-muted-foreground mt-2">
                           {t.history.afterAnalysisSave}
                         </p>
                         <Button
@@ -1017,7 +1017,7 @@ export default function HistoryPage() {
                               <span className="text-xl font-bold gradient-text-primary">
                                 {report.ticker}
                               </span>
-                              <span className="text-xs px-3 py-1 rounded-2xl bg-gradient-to-r from-blue-100 to-blue-100 dark:from-blue-900/40 dark:to-blue-900/40 border-2 border-blue-200 dark:border-slate-600/30 text-blue-600 dark:text-blue-300 font-semibold shadow-[0_2px_0_rgba(147,197,253,0.5)]">
+                              <span className="text-xs px-3 py-1 rounded-2xl border-2 border-border text-deep-green dark:text-pale-green font-semibold shadow-[0_2px_0_rgba(147,197,253,0.5)]">
                                 {MARKET_LABELS[report.market_type].label}
                               </span>
                             </CardTitle>
@@ -1026,7 +1026,7 @@ export default function HistoryPage() {
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground ">
                               {t.history.savedAt}：
                               {format(
                                 new Date(report.saved_at),
@@ -1055,7 +1055,7 @@ export default function HistoryPage() {
                               const quickName = getModelDisplayName(report.result?.quick_think_llm);
                               if (!deepName && !quickName) return null;
                               return (
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                <p className="text-xs text-muted-foreground mt-1">
                                   {deepName === quickName && deepName
                                     ? deepName
                                     : [deepName, quickName].filter(Boolean).join(" / ")}
@@ -1096,7 +1096,7 @@ export default function HistoryPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="col-span-2 w-full gap-2 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+                              className="col-span-2 w-full gap-2 text-deep-green dark:text-pale-green border-border hover:bg-secondary "
                               onClick={() => router.push(`/history/chat?ticker=${report.ticker}&date=${report.analysis_date}&market=${report.market_type}`)}
                             >
                               <MessageCircle className="h-4 w-4" />
@@ -1134,7 +1134,7 @@ export default function HistoryPage() {
               <strong>{reportToDelete?.ticker}</strong> {t.history.on}{" "}
               <strong>{reportToDelete?.analysis_date}</strong>?
               <br />
-              <span className="text-red-500">{t.history.cannotUndo}</span>
+              <span className="text-destructive">{t.history.cannotUndo}</span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1158,35 +1158,35 @@ export default function HistoryPage() {
 
       {/* PDF Preview Modal */}
       {pdfPreviewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl flex flex-col w-full max-w-5xl h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="relative bg-card rounded-2xl flex flex-col w-full max-w-5xl h-[90vh]">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2 min-w-0">
-                <FileText className="h-5 w-5 text-blue-500 shrink-0" />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 truncate">
+                <FileText className="h-5 w-5 text-deep-green dark:text-pale-green shrink-0" />
+                <span className="text-sm font-semibold text-foreground truncate">
                   {pdfPreviewFilename}
                 </span>
               </div>
               <button
                 onClick={handleClosePdfPreview}
-                className="ml-3 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
+                className="ml-3 p-1.5 rounded-full hover:bg-muted transition-colors shrink-0"
                 aria-label="Close preview"
               >
-                <X className="h-5 w-5 text-gray-500" />
+                <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 relative overflow-hidden bg-gray-100 dark:bg-gray-800">
+            <div className="flex-1 relative overflow-hidden bg-muted ">
               {/* Generating spinner */}
               {pdfGenerating && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white dark:bg-gray-900">
-                  <div className="h-16 w-16 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
-                  <p className="text-gray-600 dark:text-gray-300 font-medium">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-card ">
+                  <div className="h-16 w-16 rounded-full border-4 border-border border-t-foreground animate-spin" />
+                  <p className="text-muted-foreground font-medium">
                     {locale === "zh-TW" ? "正在產生 PDF 報告…" : "Generating PDF report…"}
                   </p>
-                  <p className="text-sm text-gray-400 dark:text-gray-500">
+                  <p className="text-sm text-muted-foreground ">
                     {locale === "zh-TW" ? "請稍候，通常需要 10–30 秒" : "This usually takes 10–30 seconds"}
                   </p>
                 </div>
@@ -1194,11 +1194,11 @@ export default function HistoryPage() {
 
               {/* Error state */}
               {!pdfGenerating && pdfError && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white dark:bg-gray-900 p-8 text-center">
-                  <p className="text-red-500 font-medium">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-card p-8 text-center">
+                  <p className="text-destructive font-medium">
                     {locale === "zh-TW" ? "PDF 產生失敗" : "Failed to generate PDF"}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{pdfError}</p>
+                  <p className="text-sm text-muted-foreground ">{pdfError}</p>
                   <Button
                     variant="outline"
                     onClick={() => pdfPreviewReport && handleDownloadPdf(pdfPreviewReport)}
@@ -1210,9 +1210,9 @@ export default function HistoryPage() {
 
               {/* iframe loading overlay — shown until iframe fires onLoad */}
               {pdfPreviewUrl && !pdfIframeLoaded && !pdfGenerating && !pdfError && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-900">
-                  <div className="h-10 w-10 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-card ">
+                  <div className="h-10 w-10 rounded-full border-4 border-border border-t-foreground animate-spin" />
+                  <p className="text-sm text-muted-foreground ">
                     {locale === "zh-TW" ? "載入中…" : "Loading…"}
                   </p>
                 </div>
@@ -1231,11 +1231,11 @@ export default function HistoryPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
+            <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-border shrink-0">
               <Button
                 onClick={handleDownloadFromPreview}
                 disabled={!pdfTempId || pdfGenerating || !!pdfError}
-                className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                className="gap-2 bg-primary hover:bg-secondary text-primary-foreground"
               >
                 <Download className="h-4 w-4" />
                 {locale === "zh-TW" ? "下載 PDF" : "Download PDF"}

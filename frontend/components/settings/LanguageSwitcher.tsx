@@ -33,7 +33,7 @@ export function LanguageSwitcher({ disabled = false }: LanguageSwitcherProps) {
         variant="ghost"
         size="icon"
         disabled
-        className="text-slate-400 dark:text-slate-600 opacity-50 cursor-not-allowed"
+        className="text-muted-foreground opacity-50 cursor-not-allowed"
         aria-label="Switch language (disabled)"
         title={t.nav.languageLockedOnReport}
       >
@@ -48,7 +48,7 @@ export function LanguageSwitcher({ disabled = false }: LanguageSwitcherProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300"
+          className="text-muted-foreground hover:bg-secondary hover:text-foreground "
           aria-label="Switch language"
         >
           <Globe className="h-5 w-5" />

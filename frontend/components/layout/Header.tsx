@@ -28,21 +28,15 @@ export function Header() {
   const isReportDetailPage = pathname === "/analysis/results";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border dark:border-slate-700/40 bg-white/80 dark:bg-[#0A0F1E]/85 backdrop-blur-xl pwa-safe-header shadow-[0_1px_8px_rgba(15,23,42,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+    <header className="sticky top-0 z-50 border-b border-border bg-background pwa-safe-header">
       <div className="container mx-auto px-4 py-4 md:py-5">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div
-              className="text-xl md:text-2xl font-black bg-clip-text text-transparent"
-              style={{
-                fontFamily: 'Nunito, sans-serif',
-                backgroundImage: 'linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 40%, #06b6d4 70%, #2dd4bf 100%)',
-              }}
-            >
+            <div className="font-display text-xl md:text-2xl tracking-tight text-foreground">
               TradingAgentsX
             </div>
-            <div className="hidden lg:block text-xs font-medium text-slate-400 dark:text-slate-500 opacity-80">
+            <div className="hidden lg:block type-mono-label text-xs text-muted-foreground">
               {t.nav.tagline}
             </div>
           </Link>
@@ -51,19 +45,19 @@ export function Header() {
           <nav className="hidden md:flex gap-1 lg:gap-2 items-center">
             <Link
               href="/"
-              className="px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200"
+              className="px-3 py-2 text-sm text-foreground/80 underline-offset-8 hover:text-foreground hover:underline decoration-1 transition-colors"
             >
               {t.nav.home}
             </Link>
             <Link
               href="/analysis"
-              className="px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200"
+              className="px-3 py-2 text-sm text-foreground/80 underline-offset-8 hover:text-foreground hover:underline decoration-1 transition-colors"
             >
               {t.nav.analysis}
             </Link>
             <Link
               href="/history"
-              className="px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200"
+              className="px-3 py-2 text-sm text-foreground/80 underline-offset-8 hover:text-foreground hover:underline decoration-1 transition-colors"
             >
               {t.nav.history}
             </Link>
@@ -80,7 +74,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="text-foreground/80"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -90,24 +84,24 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <nav className="md:hidden mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/40 space-y-1">
+          <nav className="md:hidden mt-4 pt-4 border-t border-border space-y-1">
             <Link
               href="/"
-              className="block px-4 py-2 rounded-xl font-semibold text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 transition-all"
+              className="block px-3 py-2 text-foreground/80 hover:text-foreground hover:underline underline-offset-8 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.nav.home}
             </Link>
             <Link
               href="/analysis"
-              className="block px-4 py-2 rounded-xl font-semibold text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 transition-all"
+              className="block px-3 py-2 text-foreground/80 hover:text-foreground hover:underline underline-offset-8 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.nav.analysis}
             </Link>
             <Link
               href="/history"
-              className="block px-4 py-2 rounded-xl font-semibold text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 transition-all"
+              className="block px-3 py-2 text-foreground/80 hover:text-foreground hover:underline underline-offset-8 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.nav.history}

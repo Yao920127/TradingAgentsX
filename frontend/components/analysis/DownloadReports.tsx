@@ -208,7 +208,7 @@ export function DownloadReports({
         onClick={handleDownload}
         disabled={isDownloading}
         size="lg"
-        className="gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+        className="gap-2 "
       >
         {isDownloading ? (
           <>

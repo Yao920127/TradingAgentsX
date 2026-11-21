@@ -20,7 +20,7 @@ export function ApiKeyHelpLink({ field }: Props) {
         href={source.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-0.5 font-medium text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:text-blue-800 dark:hover:text-blue-300"
+        className="inline-flex items-center gap-0.5 font-medium text-deep-green dark:text-pale-green underline underline-offset-2 hover:text-foreground "
       >
         {source.site}
         <ExternalLink className="h-3 w-3" aria-hidden="true" />

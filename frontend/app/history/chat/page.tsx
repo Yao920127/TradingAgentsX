@@ -282,18 +282,18 @@ function HistoryChatContent() {
 
   if (loadingReport) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-slate-50/20 to-blue-50/30 dark:from-gray-950 dark:via-blue-950/40 dark:to-gray-950 flex flex-col items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4" />
-        <p className="text-gray-500">{t.history?.loading || "Loading..."}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-deep-green dark:text-pale-green mb-4" />
+        <p className="text-muted-foreground">{t.history?.loading || "Loading..."}</p>
       </div>
     );
   }
 
   if (!report) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-slate-50/20 to-blue-50/30 dark:from-gray-950 dark:via-blue-950/40 dark:to-gray-950 flex flex-col items-center justify-center p-6 text-center">
-        <AlertCircle className="h-16 w-16 text-gray-400 mb-4" />
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <AlertCircle className="h-16 w-16 text-muted-foreground mb-4" />
+        <p className="text-lg text-muted-foreground mb-6">
           Report not found.
         </p>
         <Button onClick={() => router.push("/history")}>
@@ -307,30 +307,30 @@ function HistoryChatContent() {
   const contextLabel = t.chat?.allReports || "All Reports";
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50/30 via-slate-50/20 to-blue-50/30 dark:from-gray-950 dark:via-blue-950/40 dark:to-gray-950">
+    <div className="h-screen flex flex-col ">
       {/* Header */}
-      <div className="flex-shrink-0 px-4 py-4 md:px-8 md:py-6 border-b border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+      <div className="flex-shrink-0 px-4 py-4 md:px-8 md:py-6 border-b border-border bg-card sticky top-0 z-10 ">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => router.push("/history")}
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              className="text-muted-foreground hover:text-foreground dark:hover:text-white"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="flex items-center gap-2 text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                <Sparkles className="h-6 w-6 text-blue-500" />
+              <h1 className="flex items-center gap-2 text-xl md:text-2xl font-bold text-foreground ">
+                <Sparkles className="h-6 w-6 text-deep-green dark:text-pale-green" />
                 <span>
                   {t.chat?.title || "Report Chat"} — {report.ticker}
                 </span>
-                <span className="hidden sm:inline text-blue-600 dark:text-blue-400 text-sm md:text-base font-normal ml-2 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">
+                <span className="hidden sm:inline text-deep-green dark:text-pale-green text-sm md:text-base font-normal ml-2 bg-secondary px-3 py-1 rounded-full">
                   {contextLabel}
                 </span>
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 ml-10">
+              <p className="text-sm text-muted-foreground mt-1 ml-10">
                 {t.history?.analysisDate || "Date"}: {report.analysis_date}
               </p>
             </div>
@@ -341,7 +341,7 @@ function HistoryChatContent() {
                 variant="outline"
                 size="sm"
                 onClick={handleClearChat}
-                className="gap-2 text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-900/50 dark:hover:bg-red-900/20"
+                className="gap-2 text-destructive border-destructive/30 hover:bg-coral-soft/20 dark:bg-destructive/15 "
                 title={t.chat?.clearChat || "Clear chat"}
               >
                 <Trash2 className="h-4 w-4" />
@@ -359,15 +359,15 @@ function HistoryChatContent() {
         <div className="max-w-5xl mx-auto">
           {/* Empty state */}
           {messages.length === 0 && !isLoading && (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] text-center text-gray-400 dark:text-gray-500 gap-6">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-slate-100 dark:from-blue-900/30 dark:to-slate-900/30 flex items-center justify-center shadow-inner">
-                <Bot className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+            <div className="flex flex-col items-center justify-center min-h-[50vh] text-center text-muted-foreground gap-6">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-inner">
+                <Bot className="h-10 w-10 text-deep-green dark:text-pale-green " />
               </div>
               <div>
-                <p className="text-xl font-medium text-gray-700 dark:text-gray-200">
+                <p className="text-xl font-medium text-foreground ">
                   {t.chat?.emptyState || "Ask any question about this analysis report"}
                 </p>
-                <p className="text-base mt-2 text-gray-500 dark:text-gray-400">
+                <p className="text-base mt-2 text-muted-foreground ">
                   {t.chat?.emptyHint || 'e.g. "What are the main risk factors?"'}
                 </p>
               </div>
@@ -405,7 +405,7 @@ function HistoryChatContent() {
                       setInput(suggestion);
                       setTimeout(() => inputRef.current?.focus(), 50);
                     }}
-                    className="px-4 py-2 text-sm rounded-full border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-gray-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-all duration-200 shadow-sm hover:shadow"
+                    className="px-4 py-2 text-sm rounded-full border border-border text-deep-green dark:text-pale-green bg-card hover:bg-secondary transition-all duration-200 hover:shadow"
                   >
                     {suggestion}
                   </button>
@@ -423,10 +423,9 @@ function HistoryChatContent() {
               >
                 {/* Avatar */}
                 <div
-                  className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white text-sm shadow-sm ${
-                    msg.role === "user"
-                      ? "bg-gradient-to-br from-blue-500 to-cyan-500"
-                      : "bg-gradient-to-br from-blue-600 to-slate-600"
+                  className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground text-sm ${ msg.role === "user"
+                      ? "  "
+                      : "  "
                   }`}
                 >
                   {msg.role === "user" ? (
@@ -437,14 +436,13 @@ function HistoryChatContent() {
                 </div>
 
                 <div
-                  className={`max-w-[100%] md:max-w-[85%] rounded-2xl px-5 py-4 text-base leading-relaxed shadow-sm overflow-x-auto ${
-                    msg.role === "user"
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-tr-sm"
-                      : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-sm"
+                  className={`max-w-[100%] md:max-w-[85%] rounded-2xl px-5 py-4 text-base leading-relaxed overflow-x-auto ${ msg.role === "user"
+                      ? "   text-primary-foreground rounded-tr-sm"
+                      : "bg-card  border border-border  text-foreground  rounded-tl-sm"
                   }`}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 prose-table:border-collapse prose-table:w-full prose-td:border prose-td:border-gray-300 dark:prose-td:border-gray-600 prose-td:p-2 prose-th:border prose-th:border-gray-300 dark:prose-th:border-gray-600 prose-th:p-2 prose-th:bg-gray-100 dark:prose-th:bg-gray-800">
+                    <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 prose-table:border-collapse prose-table:w-full prose-td:border prose-td:border-border prose-td:p-2 prose-th:border prose-th:border-border prose-th:p-2 prose-th:bg-muted ">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {msg.content}
                       </ReactMarkdown>
@@ -459,12 +457,12 @@ function HistoryChatContent() {
             {/* Loading indicator */}
             {isLoading && (
               <div className="flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-slate-600 text-white shadow-sm">
-                  <Bot className="h-5 w-5 text-white animate-pulse" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground ">
+                  <Bot className="h-5 w-5 text-primary-foreground animate-pulse" />
                 </div>
-                <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm">
-                  <div className="flex items-center gap-3 text-base text-gray-500 dark:text-gray-400 font-medium">
-                    <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                <div className="bg-card border border-border rounded-2xl rounded-tl-sm px-5 py-4 ">
+                  <div className="flex items-center gap-3 text-base text-muted-foreground font-medium">
+                    <Loader2 className="h-5 w-5 animate-spin text-deep-green dark:text-pale-green" />
                     <span>{t.chat?.thinking || "Thinking..."}</span>
                   </div>
                 </div>
@@ -473,7 +471,7 @@ function HistoryChatContent() {
 
             {/* Error message */}
             {error && (
-              <div className="flex items-start gap-3 text-red-600 dark:text-red-400 text-base bg-red-50 border border-red-100 dark:border-red-900 dark:bg-red-950/30 rounded-xl p-4 shadow-sm">
+              <div className="flex items-start gap-3 text-destructive text-base bg-coral-soft/20 dark:bg-destructive/15 border border-destructive/30 rounded-xl p-4 ">
                 <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -485,12 +483,12 @@ function HistoryChatContent() {
       </div>
 
       {/* Input Bar */}
-      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 px-4 py-4 md:px-8 md:py-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+      <div className="flex-shrink-0 border-t border-border px-4 py-4 md:px-8 md:py-6 bg-card ">
         <div className="max-w-4xl mx-auto flex flex-col gap-3">
           {/* Model Selector */}
           <div className="flex flex-wrap items-center gap-2">
             <Select value={selectedModelId} onValueChange={setSelectedModelId}>
-              <SelectTrigger className="w-fit min-w-[200px] h-9 text-sm bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 shadow-sm transition-colors">
+              <SelectTrigger className="w-fit min-w-[200px] h-9 text-sm bg-card rounded-full border border-border hover:bg-muted transition-colors">
                 <SelectValue placeholder="選擇模型" />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
@@ -510,7 +508,7 @@ function HistoryChatContent() {
                 value={customModel}
                 onChange={(e) => setCustomModel(e.target.value)}
                 placeholder="輸入模型名稱 (e.g. gpt-4)"
-                className="h-8 w-[180px] text-xs rounded-full border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                className="h-8 w-[180px] text-xs rounded-full border-border bg-card "
               />
             )}
           </div>
@@ -524,24 +522,24 @@ function HistoryChatContent() {
               onKeyDown={handleKeyDown}
               placeholder={t.chat?.placeholder || "Ask about this report..."}
               disabled={isLoading}
-              className="flex-1 text-base rounded-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus-visible:ring-blue-500 h-12 md:h-14 px-6 shadow-sm"
+              className="flex-1 text-base rounded-full border-border bg-card focus-visible:ring-ring h-12 md:h-14 px-6 "
             />
             <Button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
               size="icon"
-              className="rounded-full bg-gradient-to-r from-blue-600 to-slate-600 hover:from-blue-700 hover:to-slate-700 h-12 w-12 md:h-14 md:w-14 flex-shrink-0 shadow-md hover:shadow-lg transition-all"
+              className="rounded-full h-12 w-12 md:h-14 md:w-14 flex-shrink-0 transition-all"
             >
               {isLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-white" />
+                <Loader2 className="h-6 w-6 animate-spin text-primary-foreground" />
               ) : (
-                <Send className="h-6 w-6 text-white ml-1" />
+                <Send className="h-6 w-6 text-primary-foreground ml-1" />
               )}
             </Button>
           </div>
         </div>
         <div className="max-w-4xl mx-auto mt-2 text-center">
-          <p className="text-xs text-gray-400 dark:text-gray-500">
+          <p className="text-xs text-muted-foreground ">
             LLM can make mistakes. Please verify important information.
           </p>
         </div>
@@ -554,9 +552,9 @@ export default function HistoryChatPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-slate-50/20 to-blue-50/30 flex flex-col items-center justify-center">
-          <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4" />
-          <p className="text-gray-500">Loading chat...</p>
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-deep-green dark:text-pale-green mb-4" />
+          <p className="text-muted-foreground">Loading chat...</p>
         </div>
       }
     >

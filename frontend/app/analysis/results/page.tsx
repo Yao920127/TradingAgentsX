@@ -157,7 +157,7 @@ export default function AnalysisResultsPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">{t.results.noResults}</h1>
-          <p className="text-gray-600 mb-4">{t.results.runAnalysisFirst}</p>
+          <p className="text-muted-foreground mb-4">{t.results.runAnalysisFirst}</p>
           <Button onClick={() => router.push("/analysis")}>
             {t.results.backToAnalysis}
           </Button>
@@ -182,7 +182,7 @@ export default function AnalysisResultsPage() {
   const hasDebates = researchDebate.length > 0 || riskDebate.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-slate-50/20 to-blue-50/30 dark:from-gray-950 dark:via-blue-950/40 dark:to-gray-950">
+    <div className="min-h-screen ">
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="mx-auto max-w-7xl space-y-6 md:space-y-8">
           {/* Header */}
@@ -192,7 +192,7 @@ export default function AnalysisResultsPage() {
               <h1 className="mb-2 text-3xl font-bold gradient-text-primary sm:text-4xl">
                 {companyName ?? analysisResult.ticker} {t.results.detailedResults}
               </h1>
-              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
+              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground ">
                 <span className="font-mono font-medium text-foreground/70">
                   {analysisResult.ticker}
                 </span>
@@ -272,10 +272,10 @@ export default function AnalysisResultsPage() {
 
           {!hasDebates && fullReportSections.length === 0 && (
             <div className="rounded-2xl border border-border bg-card py-12 text-center">
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground ">
                 {t.results.noReportGenerated}
               </p>
-              <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">
+              <p className="mt-2 text-sm text-muted-foreground ">
                 {t.results.notSelectedOrNoReport}
               </p>
             </div>

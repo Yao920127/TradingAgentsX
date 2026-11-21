@@ -33,9 +33,9 @@ export function MarkdownReport({ children, className, compact = false }: Markdow
         // `block` is what allows the overflow; the page itself never scrolls sideways.
         "prose-table:block prose-table:overflow-x-auto prose-table:max-w-full",
         "prose-table:border-collapse",
-        "prose-td:border prose-td:border-gray-300 dark:prose-td:border-gray-600 prose-td:p-2",
-        "prose-th:border prose-th:border-gray-300 dark:prose-th:border-gray-600 prose-th:p-2",
-        "prose-th:bg-gray-100 dark:prose-th:bg-gray-800",
+        "prose-td:border prose-td:border-border  prose-td:p-2",
+        "prose-th:border prose-th:border-border  prose-th:p-2",
+        "prose-th:bg-muted ",
         "prose-pre:overflow-x-auto break-words",
         className,
       )}
