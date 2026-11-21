@@ -43,25 +43,21 @@ export function AgentFlowDiagram() {
             icon={<Database className="w-5 h-5" />}
             name="yfinance / FinMind / Alpha Vantage"
             description={t.flowDiagram.priceAndFinancials}
-            color="blue"
           />
           <DataSourceCard
             icon={<Newspaper className="w-5 h-5" />}
             name="Finnhub · Marketaux · NewsAPI · GDELT"
             description={t.flowDiagram.multiSourceNews}
-            color="green"
           />
           <DataSourceCard
             icon={<MessageSquare className="w-5 h-5" />}
             name="StockTwits · Reddit · Hacker News · PTT"
             description={t.flowDiagram.socialSentiment}
-            color="orange"
           />
           <DataSourceCard
             icon={<BookOpen className="w-5 h-5" />}
             name="Jina AI"
             description={t.flowDiagram.fullTextExtraction}
-            color="amber"
           />
         </div>
       </div>
@@ -254,22 +250,13 @@ function DataSourceCard({
   icon,
   name,
   description,
-  color,
 }: {
   icon: React.ReactNode;
   name: string;
   description: string;
-  color: "blue" | "orange" | "green" | "amber";
 }) {
-  const colorClasses = {
-    blue: "  border-border ",
-    orange: "  border-coral/50 ",
-    green: "  border-deep-green/30 dark:border-pale-green/30 ",
-    amber: "  border-coral/50 ",
-  };
-
   return (
-    <Card className={`p-3 hover-lift animate-slide-up border-2 ${colorClasses[color]}`}>
+    <Card className={`p-3 hover-lift animate-slide-up border-2 border-border`}>
       <div className="flex flex-col items-center justify-center">
         <div className={`${ICON_DISC} w-10 h-10 mb-2`}>
           {icon}
