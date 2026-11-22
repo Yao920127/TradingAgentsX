@@ -68,8 +68,11 @@ export default function HomePage() {
           </div>
         </ScrollReveal>
 
-        {/* 12 Professional Agents Section */}
-        <ScrollReveal from="right" className="mb-24 md:mb-section">
+        {/* 12 Professional Agents Section — pale-green wash band */}
+        <ScrollReveal
+          from="right"
+          className="mb-24 rounded-lg bg-pale-green px-6 py-12 dark:bg-deep-green/30 md:mb-section md:px-12 md:py-section"
+        >
           <SectionHeading eyebrow={t.home.subtitle} title={t.home.professionalAgents} />
           <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto text-lg">
             {t.home.professionalAgentsDesc}
@@ -138,10 +141,13 @@ export default function HomePage() {
           <AgentFlowDiagram />
         </ScrollReveal>
 
-        {/* LLM Support Section */}
-        <ScrollReveal from="right" className="mb-24 md:mb-section">
-          <SectionHeading title={t.home.llmSupport} />
-          <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto text-lg">
+        {/* LLM Support Section — dark-navy band */}
+        <ScrollReveal
+          from="right"
+          className="mb-24 rounded-lg bg-dark-navy px-6 py-12 text-white md:mb-section md:px-12 md:py-section"
+        >
+          <SectionHeading title={t.home.llmSupport} tone="dark" />
+          <p className="text-center text-white/70 mb-10 max-w-3xl mx-auto text-lg">
             {t.home.llmSupportDesc}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -153,7 +159,7 @@ export default function HomePage() {
             <LLMProviderCard name="Qwen (Alibaba)" models={["Qwen3.8-Max","Qwen3.8-Flash","Qwen3.7-Plus"]} />
           </div>
           <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white/70">
               {t.home.llmFeatures}
             </p>
           </div>
@@ -162,7 +168,7 @@ export default function HomePage() {
         {/* Workflow Section */}
         <ScrollReveal from="left" className="mb-24 md:mb-section">
           <SectionHeading title={t.home.workflowTitle} />
-          <Card className="rounded-sm">
+          <Card className="rounded-sm border-0 bg-soft-stone dark:bg-card">
             <CardContent className="pt-6">
               <div className="space-y-4">
                 <WorkflowStep number={1} title={t.home.processSteps.dataCollection.title} description={t.home.processSteps.dataCollection.description} />
@@ -228,11 +234,26 @@ export default function HomePage() {
 
 const CHECK_ICON = "text-deep-green dark:text-pale-green flex-shrink-0";
 
-function SectionHeading({ title, eyebrow }: { title: string; eyebrow?: string }) {
+function SectionHeading({
+  title,
+  eyebrow,
+  tone = "light",
+}: {
+  title: string;
+  eyebrow?: string;
+  tone?: "light" | "dark";
+}) {
+  const isDark = tone === "dark";
   return (
     <div className="text-center mb-6">
-      {eyebrow && <span className="type-mono-label mb-3 inline-block text-muted-foreground">{eyebrow}</span>}
-      <h2 className="font-display text-3xl sm:text-5xl md:text-heading leading-tight tracking-[-0.01em] text-foreground">
+      {eyebrow && (
+        <span className={`type-mono-label mb-3 inline-block ${isDark ? "text-white/60" : "text-muted-foreground"}`}>
+          {eyebrow}
+        </span>
+      )}
+      <h2
+        className={`font-display text-3xl sm:text-5xl md:text-heading leading-tight tracking-[-0.01em] ${isDark ? "text-white" : "text-foreground"}`}
+      >
         {title}
       </h2>
     </div>
@@ -242,7 +263,7 @@ function SectionHeading({ title, eyebrow }: { title: string; eyebrow?: string })
 function FeatureCard({ title, description, icon }: { title: string; description: string; icon: React.ReactNode }) {
   return (
     <InteractiveCard>
-      <Card className="h-full rounded-sm">
+      <Card className="h-full rounded-none border-0 border-t border-foreground/25 bg-transparent">
         <CardHeader>
           <div className="mb-2 text-deep-green dark:text-pale-green">{icon}</div>
           <CardTitle className="text-xl">{title}</CardTitle>
@@ -258,10 +279,10 @@ function FeatureCard({ title, description, icon }: { title: string; description:
 function AgentCard({ name, role, description, accent }: { name: string; role: string; description: string; accent?: "bull" | "bear" }) {
   const accentClass =
     accent === "bull"
-      ? "border-deep-green dark:border-pale-green/50"
+      ? "border-deep-green/40 bg-white dark:border-pale-green/50 dark:bg-card"
       : accent === "bear"
-      ? "border-coral"
-      : "";
+      ? "border-coral bg-coral-soft/25 dark:bg-coral/10"
+      : "bg-white dark:bg-card";
 
   return (
     <InteractiveCard>
@@ -293,29 +314,29 @@ function LLMProviderCard({ name, models }: { name: string; models: string[] }) {
     "Qwen (Alibaba)": "/logos/qwen-color.svg",
   };
   const logoSrc = logoMap[name];
-  // OpenAI / Grok marks are single-colour black glyphs: flip to white on dark backgrounds
-  const logoClass = name === "OpenAI" || name === "Grok (xAI)" ? "object-contain dark:invert" : "object-contain";
+  // The logo sits on a light stone tile in both themes, so the black marks never need inverting
+  const logoClass = "object-contain";
 
   return (
     <InteractiveCard>
-      <Card className="h-full rounded-sm">
+      <Card className="h-full rounded-sm border-white/15 bg-white/5 text-white">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-sm bg-soft-stone dark:bg-secondary flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-sm bg-soft-stone flex items-center justify-center flex-shrink-0">
               {logoSrc ? (
                 <Image src={logoSrc} alt={`${name} logo`} width={28} height={28} className={logoClass} />
               ) : (
-                <Globe className="w-5 h-5 text-muted-foreground" />
+                <Globe className="w-5 h-5 text-near-black" />
               )}
             </div>
-            <CardTitle className="text-xl">{name}</CardTitle>
+            <CardTitle className="text-xl text-white">{name}</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <ul className="space-y-1.5">
             {models.map((model, i) => (
-              <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                <CheckCircle2 className={`w-3.5 h-3.5 ${CHECK_ICON}`} />
+              <li key={i} className="flex items-center gap-2 text-xs text-white/70">
+                <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 text-pale-green" />
                 {model}
               </li>
             ))}
@@ -329,7 +350,7 @@ function LLMProviderCard({ name, models }: { name: string; models: string[] }) {
 function TechnicalCard({ title, features, icon }: { title: string; features: string[]; icon: React.ReactNode }) {
   return (
     <InteractiveCard>
-      <Card className="h-full rounded-sm">
+      <Card className="h-full rounded-sm border-0 bg-soft-stone dark:bg-card">
         <CardHeader>
           <div className="flex items-center gap-2 text-deep-green dark:text-pale-green">
             {icon}
@@ -353,7 +374,7 @@ function TechnicalCard({ title, features, icon }: { title: string; features: str
 
 function WorkflowStep({ number, title, description }: { number: number; title: string; description: string }) {
   return (
-    <div className="flex gap-4 items-start border-t border-border pt-4 first:border-t-0 first:pt-0">
+    <div className="flex gap-4 items-start border-t border-foreground/15 pt-4 first:border-t-0 first:pt-0">
       <div className="flex-shrink-0 w-9 h-9 rounded-xs border border-foreground flex items-center justify-center font-mono text-sm">
         {number}
       </div>

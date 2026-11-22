@@ -139,7 +139,7 @@ export function TickerCombobox({
       {showList && (matches.length > 0 || (!querying && loaded)) && (
         <ul
           role="listbox"
-          className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-sm border border-border bg-popover p-1 animate-fade-in"
+          className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-border bg-popover p-1 animate-fade-in"
         >
           {matches.length === 0 ? (
             <li className="px-3 py-2 text-sm text-muted-foreground">

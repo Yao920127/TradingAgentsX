@@ -374,7 +374,7 @@ export function AnalysisForm({ onSubmit, loading = false }: AnalysisFormProps) {
                                     field.onChange(newValue);
                                   }}
                                   className={cn(
-                                    "relative flex cursor-pointer flex-row items-center gap-3 rounded-sm border p-4 transition-all hover:bg-accent",
+                                    "relative flex cursor-pointer flex-row items-center gap-3 rounded-lg border-2 p-4 transition-all hover:bg-accent",
                                     isSelected
                                       ? "border-primary bg-primary/5 text-primary"
                                       : "border-muted-foreground/25 bg-card text-muted-foreground"
