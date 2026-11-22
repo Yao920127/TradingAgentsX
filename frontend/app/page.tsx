@@ -13,9 +13,6 @@ import {
   Container,
   Download,
   TrendingUp,
-  TrendingDown,
-  Users,
-  Shield,
   Zap,
   Database,
   Lock,
@@ -27,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -65,70 +61,6 @@ export default function HomePage() {
             <FeatureCard title={t.home.features.modernUI} description={t.home.features.modernUIDesc} icon={<Palette className="w-6 h-6" />} />
             <FeatureCard title={t.home.features.oneClickDeploy} description={t.home.features.oneClickDeployDesc} icon={<Container className="w-6 h-6" />} />
             <FeatureCard title={t.home.features.reportDownload} description={t.home.features.reportDownloadDesc} icon={<Download className="w-6 h-6" />} />
-          </div>
-        </ScrollReveal>
-
-        {/* 12 Professional Agents Section — pale-green wash band */}
-        <ScrollReveal
-          from="right"
-          className="mb-24 rounded-lg bg-pale-green px-6 py-12 dark:bg-deep-green/30 md:mb-section md:px-12 md:py-section"
-        >
-          <SectionHeading eyebrow={t.home.subtitle} title={t.home.professionalAgents} />
-          <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto text-lg">
-            {t.home.professionalAgentsDesc}
-          </p>
-
-          {/* Analyst Team */}
-          <div className="mb-8">
-            <h3 className="font-display text-2xl mb-4 text-foreground flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              {t.home.analystsTeamTitle}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <AgentCard name={t.agents.market_analyst} role={t.agents.market_analyst_role} description={t.agents.market_analyst_desc} />
-              <AgentCard name={t.agents.social_analyst} role={t.agents.social_analyst_role} description={t.agents.social_analyst_desc} />
-              <AgentCard name={t.agents.news_analyst} role={t.agents.news_analyst_role} description={t.agents.news_analyst_desc} />
-              <AgentCard name={t.agents.fundamentals_analyst} role={t.agents.fundamentals_analyst_role} description={t.agents.fundamentals_analyst_desc} />
-              <AgentCard name={t.agents.report_summarizer} role={t.agents.report_summarizer_role} description={t.agents.report_summarizer_desc} />
-            </div>
-          </div>
-
-          {/* Research Team */}
-          <div className="mb-8">
-            <h3 className="font-display text-2xl mb-4 text-foreground flex items-center gap-2">
-              <Brain className="w-5 h-5" />
-              {t.home.researchTeamTitle}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <AgentCard name={t.agents.bull_researcher} role={t.agents.bull_researcher_role} description={t.agents.bull_researcher_desc} accent="bull" />
-              <AgentCard name={t.agents.bear_researcher} role={t.agents.bear_researcher_role} description={t.agents.bear_researcher_desc} accent="bear" />
-              <AgentCard name={t.agents.research_manager} role={t.agents.research_manager_role} description={t.agents.research_manager_desc} />
-            </div>
-          </div>
-
-          {/* Trading Team */}
-          <div className="mb-8">
-            <h3 className="font-display text-2xl mb-4 text-foreground flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              {t.home.tradingTeamTitle}
-            </h3>
-            <div className="grid grid-cols-1 gap-4 max-w-md mx-auto">
-              <AgentCard name={t.agents.trader} role={t.agents.trader_role} description={t.agents.trader_desc} />
-            </div>
-          </div>
-
-          {/* Risk Management Team */}
-          <div className="mb-8">
-            <h3 className="font-display text-2xl mb-4 text-foreground flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              {t.home.riskTeamTitle}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <AgentCard name={t.agents.aggressive_debator} role={t.agents.aggressive_debator_role} description={t.agents.aggressive_debator_desc} />
-              <AgentCard name={t.agents.conservative_debator} role={t.agents.conservative_debator_role} description={t.agents.conservative_debator_desc} />
-              <AgentCard name={t.agents.neutral_debator} role={t.agents.neutral_debator_role} description={t.agents.neutral_debator_desc} />
-              <AgentCard name={t.agents.risk_manager} role={t.agents.risk_manager_role} description={t.agents.risk_manager_desc} />
-            </div>
           </div>
         </ScrollReveal>
 
@@ -270,34 +202,6 @@ function FeatureCard({ title, description, icon }: { title: string; description:
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">{description}</p>
-        </CardContent>
-      </Card>
-    </InteractiveCard>
-  );
-}
-
-function AgentCard({ name, role, description, accent }: { name: string; role: string; description: string; accent?: "bull" | "bear" }) {
-  const accentClass =
-    accent === "bull"
-      ? "border-deep-green/40 bg-white dark:border-pale-green/50 dark:bg-card"
-      : accent === "bear"
-      ? "border-coral bg-coral-soft/25 dark:bg-coral/10"
-      : "bg-white dark:bg-card";
-
-  return (
-    <InteractiveCard>
-      <Card className={`h-full rounded-sm ${accentClass}`}>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            {accent === "bull" && <TrendingUp className="w-4 h-4 text-deep-green dark:text-pale-green" />}
-            {accent === "bear" && <TrendingDown className="w-4 h-4 text-coral" />}
-            {!accent && <Users className="w-4 h-4 text-muted-foreground" />}
-            <CardTitle className="text-base">{name}</CardTitle>
-          </div>
-          <CardDescription className="type-mono-label text-xs">{role}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-xs text-muted-foreground">{description}</p>
         </CardContent>
       </Card>
     </InteractiveCard>

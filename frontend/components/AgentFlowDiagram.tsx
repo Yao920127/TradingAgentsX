@@ -25,8 +25,30 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // Solid disc behind every flow icon so the white glyph is always visible.
-const ICON_DISC =
-  "inline-flex items-center justify-center rounded-full bg-deep-green text-white dark:bg-pale-green dark:text-deep-green";
+const ICON_DISC_BASE = "inline-flex items-center justify-center rounded-full";
+const ICON_DISC = `${ICON_DISC_BASE} bg-deep-green text-white dark:bg-pale-green dark:text-deep-green`;
+
+type CardTone = "sky" | "violet" | "amber" | "emerald";
+
+// One tint per analyst so the four parallel agents are told apart at a glance.
+const CARD_TONES: Record<CardTone, { card: string; disc: string }> = {
+  sky: {
+    card: "border-sky-300 bg-sky-50 dark:border-sky-400/40 dark:bg-sky-950/40",
+    disc: "bg-sky-600 text-white dark:bg-sky-300 dark:text-sky-950",
+  },
+  violet: {
+    card: "border-violet-300 bg-violet-50 dark:border-violet-400/40 dark:bg-violet-950/40",
+    disc: "bg-violet-600 text-white dark:bg-violet-300 dark:text-violet-950",
+  },
+  amber: {
+    card: "border-amber-300 bg-amber-50 dark:border-amber-400/40 dark:bg-amber-950/40",
+    disc: "bg-amber-600 text-white dark:bg-amber-300 dark:text-amber-950",
+  },
+  emerald: {
+    card: "border-emerald-300 bg-emerald-50 dark:border-emerald-400/40 dark:bg-emerald-950/40",
+    disc: "bg-emerald-700 text-white dark:bg-emerald-300 dark:text-emerald-950",
+  },
+};
 
 export function AgentFlowDiagram() {
   const { t } = useLanguage();
@@ -73,24 +95,28 @@ export function AgentFlowDiagram() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <AgentCard
             name={t.agents.market_analyst}
+            tone="sky"
             icon={<BarChart3 className="w-5 h-5" />}
             description={t.flowDiagram.technicalAnalysis}
             tasks={[t.flowDiagram.rsiIndicator, t.flowDiagram.macdMomentum, t.flowDiagram.priceTrend]}
           />
           <AgentCard
             name={t.agents.social_analyst}
+            tone="violet"
             icon={<MessageSquare className="w-5 h-5" />}
             description={t.flowDiagram.sentimentAnalysis}
             tasks={[t.flowDiagram.bullBearRatio, t.flowDiagram.discussionHeat, t.flowDiagram.investorConfidence]}
           />
           <AgentCard
             name={t.agents.news_analyst}
+            tone="amber"
             icon={<Newspaper className="w-5 h-5" />}
             description={t.flowDiagram.newsAnalysis}
             tasks={[t.flowDiagram.multiSourceNews, t.flowDiagram.fullTextReading, t.flowDiagram.eventAssessment]}
           />
           <AgentCard
             name={t.agents.fundamentals_analyst}
+            tone="emerald"
             icon={<DollarSign className="w-5 h-5" />}
             description={t.flowDiagram.fundamentalsAnalysis}
             tasks={[t.flowDiagram.financialAnalysis, t.flowDiagram.valuationMetrics, t.flowDiagram.profitEvaluation]}
@@ -273,18 +299,23 @@ function AgentCard({
   icon,
   description,
   tasks,
+  tone,
 }: {
   name: string;
   icon: React.ReactNode;
   description: string;
   tasks: string[];
+  tone?: CardTone;
 }) {
+  const toneClasses = tone ? CARD_TONES[tone] : null;
   return (
-    <Card className="p-4 hover-lift animate-scale-up relative overflow-hidden group">
+    <Card className={`p-4 hover-lift animate-scale-up relative overflow-hidden group ${toneClasses?.card ?? ""}`}>
       
       <div className="relative z-10">
         <div className="text-center mb-3">
-          <div className={`${ICON_DISC} w-10 h-10 mb-2`}>
+          <div
+            className={`${toneClasses ? `${ICON_DISC_BASE} ${toneClasses.disc}` : ICON_DISC} w-10 h-10 mb-2`}
+          >
             {icon}
           </div>
           <h4 className="font-bold text-sm mb-0.5">{name}</h4>
