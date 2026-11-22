@@ -792,7 +792,7 @@ export const en = {
     nav: "Demo",
     loading: "Loading demo…",
     loadFailed: "Failed to load the demo. Please try again later.",
-    banner: "This is a sample NVDA analysis report. Preview and download the PDF, or use the \"Ask About Report\" chat at the bottom right (add your own API key in Settings first).",
+    banner: "This is a sample NVDA analysis report. Browse the full content, then preview or download the PDF.",
     startOwn: "Start your own analysis",
   },
   chat: {

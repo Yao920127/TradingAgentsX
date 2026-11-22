@@ -723,7 +723,7 @@ export const zhTW = {
     nav: "範例",
     loading: "載入範例中…",
     loadFailed: "範例載入失敗，請稍後再試",
-    banner: "這是 NVDA 的範例分析報告。你可以預覽並下載 PDF，也能用右下角的「報告問答」詢問報告內容（需先在設定中填入你自己的 API Key）。",
+    banner: "這是 NVDA 的範例分析報告，你可以瀏覽完整內容，並預覽、下載 PDF。",
     startOwn: "開始自己的分析",
   },
   chat: {

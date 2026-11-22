@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { lookupStockName, type MarketType } from "@/lib/stock-search";
 import type { AnalysisResponse, LiveMarketType } from "@/lib/types";
-import { ReportChat } from "@/components/analysis/ReportChat";
 import { PdfPreviewModal } from "@/components/analysis/PdfPreviewModal";
 import { usePdfPreview } from "@/hooks/usePdfPreview";
 import { FileText } from "lucide-react";
@@ -277,11 +276,6 @@ export function ResultsView({ analysisResult, marketType, onBack, banner }: Resu
         </div>
       </div>
       <PdfPreviewModal {...pdf.modal} />
-      <ReportChat
-        reports={analysisResult.reports}
-        ticker={analysisResult.ticker}
-        analysisDate={analysisResult.analysis_date}
-      />
     </div>
   );
 }
