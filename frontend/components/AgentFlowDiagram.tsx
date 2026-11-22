@@ -28,27 +28,68 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const ICON_DISC_BASE = "inline-flex items-center justify-center rounded-full";
 const ICON_DISC = `${ICON_DISC_BASE} bg-deep-green text-white dark:bg-pale-green dark:text-deep-green`;
 
-type CardTone = "sky" | "violet" | "amber" | "emerald";
-
-// One tint per analyst so the four parallel agents are told apart at a glance.
-const CARD_TONES: Record<CardTone, { card: string; disc: string }> = {
+// One accent per agent: coloured border + icon disc, card background stays neutral.
+const CARD_TONES = {
   sky: {
-    card: "border-sky-300 bg-sky-50 dark:border-sky-400/40 dark:bg-sky-950/40",
+    card: "border-sky-400 dark:border-sky-400/70",
     disc: "bg-sky-600 text-white dark:bg-sky-300 dark:text-sky-950",
   },
   violet: {
-    card: "border-violet-300 bg-violet-50 dark:border-violet-400/40 dark:bg-violet-950/40",
+    card: "border-violet-400 dark:border-violet-400/70",
     disc: "bg-violet-600 text-white dark:bg-violet-300 dark:text-violet-950",
   },
   amber: {
-    card: "border-amber-300 bg-amber-50 dark:border-amber-400/40 dark:bg-amber-950/40",
+    card: "border-amber-400 dark:border-amber-400/70",
     disc: "bg-amber-600 text-white dark:bg-amber-300 dark:text-amber-950",
   },
   emerald: {
-    card: "border-emerald-300 bg-emerald-50 dark:border-emerald-400/40 dark:bg-emerald-950/40",
+    card: "border-emerald-500 dark:border-emerald-400/70",
     disc: "bg-emerald-700 text-white dark:bg-emerald-300 dark:text-emerald-950",
   },
-};
+  teal: {
+    card: "border-teal-400 dark:border-teal-400/70",
+    disc: "bg-teal-700 text-white dark:bg-teal-300 dark:text-teal-950",
+  },
+  lime: {
+    card: "border-lime-500 dark:border-lime-400/70",
+    disc: "bg-lime-700 text-white dark:bg-lime-300 dark:text-lime-950",
+  },
+  red: {
+    card: "border-red-400 dark:border-red-400/70",
+    disc: "bg-red-600 text-white dark:bg-red-300 dark:text-red-950",
+  },
+  indigo: {
+    card: "border-indigo-400 dark:border-indigo-400/70",
+    disc: "bg-indigo-600 text-white dark:bg-indigo-300 dark:text-indigo-950",
+  },
+  orange: {
+    card: "border-orange-400 dark:border-orange-400/70",
+    disc: "bg-orange-600 text-white dark:bg-orange-300 dark:text-orange-950",
+  },
+  slate: {
+    card: "border-slate-400 dark:border-slate-400/70",
+    disc: "bg-slate-600 text-white dark:bg-slate-300 dark:text-slate-950",
+  },
+  blue: {
+    card: "border-blue-400 dark:border-blue-400/70",
+    disc: "bg-blue-600 text-white dark:bg-blue-300 dark:text-blue-950",
+  },
+  rose: {
+    card: "border-rose-400 dark:border-rose-400/70",
+    disc: "bg-rose-600 text-white dark:bg-rose-300 dark:text-rose-950",
+  },
+  yellow: {
+    card: "border-yellow-400 dark:border-yellow-400/70",
+    disc: "bg-yellow-500 text-yellow-950 dark:bg-yellow-300",
+  },
+} as const;
+
+type CardTone = keyof typeof CARD_TONES;
+
+function toneStyles(tone: CardTone | undefined, fallbackCard: string) {
+  if (!tone) return { card: fallbackCard, disc: ICON_DISC };
+  return { card: CARD_TONES[tone].card, disc: `${ICON_DISC_BASE} ${CARD_TONES[tone].disc}` };
+}
 
 export function AgentFlowDiagram() {
   const { t } = useLanguage();
@@ -64,21 +105,25 @@ export function AgentFlowDiagram() {
           <DataSourceCard
             icon={<Database className="w-5 h-5" />}
             name="yfinance / FinMind / Alpha Vantage"
+            tone="sky"
             description={t.flowDiagram.priceAndFinancials}
           />
           <DataSourceCard
             icon={<Newspaper className="w-5 h-5" />}
             name="Finnhub · Marketaux · NewsAPI · GDELT"
+            tone="amber"
             description={t.flowDiagram.multiSourceNews}
           />
           <DataSourceCard
             icon={<MessageSquare className="w-5 h-5" />}
             name="StockTwits · Reddit · Hacker News · PTT"
+            tone="violet"
             description={t.flowDiagram.socialSentiment}
           />
           <DataSourceCard
             icon={<BookOpen className="w-5 h-5" />}
             name="Jina AI"
+            tone="orange"
             description={t.flowDiagram.fullTextExtraction}
           />
         </div>
@@ -131,6 +176,7 @@ export function AgentFlowDiagram() {
       <div className="max-w-md mx-auto">
         <ManagerCard
           name={t.agents.report_summarizer}
+          tone="teal"
           icon={<FileText className="w-6 h-6" />}
           description={t.flowDiagram.summarizerDesc}
           tasks={[t.flowDiagram.keepKeyData, t.flowDiagram.structuredSummary, t.flowDiagram.saveTokens]}
@@ -148,12 +194,14 @@ export function AgentFlowDiagram() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
           <AgentCard
             name={t.agents.bull_researcher}
+          tone="lime"
             icon={<TrendingUp className="w-5 h-5" />}
             description={t.flowDiagram.bullishResearch}
             tasks={[t.flowDiagram.positiveFactors, t.flowDiagram.growthOpportunities, t.flowDiagram.buyReasons]}
           />
           <AgentCard
             name={t.agents.bear_researcher}
+          tone="red"
             icon={<TrendingDown className="w-5 h-5" />}
             description={t.flowDiagram.bearishResearch}
             tasks={[t.flowDiagram.negativeFactors, t.flowDiagram.riskAssessment, t.flowDiagram.sellReasons]}
@@ -168,6 +216,7 @@ export function AgentFlowDiagram() {
       <div className="max-w-md mx-auto">
         <ManagerCard
           name={t.flowDiagram.researchManager}
+          tone="indigo"
           icon={<Users className="w-6 h-6" />}
           description={t.flowDiagram.integrateViews}
           tasks={[t.flowDiagram.balanceArguments, t.flowDiagram.comprehensiveAdvice, t.flowDiagram.preliminaryStrategy]}
@@ -185,18 +234,21 @@ export function AgentFlowDiagram() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <AgentCard
             name={t.agents.aggressive_debator}
+          tone="orange"
             icon={<ShieldAlert className="w-5 h-5" />}
             description={t.flowDiagram.highRiskReward}
             tasks={[t.flowDiagram.aggressiveStrategy, t.flowDiagram.maximizeReturns, t.flowDiagram.calculatedRisk]}
           />
           <AgentCard
             name={t.agents.neutral_debator}
+          tone="slate"
             icon={<Shield className="w-5 h-5" />}
             description={t.flowDiagram.balancedRisk}
             tasks={[t.flowDiagram.prudentStrategy, t.flowDiagram.riskBalance, t.flowDiagram.rationalDecision]}
           />
           <AgentCard
             name={t.agents.conservative_debator}
+          tone="blue"
             icon={<ShieldCheck className="w-5 h-5" />}
             description={t.flowDiagram.lowRiskVol}
             tasks={[t.flowDiagram.conservativeStrategy, t.flowDiagram.capitalProtection, t.flowDiagram.riskReduction]}
@@ -211,6 +263,7 @@ export function AgentFlowDiagram() {
       <div className="max-w-md mx-auto">
         <ManagerCard
           name={t.flowDiagram.riskManager}
+          tone="rose"
           icon={<Shield className="w-6 h-6" />}
           description={t.flowDiagram.integrateRisk}
           tasks={[t.flowDiagram.riskRating, t.flowDiagram.stopLossSettings, t.flowDiagram.finalRiskControl]}
@@ -224,6 +277,7 @@ export function AgentFlowDiagram() {
       <div className="max-w-md mx-auto">
         <TraderCard
           name={t.flowDiagram.trader}
+          tone="yellow"
           icon={<Target className="w-7 h-7" />}
           description={t.flowDiagram.executeTrade}
           outputs={[t.flowDiagram.tradeSignal, t.flowDiagram.targetPrice, t.flowDiagram.tradeQuantity, t.flowDiagram.riskParams]}
@@ -276,15 +330,18 @@ function DataSourceCard({
   icon,
   name,
   description,
+  tone,
 }: {
   icon: React.ReactNode;
   name: string;
   description: string;
+  tone?: CardTone;
 }) {
+  const styles = toneStyles(tone, "border-border");
   return (
-    <Card className={`p-3 hover-lift animate-slide-up border-2 border-border`}>
+    <Card className={`p-3 hover-lift animate-slide-up border-2 ${styles.card}`}>
       <div className="flex flex-col items-center justify-center">
-        <div className={`${ICON_DISC} w-10 h-10 mb-2`}>
+        <div className={`${styles.disc} w-10 h-10 mb-2`}>
           {icon}
         </div>
         <h4 className="font-semibold text-xs mb-0.5 text-center">{name}</h4>
@@ -307,15 +364,13 @@ function AgentCard({
   tasks: string[];
   tone?: CardTone;
 }) {
-  const toneClasses = tone ? CARD_TONES[tone] : null;
+  const styles = toneStyles(tone, "");
   return (
-    <Card className={`p-4 hover-lift animate-scale-up relative overflow-hidden group ${toneClasses?.card ?? ""}`}>
+    <Card className={`p-4 hover-lift animate-scale-up relative overflow-hidden group border-2 ${styles.card}`}>
       
       <div className="relative z-10">
         <div className="text-center mb-3">
-          <div
-            className={`${toneClasses ? `${ICON_DISC_BASE} ${toneClasses.disc}` : ICON_DISC} w-10 h-10 mb-2`}
-          >
+          <div className={`${styles.disc} w-10 h-10 mb-2`}>
             {icon}
           </div>
           <h4 className="font-bold text-sm mb-0.5">{name}</h4>
@@ -340,16 +395,19 @@ function ManagerCard({
   icon,
   description,
   tasks,
+  tone,
 }: {
   name: string;
   icon: React.ReactNode;
   description: string;
   tasks: string[];
+  tone?: CardTone;
 }) {
+  const styles = toneStyles(tone, "border-border");
   return (
-    <Card className={`p-5 hover-lift relative overflow-hidden border-2 border-border`}>
+    <Card className={`p-5 hover-lift relative overflow-hidden border-2 ${styles.card}`}>
       <div className="text-center mb-3">
-        <div className={`${ICON_DISC} w-12 h-12 mb-2`}>
+        <div className={`${styles.disc} w-12 h-12 mb-2`}>
           {icon}
         </div>
         <h4 className="font-bold text-base mb-1">{name}</h4>
@@ -373,17 +431,20 @@ function TraderCard({
   icon,
   description,
   outputs,
+  tone,
 }: {
   name: string;
   icon: React.ReactNode;
   description: string;
   outputs: string[];
+  tone?: CardTone;
 }) {
+  const styles = toneStyles(tone, "border-foreground");
   return (
-    <Card className={`p-6 hover-lift relative overflow-hidden border-2 border-foreground`}>
+    <Card className={`p-6 hover-lift relative overflow-hidden border-2 ${styles.card}`}>
             <div className="relative z-10">
         <div className="text-center mb-4">
-          <div className={`${ICON_DISC} w-14 h-14 mb-3`}>
+          <div className={`${styles.disc} w-14 h-14 mb-3`}>
             {icon}
           </div>
           <h4 className="font-bold text-lg mb-1 gradient-text-primary">{name}</h4>
