@@ -563,6 +563,12 @@ export const en = {
 
   // Analysis results
   results: {
+    pdfPreview: "PDF Preview",
+    pdfGenerating: "Generating PDF report…",
+    pdfGeneratingHint: "This usually takes 10–30 seconds",
+    pdfFailed: "Failed to generate PDF",
+    pdfRetry: "Retry",
+    pdfDownload: "Download PDF",
     title: "Analysis Results",
     detailedResults: "Detailed Analysis Results",
     analysisDate: "Analysis Date",
@@ -781,6 +787,14 @@ export const en = {
   },
 
   // Chat
+  demo: {
+    viewDemo: "View sample report",
+    nav: "Demo",
+    loading: "Loading demo…",
+    loadFailed: "Failed to load the demo. Please try again later.",
+    banner: "This is a sample NVDA analysis report. Preview and download the PDF, or use the \"Ask About Report\" chat at the bottom right (add your own API key in Settings first).",
+    startOwn: "Start your own analysis",
+  },
   chat: {
     title: "Ask About Report",
     placeholder: "Ask about this analysis report...",

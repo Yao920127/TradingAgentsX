@@ -61,6 +61,12 @@ export function Header() {
             >
               {t.nav.history}
             </Link>
+            <Link
+              href="/demo"
+              className="px-3 py-2 text-sm text-foreground/80 underline-offset-8 hover:text-foreground hover:underline decoration-1 transition-colors"
+            >
+              {t.demo.nav}
+            </Link>
             <ApiSettingsDialog />
             <LanguageSwitcher disabled={isReportDetailPage} />
             <ThemeToggle />
@@ -105,6 +111,13 @@ export function Header() {
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.nav.history}
+            </Link>
+            <Link
+              href="/demo"
+              className="block px-3 py-2 text-foreground/80 hover:text-foreground hover:underline underline-offset-8 transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t.demo.nav}
             </Link>
             <div className="flex items-center gap-3 pt-2">
               <ApiSettingsDialog />

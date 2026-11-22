@@ -422,6 +422,12 @@ export const zhTW = {
 
   // Analysis results
   results: {
+    pdfPreview: "PDF 預覽",
+    pdfGenerating: "正在產生 PDF 報告…",
+    pdfGeneratingHint: "請稍候，通常需要 10–30 秒",
+    pdfFailed: "PDF 產生失敗",
+    pdfRetry: "重試",
+    pdfDownload: "下載 PDF",
     title: "分析結果",
     detailedResults: "詳細分析結果",
     analysisDate: "分析日期",
@@ -712,6 +718,14 @@ export const zhTW = {
   },
 
   // Chat
+  demo: {
+    viewDemo: "查看範例報告",
+    nav: "範例",
+    loading: "載入範例中…",
+    loadFailed: "範例載入失敗，請稍後再試",
+    banner: "這是 NVDA 的範例分析報告。你可以預覽並下載 PDF，也能用右下角的「報告問答」詢問報告內容（需先在設定中填入你自己的 API Key）。",
+    startOwn: "開始自己的分析",
+  },
   chat: {
     title: "報告問答",
     placeholder: "詢問有關此分析報告的問題...",

@@ -33,6 +33,12 @@ export function Hero() {
           >
             {t.home.viewHistory}
           </Link>
+          <Link
+            href="/demo"
+            className="text-sm text-foreground underline underline-offset-4 hover:text-action-blue"
+          >
+            {t.demo.viewDemo}
+          </Link>
         </div>
       </div>
 

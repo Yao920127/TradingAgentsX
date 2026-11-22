@@ -16,3 +16,4 @@ __pycache__/
 eval_results/
 *.egg-info/
 .env
+!frontend/public/demo/*.json
