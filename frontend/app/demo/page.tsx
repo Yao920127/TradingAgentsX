@@ -8,28 +8,43 @@ import { Button } from "@/components/ui/button";
 import { ResultsView } from "@/components/analysis/ResultsView";
 import type { AnalysisResponse } from "@/lib/types";
 
-const DEMO_URL = "/demo/nvda.json";
+const DEMO_URLS: Record<string, string> = {
+  "zh-TW": "/demo/nvda-zh-TW.json",
+  en: "/demo/nvda-en.json",
+};
+const DEFAULT_DEMO_URL = DEMO_URLS.en;
+
+interface LoadedDemo {
+  url: string;
+  data: AnalysisResponse;
+}
 
 export default function DemoPage() {
   const router = useRouter();
-  const { t } = useLanguage();
-  const [result, setResult] = useState<AnalysisResponse | null>(null);
-  const [failed, setFailed] = useState(false);
+  const { t, locale } = useLanguage();
+  const demoUrl = DEMO_URLS[locale] ?? DEFAULT_DEMO_URL;
+  const [loaded, setLoaded] = useState<LoadedDemo | null>(null);
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
+  // The demo report exists in each UI language; refetch when the locale changes.
   useEffect(() => {
     const controller = new AbortController();
-    fetch(DEMO_URL, { signal: controller.signal })
+    fetch(demoUrl, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(String(res.status));
         return res.json() as Promise<AnalysisResponse>;
       })
-      .then((data) => setResult({ ...data, market_type: data.market_type ?? "us" }))
-      .catch((err: unknown) => {
-        if (!controller.signal.aborted) setFailed(true);
-        void err;
+      .then((data) =>
+        setLoaded({ url: demoUrl, data: { ...data, market_type: data.market_type ?? "us" } }),
+      )
+      .catch(() => {
+        if (!controller.signal.aborted) setFailedUrl(demoUrl);
       });
     return () => controller.abort();
-  }, []);
+  }, [demoUrl]);
+
+  const result = loaded?.url === demoUrl ? loaded.data : null;
+  const failed = failedUrl === demoUrl;
 
   if (failed) {
     return (
