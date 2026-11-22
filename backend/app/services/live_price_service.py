@@ -1,5 +1,5 @@
 """
-即時股價服務：從 Yahoo Finance 取得當日每分鐘的價格與成交量（含盤前、盤後）。
+即時股價服務：從 Yahoo Finance 取得當日正常盤（開盤到收盤）每分鐘的價格與成交量。
 
 給結果頁的「即時」模式使用。同一支股票在 CACHE_TTL_SECONDS 內的重複請求
 共用同一份結果，避免多位使用者同時輪詢時一直打 Yahoo。
@@ -220,11 +220,13 @@ def build_live_quote(
 
 
 def fetch_live_quote(symbol: str) -> dict[str, Any]:
-    """向 Yahoo Finance 取當日（休市時為最近交易日）每分鐘資料，含盤前與盤後。"""
+    """向 Yahoo Finance 取當日（休市時為最近交易日）正常盤每分鐘資料（不含盤前、盤後）。
+
+    Yahoo 依交易所當地時區回傳正常盤的 Unix 秒，夏令/冬令時間由前端依交易所時區換算顯示。"""
     import yfinance as yf  # type: ignore
 
     ticker = yf.Ticker(symbol)
-    frame = ticker.history(period="1d", interval="1m", prepost=True)
+    frame = ticker.history(period="1d", interval="1m", prepost=False)
     if frame is None or frame.empty:
         raise LiveDataUnavailableError(f"No intraday data for {symbol}")
 

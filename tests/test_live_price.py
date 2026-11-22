@@ -400,8 +400,8 @@ def test_fetch_live_quote_survives_missing_quote_summary(monkeypatch):
     assert quote["previous_close"] is None
 
 
-def test_fetch_live_quote_requests_extended_hours_and_labels_sessions(monkeypatch):
-    start = _ny_epoch("04:00")
+def test_fetch_live_quote_requests_regular_session_only(monkeypatch):
+    start = _ny_epoch("09:30")
     metadata = {
         "currentTradingPeriod": {
             "pre": {"start": US_PERIODS.pre_start, "end": US_PERIODS.regular_start},
@@ -415,8 +415,7 @@ def test_fetch_live_quote_requests_extended_hours_and_labels_sessions(monkeypatc
 
     quote = lps.fetch_live_quote("NVDA")
 
-    assert ticker.history_kwargs["prepost"] is True
-    assert quote["session"] == "pre"
-    assert quote["price"] == 102.0
-    # 盤前的比較基準是最近一次正常盤收盤價（fast_info 的 lastPrice）
-    assert quote["previous_close"] == 101.0
+    assert ticker.history_kwargs["prepost"] is False
+    assert quote["session"] == "regular"
+    assert quote["price"] == 101.0
+    assert [r["session"] for r in quote["sessions"]] == ["regular"]
