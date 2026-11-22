@@ -12,6 +12,7 @@ import type {
   LivePricePoint,
   LiveQuote,
   LiveSessionRange,
+  LiveVolumeBar,
 } from "./types";
 
 /** One-minute bars. */
@@ -63,4 +64,72 @@ export function formatMarketTime(unixSeconds: number, marketType: LiveMarketType
     hour12: false,
     timeZone: marketTimeZone(marketType),
   }).format(new Date(unixSeconds * 1000));
+}
+
+/** Candidate bucket sizes (minutes) for aggregating per-minute volume bars. */
+const VOLUME_BUCKET_MINUTES = [1, 2, 5, 10, 15, 30, 60];
+/** Upper bound of volume bars drawn, so each bar stays wide enough to read. */
+export const MAX_VOLUME_BARS = 150;
+
+export interface AggregatedVolumeBar {
+  /** Bucket start, epoch seconds. */
+  time: number;
+  volume: number;
+  /** Close of the bucket is at or above the previous bucket's close. */
+  isUp: boolean;
+}
+
+export interface AggregatedVolume {
+  bars: AggregatedVolumeBar[];
+  bucketMinutes: number;
+}
+
+/**
+ * Merge per-minute volume into coarser buckets (smallest of 1/2/5/10/15/30/60 min that
+ * keeps the bar count within MAX_VOLUME_BARS), coloured by price direction.
+ * Without this, a 16-hour US session (pre + regular + post) renders ~960 hairline bars.
+ */
+export function aggregateVolume(
+  volumes: LiveVolumeBar[],
+  candles: LiveCandle[],
+  maxBars: number = MAX_VOLUME_BARS,
+): AggregatedVolume {
+  if (volumes.length === 0) return { bars: [], bucketMinutes: 1 };
+
+  const sortedVolumes = [...volumes].sort((a, b) => a.time - b.time);
+  const sortedCandles = [...candles].sort((a, b) => a.time - b.time);
+  const spanSeconds = sortedVolumes[sortedVolumes.length - 1].time - sortedVolumes[0].time + LIVE_BAR_SECONDS;
+  const rawBars = Math.ceil(spanSeconds / LIVE_BAR_SECONDS);
+  const bucketMinutes =
+    VOLUME_BUCKET_MINUTES.find((m) => Math.ceil(rawBars / m) <= maxBars) ??
+    VOLUME_BUCKET_MINUTES[VOLUME_BUCKET_MINUTES.length - 1];
+  const bucketSeconds = bucketMinutes * 60;
+  const bucketStart = (time: number) => Math.floor(time / bucketSeconds) * bucketSeconds;
+
+  const volumeByBucket = new Map<number, number>();
+  for (const v of sortedVolumes) {
+    const key = bucketStart(v.time);
+    volumeByBucket.set(key, (volumeByBucket.get(key) ?? 0) + v.volume);
+  }
+
+  // first open / last close of every bucket that has candles
+  const priceByBucket = new Map<number, { open: number; close: number }>();
+  for (const c of sortedCandles) {
+    const key = bucketStart(c.time);
+    const existing = priceByBucket.get(key);
+    priceByBucket.set(key, { open: existing?.open ?? c.open, close: c.close });
+  }
+
+  let previousClose: number | null = null;
+  const bars = [...volumeByBucket.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([time, volume]) => {
+      const price = priceByBucket.get(time);
+      const reference = previousClose ?? price?.open;
+      const isUp = price && reference != null ? price.close >= reference : true;
+      if (price) previousClose = price.close;
+      return { time, volume, isUp };
+    });
+
+  return { bars, bucketMinutes };
 }

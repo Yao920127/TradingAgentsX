@@ -5,6 +5,7 @@ import {
   marketTimeZone,
   formatMarketTime,
   hasExtendedHours,
+  aggregateVolume,
   sessionAt,
   MIN_LIVE_WINDOW_SECONDS,
 } from "./live-price";
@@ -95,5 +96,39 @@ describe("market time", () => {
   test("formats Unix seconds as HH:mm in the exchange time zone", () => {
     // 2026-11-06 05:24 UTC = 13:24 Taipei
     expect(formatMarketTime(1_793_942_640, "twse")).toBe("13:24");
+  });
+});
+
+describe("aggregateVolume", () => {
+  const minute = (i: number) => 1_000_020 + i * 60;
+
+  test("keeps per-minute bars when few enough", () => {
+    const volumes = [0, 1, 2].map((i) => ({ time: minute(i), volume: 10 }));
+    const candles = [0, 1, 2].map((i) => ({ time: minute(i), open: 100, high: 101, low: 99, close: 100 + i }));
+    const { bars, bucketMinutes } = aggregateVolume(volumes, candles);
+    expect(bucketMinutes).toBe(1);
+    expect(bars).toHaveLength(3);
+  });
+
+  test("merges bars into larger buckets and sums volume", () => {
+    const volumes = Array.from({ length: 960 }, (_, i) => ({ time: minute(i), volume: 1 }));
+    const { bars, bucketMinutes } = aggregateVolume(volumes, []);
+    expect(bucketMinutes).toBe(10);
+    expect(bars.length).toBeLessThanOrEqual(150);
+    expect(bars.reduce((sum, b) => sum + b.volume, 0)).toBe(960);
+  });
+
+  test("colours a bucket down when close falls below previous close", () => {
+    const volumes = [0, 1].map((i) => ({ time: minute(i), volume: 5 }));
+    const candles = [
+      { time: minute(0), open: 100, high: 101, low: 99, close: 100 },
+      { time: minute(1), open: 100, high: 100, low: 98, close: 99 },
+    ];
+    const { bars } = aggregateVolume(volumes, candles);
+    expect(bars.map((b) => b.isUp)).toEqual([true, false]);
+  });
+
+  test("returns empty result without volumes", () => {
+    expect(aggregateVolume([], [])).toEqual({ bars: [], bucketMinutes: 1 });
   });
 });

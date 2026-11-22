@@ -23,6 +23,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useLivePrice } from "@/hooks/useLivePrice";
 import {
   LIVE_BAR_SECONDS,
+  aggregateVolume,
   anchorQuoteToNow,
   formatMarketTime,
   hasExtendedHours,
@@ -94,24 +95,14 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
   const offset = anchored?.offset ?? 0;
   const sessions = quote?.sessions ?? [];
   const showSessions = hasExtendedHours(sessions);
-  const volumeData = useMemo(() => {
-    // 漲跌：該分鐘收盤高於前一根收盤為漲（綠），否則為跌（紅）；首根以開盤價比較
-    const candleByTime = new Map((quote?.candles ?? []).map((c) => [c.time, c]));
-    const sortedCandles = [...(quote?.candles ?? [])].sort((a, b) => a.time - b.time);
-    const prevCloseByTime = new Map<number, number>();
-    sortedCandles.forEach((c, i) => {
-      if (i > 0) prevCloseByTime.set(c.time, sortedCandles[i - 1].close);
-    });
-    return (quote?.volumes ?? []).map((v) => {
-      const candle = candleByTime.get(v.time);
-      const ref = prevCloseByTime.get(v.time) ?? candle?.open;
-      return {
-        ...v,
-        label: formatMarketTime(v.time, marketType),
-        isUp: candle && ref != null ? candle.close >= ref : true,
-      };
-    });
+  const { volumeData, bucketMinutes } = useMemo(() => {
+    const { bars, bucketMinutes: minutes } = aggregateVolume(quote?.volumes ?? [], quote?.candles ?? []);
+    return {
+      volumeData: bars.map((bar) => ({ ...bar, label: formatMarketTime(bar.time, marketType) })),
+      bucketMinutes: minutes,
+    };
   }, [quote, marketType]);
+  const volumeTitle = `${labels.liveVolume}（${labels.liveVolumeInterval.replace("{n}", String(bucketMinutes))}）`;
 
   return (
     <div className="space-y-6">
@@ -161,7 +152,7 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-4">{labels.liveVolume}</h3>
+        <h3 className="text-lg font-semibold mb-4">{volumeTitle}</h3>
         <ResponsiveContainer width="100%" height={VOLUME_CHART_HEIGHT}>
           <BarChart data={volumeData} barCategoryGap={0}>
             <CartesianGrid strokeDasharray="3 3" />
