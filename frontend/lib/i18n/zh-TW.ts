@@ -422,6 +422,8 @@ export const zhTW = {
 
   // Analysis results
   results: {
+    backToReports: "返回報告",
+    startAnalysis: "開始分析",
     pdfPreview: "PDF 預覽",
     pdfGenerating: "正在產生 PDF 報告…",
     pdfGeneratingHint: "請稍候，通常需要 10–30 秒",

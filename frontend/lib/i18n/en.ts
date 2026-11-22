@@ -563,6 +563,8 @@ export const en = {
 
   // Analysis results
   results: {
+    backToReports: "Back to Reports",
+    startAnalysis: "Start Analysis",
     pdfPreview: "PDF Preview",
     pdfGenerating: "Generating PDF report…",
     pdfGeneratingHint: "This usually takes 10–30 seconds",

@@ -33,7 +33,6 @@ export default function AnalysisResultsPage() {
     <ResultsView
       analysisResult={analysisResult}
       marketType={marketType}
-      onBack={() => router.push("/analysis")}
     />
   );
 }

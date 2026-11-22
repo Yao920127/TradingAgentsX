@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PriceChart } from "@/components/analysis/PriceChart";
 import { VerdictBanner } from "@/components/analysis/VerdictBanner";
 import { DebateCard, type DebateTone } from "@/components/analysis/DebateCard";
 import { FullReport, type FullReportSection } from "@/components/analysis/FullReport";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
 import { lookupStockName, type MarketType } from "@/lib/stock-search";
 import type { AnalysisResponse, LiveMarketType } from "@/lib/types";
 import { PdfPreviewModal } from "@/components/analysis/PdfPreviewModal";
 import { usePdfPreview } from "@/hooks/usePdfPreview";
-import { FileText } from "lucide-react";
+import { ChevronLeft, FileText, Play } from "lucide-react";
 import {
   extractConfidence,
   extractDecisionFromResult,
@@ -47,12 +47,12 @@ const ANALYST_REPORT_KEYS = [
 interface ResultsViewProps {
   analysisResult: AnalysisResponse;
   marketType: "us" | "twse" | "tpex";
-  onBack: () => void;
   /** Optional banner rendered above the header (e.g. demo notice). */
   banner?: React.ReactNode;
 }
 
-export function ResultsView({ analysisResult, marketType, onBack, banner }: ResultsViewProps) {
+export function ResultsView({ analysisResult, marketType, banner }: ResultsViewProps) {
+  const router = useRouter();
   const pdf = usePdfPreview(analysisResult);
   const { t, locale } = useLanguage();
   const [companyName, setCompanyName] = useState<string | null>(null);
@@ -195,11 +195,19 @@ export function ResultsView({ analysisResult, marketType, onBack, banner }: Resu
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               <Button
                 variant="outline"
-                onClick={onBack}
+                onClick={() => router.push("/history")}
                 className="gap-2 hover-lift"
               >
                 <ChevronLeft className="h-4 w-4" />
-                {t.results.backButton}
+                {t.results.backToReports}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/analysis")}
+                className="gap-2 hover-lift"
+              >
+                <Play className="h-4 w-4" />
+                {t.results.startAnalysis}
               </Button>
               <Button
                 variant="outline"

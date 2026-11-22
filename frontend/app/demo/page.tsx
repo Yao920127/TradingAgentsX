@@ -54,7 +54,6 @@ export default function DemoPage() {
     <ResultsView
       analysisResult={result}
       marketType="us"
-      onBack={() => router.push("/")}
       banner={
         <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-start gap-2 text-sm text-muted-foreground">
