@@ -33,15 +33,15 @@ const SIGNAL_THEME: Record<
   },
   sell: {
     panel:
-      "border-destructive/30 bg-coral-soft/20 dark:bg-destructive/15  ",
-    text: "text-destructive ",
-    bar: "bg-destructive ",
+      "border-red-500/30 bg-red-50 dark:border-red-400/30 dark:bg-red-950/40",
+    text: "text-red-700 dark:text-red-400",
+    bar: "bg-red-600 dark:bg-red-400",
   },
   hold: {
     panel:
-      "border-coral/50 bg-coral/10  ",
-    text: "text-foreground ",
-    bar: "bg-coral",
+      "border-amber-500/40 bg-amber-50 dark:border-amber-400/30 dark:bg-amber-950/40",
+    text: "text-amber-700 dark:text-amber-400",
+    bar: "bg-amber-500 dark:bg-amber-400",
   },
   unknown: {
     panel: "border-border bg-muted/40",
