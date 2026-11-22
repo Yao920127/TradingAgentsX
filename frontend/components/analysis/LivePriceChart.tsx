@@ -27,7 +27,6 @@ import {
   formatMarketTime,
   hasExtendedHours,
   liveWindowSeconds,
-  sessionAt,
 } from "@/lib/live-price";
 import type {
   LiveBarSession,
@@ -38,6 +37,9 @@ import type {
 } from "@/lib/types";
 
 const LIVE_LINE_COLOR = "var(--chart-2)";
+const UP_COLOR = "var(--chart-1)";
+const DOWN_COLOR = "var(--chart-5)";
+const VOLUME_CHART_HEIGHT = 320;
 const SESSION_COLORS: Record<LiveBarSession, string> = {
   pre: "var(--chart-3)",
   regular: "var(--chart-2)",
@@ -92,15 +94,24 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
   const offset = anchored?.offset ?? 0;
   const sessions = quote?.sessions ?? [];
   const showSessions = hasExtendedHours(sessions);
-  const volumeData = useMemo(
-    () =>
-      (quote?.volumes ?? []).map((v) => ({
+  const volumeData = useMemo(() => {
+    // 漲跌：該分鐘收盤高於前一根收盤為漲（綠），否則為跌（紅）；首根以開盤價比較
+    const candleByTime = new Map((quote?.candles ?? []).map((c) => [c.time, c]));
+    const sortedCandles = [...(quote?.candles ?? [])].sort((a, b) => a.time - b.time);
+    const prevCloseByTime = new Map<number, number>();
+    sortedCandles.forEach((c, i) => {
+      if (i > 0) prevCloseByTime.set(c.time, sortedCandles[i - 1].close);
+    });
+    return (quote?.volumes ?? []).map((v) => {
+      const candle = candleByTime.get(v.time);
+      const ref = prevCloseByTime.get(v.time) ?? candle?.open;
+      return {
         ...v,
         label: formatMarketTime(v.time, marketType),
-        session: sessionAt(quote?.sessions ?? [], v.time),
-      })),
-    [quote, marketType],
-  );
+        isUp: candle && ref != null ? candle.close >= ref : true,
+      };
+    });
+  }, [quote, marketType]);
 
   return (
     <div className="space-y-6">
@@ -151,8 +162,8 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
 
       <div>
         <h3 className="text-lg font-semibold mb-4">{labels.liveVolume}</h3>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={volumeData}>
+        <ResponsiveContainer width="100%" height={VOLUME_CHART_HEIGHT}>
+          <BarChart data={volumeData} barCategoryGap={0}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="label" minTickGap={30} />
             <YAxis tickFormatter={formatCompactVolume} />
@@ -179,7 +190,7 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
                 ))}
             <Bar dataKey="volume" isAnimationActive={false}>
               {volumeData.map((bar) => (
-                <Cell key={bar.time} fill={SESSION_COLORS[bar.session]} />
+                <Cell key={bar.time} fill={bar.isUp ? UP_COLOR : DOWN_COLOR} />
               ))}
             </Bar>
           </BarChart>

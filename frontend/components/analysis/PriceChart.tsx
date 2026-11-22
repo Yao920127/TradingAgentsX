@@ -6,6 +6,7 @@ import {
   Line,
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -117,6 +118,17 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
   const getCloseValue = (data: PriceData) => {
     return data["Adj Close"] ?? data.Close;
   };
+
+  // 成交量顏色：收盤高於前一日收盤為漲（綠），低於為跌（紅）；首根與平盤以開盤價比較
+  const volumeData = useMemo(
+    () =>
+      priceData.map((d, i) => {
+        const close = d["Adj Close"] ?? d.Close;
+        const ref = i === 0 ? d.Open : priceData[i - 1]["Adj Close"] ?? priceData[i - 1].Close;
+        return { ...d, isUp: close >= ref };
+      }),
+    [priceData],
+  );
 
   // 計算價格範圍用於標準化
   const priceValues = heikinAshiData.flatMap(d => [d.HA_High, d.HA_Low]);
@@ -343,7 +355,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
         <div>
           <h3 className="text-lg font-semibold mb-4">{labels.volume}</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={priceData}>
+            <BarChart data={volumeData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="Date" 
@@ -364,7 +376,11 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                 ]}
                 labelFormatter={(label) => `${labels.date}: ${formatFullDate(String(label))}`}
               />
-              <Bar dataKey="Volume" fill="var(--chart-4)" name={labels.volume} />
+              <Bar dataKey="Volume" name={labels.volume}>
+                {volumeData.map((d) => (
+                  <Cell key={d.Date} fill={d.isUp ? "var(--chart-1)" : "var(--chart-5)"} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
