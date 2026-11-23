@@ -1,23 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { useCallback, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { LiveMarketType, PriceData, PriceStats } from "@/lib/types";
 import { LivePriceChart } from "@/components/analysis/LivePriceChart";
+import { LwcPriceChart } from "@/components/analysis/LwcPriceChart";
+import { buildHistorySeries } from "@/lib/chart-data";
+import { availableRanges, sliceByRange, statsForRange, type PriceRangeId } from "@/lib/price-range";
 
 interface PriceChartProps {
   priceData: PriceData[];
@@ -28,84 +19,49 @@ interface PriceChartProps {
 
 type PriceMode = "history" | "live";
 
-// Heikin Ashi data structure
-interface HeikinAshiData extends PriceData {
-  HA_Open: number;
-  HA_Close: number;
-  HA_High: number;
-  HA_Low: number;
-}
-
-// Calculate Heikin Ashi values from regular OHLC data
-function calculateHeikinAshi(data: PriceData[]): HeikinAshiData[] {
-  const haData: HeikinAshiData[] = [];
-  
-  for (let i = 0; i < data.length; i++) {
-    const current = data[i];
-    const { Open, High, Low, Close } = current;
-    const adjClose = current["Adj Close"] ?? Close;
-    
-    // HA Close = (Open + High + Low + Close) / 4
-    const HA_Close = (Open + High + Low + adjClose) / 4;
-    
-    // HA Open = (previous HA Open + previous HA Close) / 2
-    let HA_Open: number;
-    if (i === 0) {
-      // For the first candle, use regular Open
-      HA_Open = Open;
-    } else {
-      HA_Open = (haData[i - 1].HA_Open + haData[i - 1].HA_Close) / 2;
-    }
-    
-    // HA High = max(High, HA Open, HA Close)
-    const HA_High = Math.max(High, HA_Open, HA_Close);
-    
-    // HA Low = min(Low, HA Open, HA Close)
-    const HA_Low = Math.min(Low, HA_Open, HA_Close);
-    
-    haData.push({
-      ...current,
-      HA_Open,
-      HA_Close,
-      HA_High,
-      HA_Low,
-    });
-  }
-  
-  return haData;
-}
-
 export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceChartProps) {
   const { t, locale } = useLanguage();
   const [chartType, setChartType] = useState<"line" | "candlestick">("line");
   const [priceMode, setPriceMode] = useState<PriceMode>("history");
   const isLive = priceMode === "live";
 
-  // Calculate Heikin Ashi data
-  const heikinAshiData = useMemo(() => calculateHeikinAshi(priceData), [priceData]);
+  const [range, setRange] = useState<PriceRangeId>("ALL");
+
+  const rangeOptions = useMemo(() => availableRanges(priceData), [priceData]);
+  const rangeData = useMemo(() => sliceByRange(priceData, range), [priceData, range]);
+  const series = useMemo(() => buildHistorySeries(rangeData), [rangeData]);
+  // "全部" keeps the backend's own stats; shorter ranges are derived from the visible bars.
+  const stats = useMemo(
+    () => (range === "ALL" ? priceStats : (statsForRange(rangeData) ?? priceStats)),
+    [range, rangeData, priceStats],
+  );
 
   // 格式化數字
-  const formatNumber = (num: number) => {
-    return num.toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
+  const formatNumber = useCallback(
+    (num: number) =>
+      num.toLocaleString(locale === "en" ? "en-US" : "zh-TW", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    [locale],
+  );
 
   // 新上市股票的 price_data 是盤中 K 線，Date 格式為 YYYY-MM-DDTHH:mm（交易所當地時間）
   const isIntraday = Boolean(priceStats.is_new_listing) || priceData.some((d) => d.Date.includes("T"));
 
-  // 格式化座標軸日期：日 K 只顯示月/日，盤中 K 顯示月/日 時:分。
-  // 直接切字串，避免 new Date() 依瀏覽器時區位移交易所時間
-  const formatDate = (dateStr: string) => {
-    const month = Number(dateStr.slice(5, 7));
-    const day = Number(dateStr.slice(8, 10));
-    const time = dateStr.slice(11, 16);
-    return isIntraday && time ? `${month}/${day} ${time}` : `${month}/${day}`;
-  };
-
-  // Tooltip 用的完整日期
-  const formatFullDate = (dateStr: string) => dateStr.replace("T", " ");
-
-  // 資料點太少（例如只有 1 根日 K）時折線畫不出來，改顯示資料點
-  const lineDot = priceData.length <= 2 ? { r: 4 } : false;
+  // 盤中 K 線的時間是交易所當地時間（以 UTC 秒存放），固定用 UTC 格式化避免被瀏覽器時區位移
+  const formatIntradayTime = useCallback(
+    (seconds: number) =>
+      new Intl.DateTimeFormat("en-GB", {
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "UTC",
+      }).format(new Date(seconds * 1000)),
+    [],
+  );
 
   const newListingNotice = priceStats.is_new_listing
     ? t.results.priceSection.newListingNotice
@@ -114,31 +70,10 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
         .replace("{interval}", priceStats.interval ?? "")
     : null;
 
-  // Get the close field to use (prefer Adj Close)
-  const getCloseValue = (data: PriceData) => {
-    return data["Adj Close"] ?? data.Close;
-  };
-
-  // 成交量顏色：收盤高於前一日收盤為漲（綠），低於為跌（紅）；首根與平盤以開盤價比較
-  const volumeData = useMemo(
-    () =>
-      priceData.map((d, i) => {
-        const close = d["Adj Close"] ?? d.Close;
-        const ref = i === 0 ? d.Open : priceData[i - 1]["Adj Close"] ?? priceData[i - 1].Close;
-        return { ...d, isUp: close >= ref };
-      }),
-    [priceData],
-  );
-
-  // 計算價格範圍用於標準化
-  const priceValues = heikinAshiData.flatMap(d => [d.HA_High, d.HA_Low]);
-  const minPrice = Math.min(...priceValues);
-  const maxPrice = Math.max(...priceValues);
-  const _priceRange = maxPrice - minPrice;
-
   // Localized labels
   const labels = {
     priceTitle: t.results.priceSection.title,
+    dataRange: t.results.priceSection.dataRange,
     growth: t.results.priceSection.growth,
     duration: t.results.priceSection.duration,
     days: t.results.priceSection.days,
@@ -147,24 +82,16 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
     lineChart: t.results.priceSection.lineChart,
     candlestick: t.results.priceSection.candlestick,
     volume: t.results.volumeChart,
-    adjClosePrice: locale === 'en' ? 'Adj Close' : '調整後收盤價',
-    closePrice: locale === 'en' ? 'Close' : '收盤價',
-    date: locale === 'en' ? 'Date' : '日期',
-    open: locale === 'en' ? 'Open' : '開',
-    close: locale === 'en' ? 'Close' : '收',
-    adjClose: locale === 'en' ? 'Adj Close' : '調整收',
-    high: locale === 'en' ? 'High' : '高',
-    low: locale === 'en' ? 'Low' : '低',
-    up: locale === 'en' ? '↑ Up' : '↑ 上漲',
-    down: locale === 'en' ? '↓ Down' : '↓ 下跌',
-    noChange: locale === 'en' ? '→ No Change' : '→ 無變化',
   };
 
   return (
     <Card className="w-full hover-lift animate-scale-up">
       <CardHeader>
         <div className="flex flex-wrap justify-between items-center gap-3">
-          <CardTitle className="text-2xl">{ticker} {labels.priceTitle}</CardTitle>
+          <CardTitle className="text-2xl">
+            {ticker} {labels.priceTitle}
+            {!isLive && !isIntraday && rangeOptions.length > 1 && (locale === "en" ? ` (${t.results.priceSection.ranges[range]})` : `（${t.results.priceSection.ranges[range]}）`)}
+          </CardTitle>
           <div className="flex flex-wrap items-center gap-2">
             <Tabs value={priceMode} onValueChange={(v: string) => setPriceMode(v as PriceMode)}>
               <TabsList>
@@ -190,28 +117,45 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
           </p>
         )}
 
+        {!isLive && !isIntraday && rangeOptions.length > 1 && (
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Tabs value={range} onValueChange={(v: string) => setRange(v as PriceRangeId)}>
+              <TabsList>
+                {rangeOptions.map((id) => (
+                  <TabsTrigger key={id} value={id}>
+                    {t.results.priceSection.ranges[id]}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            <p className="text-sm text-muted-foreground tabular-nums">
+              {labels.dataRange}：{stats.start_date} → {stats.end_date}
+            </p>
+          </div>
+        )}
+
         {/* 統計資訊（歷史模式；即時模式的統計在 LivePriceChart 內） */}
         {!isLive && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           <div className="bg-gradient-to-br p-4 rounded-lg border border-deep-green/30 dark:border-pale-green/30 ">
             <p className="text-sm text-muted-foreground">{labels.growth}</p>
-            <p className={`text-2xl font-bold ${priceStats.growth_rate >= 0 ? 'text-deep-green dark:text-pale-green' : 'text-destructive'}`}>
-              {priceStats.growth_rate >= 0 ? '+' : ''}{priceStats.growth_rate}%
+            <p className={`text-2xl font-bold ${stats.growth_rate >= 0 ? 'text-deep-green dark:text-pale-green' : 'text-destructive'}`}>
+              {stats.growth_rate >= 0 ? '+' : ''}{stats.growth_rate}%
             </p>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
             <p className="text-sm text-muted-foreground">{labels.duration}</p>
-            <p className="text-2xl font-bold">{priceStats.duration_days} {labels.days}</p>
+            <p className="text-2xl font-bold">{stats.duration_days} {labels.days}</p>
           </div>
           <div className="bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-800/40 dark:to-gray-800/40 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
             <p className="text-sm text-muted-foreground">{labels.startPrice}</p>
-            <p className="text-lg font-semibold">${formatNumber(priceStats.start_price)}</p>
-            <p className="text-xs text-muted-foreground">{priceStats.start_date}</p>
+            <p className="text-lg font-semibold">${formatNumber(stats.start_price)}</p>
+            <p className="text-xs text-muted-foreground">{stats.start_date}</p>
           </div>
           <div className="bg-gradient-to-br p-4 rounded-lg border border-coral/50 ">
             <p className="text-sm text-muted-foreground">{labels.endPrice}</p>
-            <p className="text-lg font-semibold">${formatNumber(priceStats.end_price)}</p>
-            <p className="text-xs text-muted-foreground">{priceStats.end_date}</p>
+            <p className="text-lg font-semibold">${formatNumber(stats.end_price)}</p>
+            <p className="text-xs text-muted-foreground">{stats.end_date}</p>
           </div>
         </div>
         )}
@@ -222,261 +166,18 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
           <LivePriceChart ticker={ticker} marketType={marketType} chartType={chartType} />
         ) : (
         <>
-        {/* 價格圖表 */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">{labels.priceTitle}</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            {chartType === "line" ? (
-              <LineChart data={priceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="Date" 
-                  tickFormatter={formatDate}
-                  minTickGap={30}
-                />
-                <YAxis 
-                  domain={['auto', 'auto']}
-                  tickFormatter={(value) => `$${value.toFixed(0)}`}
-                />
-                <Tooltip 
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload as PriceData;
-                      const adjClose = data["Adj Close"];
-                      const close = data.Close;
-                      const hasAdjClose = adjClose !== undefined && adjClose !== null;
-                      
-                      return (
-                        <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
-                          <p className="text-sm font-semibold mb-2">{labels.date}: {formatFullDate(data.Date)}</p>
-                          <div className="space-y-1 text-sm">
-                            {hasAdjClose && (
-                              <p className="text-blue-600 font-medium">
-                                {labels.adjClosePrice}: ${formatNumber(adjClose)}
-                              </p>
-                            )}
-                            <p className={hasAdjClose ? "text-gray-500 text-xs" : "text-blue-600"}>
-                              {labels.closePrice}: ${formatNumber(close)}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey={(data: PriceData) => getCloseValue(data)}
-                  stroke="var(--chart-2)" 
-                  strokeWidth={2}
-                  name={labels.adjClosePrice} 
-                  dot={lineDot}
-                />
-              </LineChart>
-            ) : (
-              // 平均K線圖（Heikin Ashi）
-              <BarChart data={heikinAshiData} barCategoryGap="20%">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="Date" 
-                  tickFormatter={formatDate}
-                  minTickGap={30}
-                />
-                <YAxis 
-                  domain={[minPrice * 0.98, maxPrice * 1.02]}
-                  tickFormatter={(value) => `$${value.toFixed(0)}`}
-                />
-                <Tooltip 
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload as HeikinAshiData;
-                      const isUp = data.HA_Close > data.HA_Open;
-                      const isDown = data.HA_Close < data.HA_Open;
-                      const adjClose = data["Adj Close"];
-                      const close = data.Close;
-                      const hasAdjClose = adjClose !== undefined && adjClose !== null;
-                      
-                      // Trend color coding for the direction indicator
-                      const trendColor = isUp ? 'text-deep-green dark:text-pale-green' : isDown ? 'text-destructive' : 'text-gray-600';
-                      const direction = isUp ? labels.up : isDown ? labels.down : labels.noChange;
-                      
-                      return (
-                        <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
-                          <p className="text-sm font-semibold mb-2">{labels.date}: {formatFullDate(data.Date)}</p>
-                          
-                          {/* 原始價格 - Adj Close 為主 */}
-                          <div className="mb-2 pb-2 border-b border-border">
-                            <p className="text-xs text-muted-foreground mb-1">
-                              {locale === 'en' ? 'Actual Prices' : '實際價格'}
-                            </p>
-                            {hasAdjClose && (
-                              <p className="text-blue-600 font-medium text-sm">
-                                {labels.adjClosePrice}: ${formatNumber(adjClose)}
-                              </p>
-                            )}
-                            <p className={hasAdjClose ? "text-gray-500 text-xs" : "text-blue-600 text-sm"}>
-                              {labels.closePrice}: ${formatNumber(close)}
-                            </p>
-                          </div>
-                          
-                          {/* Heikin Ashi 值 */}
-                          <div className="space-y-1 text-sm">
-                            <p className="text-xs text-muted-foreground mb-1">Heikin Ashi</p>
-                            <p className="text-purple-600">
-                              {labels.open}: ${formatNumber(data.HA_Open)}
-                            </p>
-                            <p className="text-cyan-600">
-                              {labels.close}: ${formatNumber(data.HA_Close)}
-                            </p>
-                            <p className="text-pink-600">{labels.high}: ${formatNumber(data.HA_High)}</p>
-                            <p className="text-foreground">{labels.low}: ${formatNumber(data.HA_Low)}</p>
-                            <p className={`text-sm mt-2 ${trendColor}`}>
-                              {direction} ${formatNumber(Math.abs(data.HA_Close - data.HA_Open))}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                {/* 使用自定義 shape 來繪製平均蠟燭 */}
-                <Bar 
-                  dataKey="HA_High"
-                  shape={(props: any) => <HeikinAshiCandlestickShape {...props} minPrice={minPrice} maxPrice={maxPrice} />}
-                />
-              </BarChart>
-            )}
-          </ResponsiveContainer>
-        </div>
-
-        {/* 交易量圖表 */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">{labels.volume}</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={volumeData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="Date" 
-                tickFormatter={formatDate}
-                minTickGap={30}
-              />
-              <YAxis 
-                tickFormatter={(value) => {
-                  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-                  if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-                  return value.toString();
-                }}
-              />
-              <Tooltip 
-                formatter={(value: number | undefined) => [
-                  value !== undefined ? value.toLocaleString() : '-', 
-                  labels.volume
-                ]}
-                labelFormatter={(label) => `${labels.date}: ${formatFullDate(String(label))}`}
-              />
-              <Bar dataKey="Volume" name={labels.volume}>
-                {volumeData.map((d) => (
-                  <Cell key={d.Date} fill={d.isUp ? "var(--chart-1)" : "var(--chart-5)"} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <LwcPriceChart
+          mode={chartType}
+          line={series.line}
+          candles={series.candles}
+          volume={series.volume}
+          volumeLabel={labels.volume}
+          timeFormatter={isIntraday ? formatIntradayTime : undefined}
+          priceFormatter={formatNumber}
+        />
         </>
         )}
       </CardContent>
     </Card>
   );
 }
-
-// 自定義平均蠟燭圖形狀組件（Heikin Ashi）
-interface HeikinAshiCandlestickShapeProps {
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-  payload?: HeikinAshiData;
-  minPrice: number;
-  maxPrice: number;
-}
-
-const HeikinAshiCandlestickShape: React.FC<HeikinAshiCandlestickShapeProps> = (props) => {
-  const { x = 0, y = 0, width = 0, height = 0, payload, minPrice, maxPrice } = props;
-  
-  if (!payload) return null;
-  
-  const { HA_Open, HA_Close, HA_High, HA_Low } = payload;
-  const isUp = HA_Close > HA_Open;
-  const isDown = HA_Close < HA_Open;
-  const _isNeutral = HA_Close === HA_Open;
-  
-  // Color coding: green for up, red for down, gray for neutral
-  let fillColor: string;
-  let strokeColor: string;
-  
-  if (isUp) {
-    fillColor = 'var(--chart-1)'; // deep green (light) / mint (dark)
-    strokeColor = 'var(--chart-1)';
-  } else if (isDown) {
-    fillColor = 'var(--chart-5)'; // error red
-    strokeColor = 'var(--chart-5)';
-  } else {
-    fillColor = 'var(--chart-4)'; // slate
-    strokeColor = 'var(--chart-4)';
-  }
-  
-  // 計算實際的 Y 坐標位置
-  const priceRange = maxPrice - minPrice;
-  const pixelsPerPriceUnit = height / priceRange;
-
-  // Calculate Y coordinates for HA values
-  const highY = y + (maxPrice - HA_High) * pixelsPerPriceUnit;
-  const lowY = y + (maxPrice - HA_Low) * pixelsPerPriceUnit;
-  const openY = y + (maxPrice - HA_Open) * pixelsPerPriceUnit;
-  const closeY = y + (maxPrice - HA_Close) * pixelsPerPriceUnit;
-  
-  // 蠟燭主體
-  const bodyTop = Math.min(openY, closeY);
-  const bodyBottom = Math.max(openY, closeY);
-  const bodyHeight = Math.max(bodyBottom - bodyTop, 1); // 至少 1px
-  
-  // 蠟燭寬度和影線位置
-  const candleWidth = width * 0.6; // 蠟燭佔 60% 寬度
-  const candleX = x + (width - candleWidth) / 2;
-  const wickX = x + width / 2; // 影線在中間
-  
-  return (
-    <g>
-      {/* 上影線（從最高價到蠟燭頂部） */}
-      <line
-        x1={wickX}
-        y1={highY}
-        x2={wickX}
-        y2={bodyTop}
-        stroke={strokeColor}
-        strokeWidth={1.5}
-      />
-      {/* 下影線（從蠟燭底部到最低價） */}
-      <line
-        x1={wickX}
-        y1={bodyBottom}
-        x2={wickX}
-        y2={lowY}
-        stroke={strokeColor}
-        strokeWidth={1.5}
-      />
-      {/* 蠟燭主體 */}
-      <rect
-        x={candleX}
-        y={bodyTop}
-        width={candleWidth}
-        height={bodyHeight}
-        fill={fillColor}
-        stroke={strokeColor}
-        strokeWidth={1}
-      />
-    </g>
-  );
-};

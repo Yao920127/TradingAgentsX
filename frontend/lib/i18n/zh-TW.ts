@@ -522,6 +522,8 @@ export const zhTW = {
     
     // Price chart section
     priceSection: {
+      dataRange: "資料範圍",
+      ranges: { "1M": "1個月", "3M": "3個月", "6M": "6個月", YTD: "年初至今", "1Y": "1年", ALL: "全部" },
       title: "價格走勢",
       growth: "增長率",
       duration: "時長",

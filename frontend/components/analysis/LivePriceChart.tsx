@@ -5,30 +5,12 @@
  * line / candles (Liveline) and per-minute volume, refreshed automatically.
  * Covers pre-market, regular hours and after hours.
  */
-import { useMemo } from "react";
-import { useTheme } from "next-themes";
-import { Liveline } from "liveline";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { useCallback, useMemo } from "react";
+import { LwcPriceChart } from "@/components/analysis/LwcPriceChart";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLivePrice } from "@/hooks/useLivePrice";
-import {
-  LIVE_BAR_SECONDS,
-  aggregateVolume,
-  anchorQuoteToNow,
-  formatMarketTime,
-  hasExtendedHours,
-  liveWindowSeconds,
-} from "@/lib/live-price";
+import { aggregateVolume, formatMarketTime, hasExtendedHours, sessionAt } from "@/lib/live-price";
+import type { CandlePoint, LinePoint, VolumePoint } from "@/lib/chart-data";
 import type {
   LiveBarSession,
   LiveMarketSession,
@@ -37,16 +19,11 @@ import type {
   LiveSessionRange,
 } from "@/lib/types";
 
-const LIVE_LINE_COLOR = "var(--chart-2)";
-const UP_COLOR = "var(--chart-1)";
-const DOWN_COLOR = "var(--chart-5)";
-const VOLUME_CHART_HEIGHT = 320;
 const SESSION_COLORS: Record<LiveBarSession, string> = {
   pre: "var(--chart-3)",
   regular: "var(--chart-2)",
   post: "var(--chart-4)",
 };
-const SESSION_SHADE_OPACITY = 0.12;
 
 interface LivePriceChartProps {
   ticker: string;
@@ -72,37 +49,49 @@ function referenceCloseLabel(priceSession: LiveBarSession, labels: PriceSectionL
   return priceSession === "post" ? labels.regularClose : labels.previousClose;
 }
 
-function formatCompactVolume(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return value.toString();
-}
-
 export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChartProps) {
   const { t, locale } = useLanguage();
-  const { resolvedTheme } = useTheme();
-  const { quote, receivedAt, hasError } = useLivePrice(ticker, marketType, true);
+  const { quote, hasError } = useLivePrice(ticker, marketType, true);
   const labels = t.results.priceSection;
   const numberLocale = locale === "en" ? "en-US" : "zh-TW";
 
-  const formatPrice = (value: number) =>
-    value.toLocaleString(numberLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const anchored = useMemo(
-    () => (quote && receivedAt ? anchorQuoteToNow(quote, receivedAt) : null),
-    [quote, receivedAt],
+  const formatPrice = useCallback(
+    (value: number) =>
+      value.toLocaleString(numberLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    [numberLocale],
   );
-  const offset = anchored?.offset ?? 0;
-  const sessions = quote?.sessions ?? [];
+
+  const sessions = useMemo(() => quote?.sessions ?? [], [quote]);
   const showSessions = hasExtendedHours(sessions);
-  const { volumeData, bucketMinutes } = useMemo(() => {
+
+  const line = useMemo<LinePoint[]>(
+    () => (quote?.points ?? []).map((p) => ({ time: p.time as LinePoint["time"], value: p.value })),
+    [quote],
+  );
+  const candles = useMemo<CandlePoint[]>(
+    () => (quote?.candles ?? []).map((c) => ({ ...c, time: c.time as CandlePoint["time"] })),
+    [quote],
+  );
+  const { volume, bucketMinutes } = useMemo(() => {
     const { bars, bucketMinutes: minutes } = aggregateVolume(quote?.volumes ?? [], quote?.candles ?? []);
-    return {
-      volumeData: bars.map((bar) => ({ ...bar, label: formatMarketTime(bar.time, marketType) })),
-      bucketMinutes: minutes,
-    };
-  }, [quote, marketType]);
+    const points: VolumePoint[] = bars.map((bar) => ({
+      time: bar.time as VolumePoint["time"],
+      value: bar.volume,
+      up: bar.isUp,
+      muted: showSessions && sessionAt(sessions, bar.time) !== "regular",
+    }));
+    return { volume: points, bucketMinutes: minutes };
+  }, [quote, sessions, showSessions]);
   const volumeTitle = `${labels.liveVolume}（${labels.liveVolumeInterval.replace("{n}", String(bucketMinutes))}）`;
+
+  const formatTime = useCallback((seconds: number) => formatMarketTime(seconds, marketType), [marketType]);
+  const referenceLine = useMemo(
+    () =>
+      quote?.previous_close != null
+        ? { value: quote.previous_close, label: referenceCloseLabel(quote.price_session, labels) }
+        : undefined,
+    [quote, labels],
+  );
 
   return (
     <div className="space-y-6">
@@ -125,67 +114,22 @@ export function LivePriceChart({ ticker, marketType, chartType }: LivePriceChart
             />
           )}
         </div>
-        <div className="h-[400px] w-full">
-          <Liveline
-            data={anchored?.points ?? []}
-            value={quote?.price ?? 0}
-            mode={chartType === "candlestick" ? "candle" : "line"}
-            candles={anchored?.candles}
-            candleWidth={LIVE_BAR_SECONDS}
-            window={liveWindowSeconds(anchored?.points ?? [])}
-            theme={resolvedTheme === "dark" ? "dark" : "light"}
-            color={LIVE_LINE_COLOR}
-            loading={!quote}
-            emptyText={hasError ? labels.liveError : labels.liveLoading}
-            referenceLine={
-              quote?.previous_close != null
-                ? { value: quote.previous_close, label: referenceCloseLabel(quote.price_session, labels) }
-                : undefined
-            }
-            formatValue={formatPrice}
-            formatTime={(time) => formatMarketTime(time - offset, marketType)}
-            grid
-            fill
-            badge
+        {quote ? (
+          <LwcPriceChart
+            mode={chartType}
+            line={line}
+            candles={candles}
+            volume={volume}
+            volumeLabel={volumeTitle}
+            timeFormatter={formatTime}
+            referenceLine={referenceLine}
+            priceFormatter={formatPrice}
           />
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-4">{volumeTitle}</h3>
-        <ResponsiveContainer width="100%" height={VOLUME_CHART_HEIGHT}>
-          <BarChart data={volumeData} barCategoryGap={0}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="label" minTickGap={30} />
-            <YAxis tickFormatter={formatCompactVolume} />
-            <Tooltip
-              formatter={(value: number | undefined) => [value?.toLocaleString() ?? "-", labels.liveVolume]}
-            />
-            {showSessions &&
-              sessions
-                .filter((range) => range.session !== "regular")
-                .map((range) => (
-                  <ReferenceArea
-                    key={`${range.session}-${range.start}`}
-                    x1={formatMarketTime(range.start, marketType)}
-                    x2={formatMarketTime(range.end, marketType)}
-                    fill={SESSION_COLORS[range.session]}
-                    fillOpacity={SESSION_SHADE_OPACITY}
-                    label={{
-                      value: sessionNames(labels)[range.session],
-                      position: "insideTop",
-                      fontSize: 12,
-                      fill: "currentColor",
-                    }}
-                  />
-                ))}
-            <Bar dataKey="volume" isAnimationActive={false}>
-              {volumeData.map((bar) => (
-                <Cell key={bar.time} fill={bar.isUp ? UP_COLOR : DOWN_COLOR} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        ) : (
+          <div className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">
+            {hasError ? labels.liveError : labels.liveLoading}
+          </div>
+        )}
         {showSessions && (
           <p className="mt-2 text-xs text-muted-foreground">{labels.extendedVolumeNote}</p>
         )}
