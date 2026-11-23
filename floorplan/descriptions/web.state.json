@@ -27,6 +27,10 @@
     "frontend/hooks/useLivePrice.ts": {
       "name": "即時報價輪詢",
       "description": "開啟即時模式時定期向主伺服器要最新報價；盤前、盤中、盤後更新得快，休市時放慢。"
+    },
+    "frontend/hooks/usePdfPreview.ts": {
+      "name": "PDF 預覽控制",
+      "description": "向伺服器要求產生 PDF，管理預覽視窗的開關、重試，並在關閉時清掉暫存檔。"
     }
   }
 }

@@ -15,6 +15,14 @@
     "tests/test_report_summarizer.py": {
       "name": "報告摘要測試",
       "description": "自動檢查四份報告是否各自摘要、依固定順序合併，以及某份摘要失敗時是否只退回該份原文。"
+    },
+    "tests/test_finmind_tw_fixes.py": {
+      "name": "台股資料修正測試",
+      "description": "確認台股資料來源的各項修正，例如代號與日期處理，不會再出錯。"
+    },
+    "tests/test_new_listing.py": {
+      "name": "新上市股票測試",
+      "description": "確認剛上市、日線不足的股票，會改用盤中資料並正確標示。"
     }
   }
 }

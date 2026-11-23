@@ -31,6 +31,10 @@
     "test.py": {
       "name": "Yahoo 資料速度測試",
       "description": "手動測試從 Yahoo 抓 30 天技術指標要花多久。"
+    },
+    "scripts/ensure_venv.sh": {
+      "name": "Python 環境準備",
+      "description": "第一次使用時建立專案的 Python 環境並裝好套件，之後每次自動啟用。"
     }
   }
 }

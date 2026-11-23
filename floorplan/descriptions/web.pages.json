@@ -31,6 +31,10 @@
     "frontend/app/page.tsx": {
       "name": "首頁",
       "description": "介紹 AI 分析團隊如何運作，並引導使用者開始分析。"
+    },
+    "frontend/app/demo/page.tsx": {
+      "name": "範例報告頁",
+      "description": "不用登入就能看一份 NVDA 範例分析，可切換中英文版本並預覽 PDF。"
     }
   }
 }

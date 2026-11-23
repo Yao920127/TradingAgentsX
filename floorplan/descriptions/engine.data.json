@@ -127,6 +127,10 @@
     "tradingagents/dataflows/yfin_utils.py": {
       "name": "Yahoo 查詢小工具",
       "description": "包裝 Yahoo Finance 的常用查詢，例如公司資訊與分析師建議。"
+    },
+    "tradingagents/dataflows/new_listing.py": {
+      "name": "新上市股票資料",
+      "description": "處理上市不到 20 天的股票：整理首日開收盤、成交均價與盤中資料，並隱藏算不準的指標。"
     }
   }
 }

@@ -1,65 +1,28 @@
 {
   "tasks": [
     {
-      "title": "新增 Trading-R1 模型",
-      "request": "模型新增一家 Trading-R1（model 為 tauric，Base URL 為 https://api.tauric.ai），不用顯示到主頁，並加上 tauric logo",
-      "summary": "新增 Tauric 這家模型供應商：分析表單與歷史聊天頁的下拉選單都能選 Trading-R1，設定視窗多一個 Tauric 金鑰欄位，伺服器與終端機版也認得它。主頁的供應商卡片沒有動。另外刪除了不再使用的 assets/、llm_logo/ 圖片資料夾，以及已移除的游標元件。尚未提交。",
+      "title": "範例報告與 PDF 預覽",
+      "request": "加上 demo 展示結果，並提供 PDF 預覽（中英文版）",
+      "summary": "新增不用登入就能看的範例報告頁，結果畫面抽成共用元件，並加上 PDF 預覽視窗與三顆操作按鈕。AI 問答後來依要求移除。",
       "items": [
-        {
-          "ref": "frontend/components/analysis/AnalysisForm.tsx",
-          "change": "changed",
-          "note": "兩個模型下拉選單（深度思考與快速思考）都多了 Trading-R1，前面帶 Tauric 的圖示。"
-        },
-        {
-          "ref": "frontend/app/history/chat/page.tsx",
-          "change": "changed",
-          "note": "歷史報告聊天頁的模型選單加入 Trading-R1；只設定 Tauric 金鑰時也能自動選用它。"
-        },
-        {
-          "ref": "frontend/components/analysis/ReportChat.tsx",
-          "change": "changed",
-          "note": "報告內的問答視窗在有 Tauric 金鑰時，也能改用 Trading-R1 回答。"
-        },
-        {
-          "ref": "frontend/components/settings/ApiSettingsDialog.tsx",
-          "change": "changed",
-          "note": "設定視窗新增「Trading-R1 (Tauric) API Key」欄位，使用者才能填入自己的金鑰。"
-        },
-        {
-          "ref": "frontend/lib/api-helpers.ts",
-          "change": "changed",
-          "note": "只要選到 tauric 開頭的模型，就自動改用 Tauric 的網址與金鑰。"
-        },
-        {
-          "ref": "frontend/lib/storage.ts",
-          "change": "changed",
-          "note": "瀏覽器保存的金鑰設定多了 Tauric 這一格。"
-        },
-        {
-          "ref": "frontend/next.config.ts",
-          "change": "changed",
-          "note": "把 api.tauric.ai 加進允許連線的網址，否則瀏覽器會擋掉呼叫。"
-        },
-        {
-          "ref": "backend/app/services/trading_service.py",
-          "change": "changed",
-          "note": "可用模型清單加入 tauric。"
-        },
-        {
-          "ref": "backend/app/services/key_validation_service.py",
-          "change": "changed",
-          "note": "金鑰檢查多了 Tauric，使用者儲存設定時可以測試金鑰是否有效。"
-        },
-        {
-          "ref": "tradingagents/graph/trading_graph.py",
-          "change": "changed",
-          "note": "選到 tauric 模型時，伺服器改讀 TAURIC_API_KEY 這個環境變數。"
-        },
-        {
-          "ref": "tui/constants.py",
-          "change": "changed",
-          "note": "終端機版的供應商與模型選項也加入 Tauric / Trading-R1。"
-        }
+        { "ref": "frontend/app/demo/page.tsx", "change": "new", "note": "新的範例報告頁，依介面語言載入中文或英文的 NVDA 範例，讓訪客不用先跑分析就能看到成果。" },
+        { "ref": "frontend/components/analysis/ResultsView.tsx", "change": "new", "note": "把結果畫面抽成共用元件，範例頁和真實結果頁看到一樣的內容，並有返回報告、開始分析、PDF 預覽三個按鈕。" },
+        { "ref": "frontend/components/analysis/PdfPreviewModal.tsx", "change": "new", "note": "做出 PDF 預覽視窗，使用者可先看過再下載。" },
+        { "ref": "frontend/hooks/usePdfPreview.ts", "change": "new", "note": "負責向伺服器要 PDF、處理失敗重試，關閉時清掉暫存檔。" },
+        { "ref": "frontend/lib/pdf-request.ts", "change": "new", "note": "把報告內容和語言整理成產生 PDF 需要的資料。" },
+        { "ref": "frontend/components/home/Hero.tsx", "change": "changed", "note": "首頁新增「查看範例報告」入口，讓人一進來就能看範例。" }
+      ]
+    },
+    {
+      "title": "價格圖與時間範圍",
+      "request": "價格線與交易量圖改成 lightweight-charts 格式，並可切換不同時間範圍與增長率",
+      "summary": "歷史圖與即時圖都換成 TradingView 圖表（價格在上、成交量在下），並新增 1 個月到全部的時間範圍切換，增長率隨範圍重算。",
+      "items": [
+        { "ref": "frontend/components/analysis/LwcPriceChart.tsx", "change": "new", "note": "新的價格與成交量圖，取代原本分開的兩張圖，並在滑過時顯示開高低收。" },
+        { "ref": "frontend/components/analysis/PriceChart.tsx", "change": "changed", "note": "歷史圖改用新圖表，並加入時間範圍按鈕、資料範圍與依範圍重算的增長率。" },
+        { "ref": "frontend/components/analysis/LivePriceChart.tsx", "change": "changed", "note": "即時圖也改用新圖表，盤前盤後的成交量以淡色區分。" },
+        { "ref": "frontend/lib/chart-data.ts", "change": "new", "note": "把價格資料整理成圖表可用的格式並依漲跌標色。" },
+        { "ref": "frontend/lib/price-range.ts", "change": "new", "note": "依選的期間切出資料並算出該期間的增長率。" }
       ]
     }
   ]

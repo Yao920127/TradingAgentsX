@@ -87,6 +87,26 @@
     "frontend/lib/sse.ts": {
       "name": "持續訊息接收",
       "description": "接收主伺服器持續推送過來的訊息，一則一則拆開交給畫面處理。"
+    },
+    "frontend/lib/chart-data.test.ts": {
+      "name": "圖表資料測試",
+      "description": "確認價格與成交量轉成圖表資料時，日期、漲跌顏色與平均 K 線算得正確。"
+    },
+    "frontend/lib/chart-data.ts": {
+      "name": "圖表資料整理",
+      "description": "把歷史價格整理成折線、K 線與成交量圖要用的資料，並依漲跌標色。"
+    },
+    "frontend/lib/pdf-request.ts": {
+      "name": "PDF 請求內容",
+      "description": "挑出報告中有內容的分析章節與語言，組成產生 PDF 時要送給伺服器的資料。"
+    },
+    "frontend/lib/price-range.test.ts": {
+      "name": "時間範圍測試",
+      "description": "確認切換 1 個月、年初至今等範圍時，資料篩選與增長率計算正確。"
+    },
+    "frontend/lib/price-range.ts": {
+      "name": "價格時間範圍",
+      "description": "依選的期間（1 個月到全部）切出價格資料，並算出該期間的增長率與起訖日。"
     }
   }
 }

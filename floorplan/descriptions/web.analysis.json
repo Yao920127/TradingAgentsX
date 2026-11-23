@@ -51,6 +51,18 @@
     "frontend/components/analysis/LivePriceChart.tsx": {
       "name": "即時股價圖",
       "description": "結果頁價格區的「即時」模式：顯示目前股價與盤前、盤中、盤後整天每分鐘的走勢線或 K 棒與成交量，並自動更新。"
+    },
+    "frontend/components/analysis/LwcPriceChart.tsx": {
+      "name": "價格與成交量圖",
+      "description": "用 TradingView 圖表畫出價格線或 K 線，下方配成交量，滑過時顯示開高低收。"
+    },
+    "frontend/components/analysis/PdfPreviewModal.tsx": {
+      "name": "PDF 預覽視窗",
+      "description": "彈出視窗顯示產生中的進度、錯誤與 PDF 預覽，並提供下載。"
+    },
+    "frontend/components/analysis/ResultsView.tsx": {
+      "name": "分析結果畫面",
+      "description": "顯示一份分析的完整結果：買賣建議、價格圖、多空與風險辯論和各項報告，並有返回報告、開始分析、PDF 預覽三個按鈕。"
     }
   }
 }
