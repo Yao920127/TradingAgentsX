@@ -34,8 +34,8 @@ describe("sliceByRange", () => {
     expect(slice[0].Date.startsWith("2026-01")).toBe(true);
   });
 
-  test("ALL returns everything", () => {
-    expect(sliceByRange(bars, "ALL")).toHaveLength(bars.length);
+  test("null returns everything", () => {
+    expect(sliceByRange(bars, null)).toHaveLength(bars.length);
   });
 });
 
@@ -45,7 +45,6 @@ describe("availableRanges", () => {
     const ids = availableRanges(short);
     expect(ids).toContain("1M");
     expect(ids).not.toContain("1Y");
-    expect(ids).toContain("ALL");
   });
 
   test("offers 1Y when data spans a year", () => {

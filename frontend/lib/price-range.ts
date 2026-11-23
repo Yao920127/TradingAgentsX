@@ -5,9 +5,9 @@
  */
 import type { PriceData, PriceStats } from "./types";
 
-export type PriceRangeId = "1M" | "3M" | "6M" | "YTD" | "1Y" | "ALL";
+export type PriceRangeId = "1M" | "3M" | "6M" | "YTD" | "1Y";
 
-export const PRICE_RANGE_IDS: readonly PriceRangeId[] = ["1M", "3M", "6M", "YTD", "1Y", "ALL"];
+export const PRICE_RANGE_IDS: readonly PriceRangeId[] = ["1M", "3M", "6M", "YTD", "1Y"];
 
 /** How many days the first bar may sit after a range start and still count as covering it. */
 const COVERAGE_TOLERANCE_DAYS = 7;
@@ -21,8 +21,8 @@ function monthsBefore(endMs: number, months: number): number {
   return Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - months, end.getUTCDate());
 }
 
-/** First day (YYYY-MM-DD) of the range, or null for ALL. */
-function rangeStart(id: PriceRangeId, lastDate: string): string | null {
+/** First day (YYYY-MM-DD) of the range, . */
+function rangeStart(id: PriceRangeId, lastDate: string): string {
   const end = parseDay(lastDate);
   switch (id) {
     case "1M":
@@ -35,25 +35,24 @@ function rangeStart(id: PriceRangeId, lastDate: string): string | null {
       return formatDay(monthsBefore(end, 12));
     case "YTD":
       return `${lastDate.slice(0, 4)}-01-01`;
-    case "ALL":
-      return null;
   }
 }
 
-export function sliceByRange(data: PriceData[], id: PriceRangeId): PriceData[] {
-  if (data.length === 0) return [];
+/** `null` means "no range": every loaded bar. */
+export function sliceByRange(data: PriceData[], id: PriceRangeId | null): PriceData[] {
+  if (data.length === 0 || id === null) return data;
   const start = rangeStart(id, data[data.length - 1].Date);
-  return start === null ? data : data.filter((bar) => bar.Date.slice(0, 10) >= start);
+  return data.filter((bar) => bar.Date.slice(0, 10) >= start);
 }
 
-/** Ranges the loaded data actually covers (ALL is always offered). */
+/** Ranges the loaded data actually covers (none when the data is shorter than a month). */
 export function availableRanges(data: PriceData[]): PriceRangeId[] {
   if (data.length === 0) return [];
   const first = parseDay(data[0].Date);
   const lastDate = data[data.length - 1].Date;
   return PRICE_RANGE_IDS.filter((id) => {
     const start = rangeStart(id, lastDate);
-    if (start === null || id === "YTD") return true;
+    if (id === "YTD") return true;
     return first <= parseDay(start) + COVERAGE_TOLERANCE_DAYS * MS_PER_DAY;
   });
 }

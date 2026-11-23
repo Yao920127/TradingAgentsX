@@ -665,7 +665,7 @@ export const en = {
     // Price chart section
     priceSection: {
       dataRange: "Data range",
-      ranges: { "1M": "1M", "3M": "3M", "6M": "6M", YTD: "YTD", "1Y": "1Y", ALL: "All" },
+      ranges: { "1M": "1M", "3M": "3M", "6M": "6M", YTD: "YTD", "1Y": "1Y" },
       title: "Price Trend",
       growth: "Growth Rate",
       duration: "Duration",

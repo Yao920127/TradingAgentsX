@@ -25,12 +25,14 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
   const [priceMode, setPriceMode] = useState<PriceMode>("history");
   const isLive = priceMode === "live";
 
-  const [range, setRange] = useState<PriceRangeId>("ALL");
+  const [range, setRange] = useState<PriceRangeId>("1Y");
 
   const rangeOptions = useMemo(() => availableRanges(priceData), [priceData]);
-  const rangeData = useMemo(() => sliceByRange(priceData, range), [priceData, range]);
+  // Fall back to the 1Y/YTD default's longest offered option, or all bars when the data is too short for any range.
+  const activeRange = rangeOptions.includes(range) ? range : (rangeOptions[rangeOptions.length - 1] ?? null);
+  const rangeData = useMemo(() => sliceByRange(priceData, activeRange), [priceData, activeRange]);
   const series = useMemo(() => buildHistorySeries(rangeData), [rangeData]);
-  // Every range (including 全部) is derived from the visible bars so the numbers stay consistent
+  // Every range is derived from the visible bars so the numbers stay consistent
   // across tabs; intraday new listings keep the backend's own stats.
   const stats = useMemo(
     () => (priceStats.is_new_listing ? priceStats : (statsForRange(rangeData) ?? priceStats)),
@@ -91,7 +93,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
         <div className="flex flex-wrap justify-between items-center gap-3">
           <CardTitle className="text-2xl">
             {ticker} {labels.priceTitle}
-            {!isLive && !isIntraday && rangeOptions.length > 1 && (locale === "en" ? ` (${t.results.priceSection.ranges[range]})` : `（${t.results.priceSection.ranges[range]}）`)}
+            {!isLive && !isIntraday && rangeOptions.length > 1 && (locale === "en" ? ` (${t.results.priceSection.ranges[activeRange ?? "1Y"]})` : `（${t.results.priceSection.ranges[activeRange ?? "1Y"]}）`)}
           </CardTitle>
           <div className="flex flex-wrap items-center gap-2">
             <Tabs value={priceMode} onValueChange={(v: string) => setPriceMode(v as PriceMode)}>
@@ -121,7 +123,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
         {!isLive && !isIntraday && rangeOptions.length > 1 && (
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="max-w-full overflow-x-auto">
-            <Tabs value={range} onValueChange={(v: string) => setRange(v as PriceRangeId)}>
+            <Tabs value={activeRange ?? range} onValueChange={(v: string) => setRange(v as PriceRangeId)}>
               <TabsList>
                 {rangeOptions.map((id) => (
                   <TabsTrigger key={id} value={id}>
