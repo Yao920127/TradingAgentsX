@@ -5,7 +5,7 @@
  * candlesticks) in the top pane, volume histogram in its own pane below, with
  * a crosshair legend. Shared by the history and live views.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import {
   CandlestickSeries,
@@ -27,8 +27,38 @@ const UP_COLOR = "#26a69a";
 const DOWN_COLOR = "#ef5350";
 const MUTED_ALPHA = "66";
 const VOLUME_ALPHA = "99";
-const VOLUME_PANE_HEIGHT = 140;
-const PRICE_MIN_MOVE = 0.01;
+const MOBILE_QUERY = "(max-width: 639px)";
+const LAYOUT = {
+  desktop: { height: 520, volumePane: 140, fontSize: 12 },
+  mobile: { height: 400, volumePane: 100, fontSize: 10 },
+} as const;
+
+/** True below the `sm` breakpoint; false during SSR. */
+function useIsMobile(): boolean {
+  return useSyncExternalStore(
+    (notify) => {
+      const query = window.matchMedia(MOBILE_QUERY);
+      query.addEventListener("change", notify);
+      return () => query.removeEventListener("change", notify);
+    },
+    () => window.matchMedia(MOBILE_QUERY).matches,
+    () => false,
+  );
+}
+
+/**
+ * The chart is a fixed view: no drag-to-pan, wheel/pinch zoom or axis dragging.
+ * Touching or hovering only moves the crosshair, so the page keeps scrolling
+ * normally on phones and the chart never shifts under the finger.
+ */
+const FIXED_INTERACTION = {
+  handleScroll: { mouseWheel: false, pressedMouseMove: false, horzTouchDrag: false, vertTouchDrag: false },
+  handleScale: { mouseWheel: false, pinch: false, axisPressedMouseMove: false, axisDoubleClickReset: false },
+  kineticScroll: { mouse: false, touch: false },
+} as const;
+// Built-in formats on purpose: custom axis formatters make lightweight-charts
+// reserve a very wide price axis, which squeezes the plot on phones.
+const PRICE_AXIS_FORMAT = { type: "price", precision: 2, minMove: 0.01 } as const;
 
 const PALETTE = {
   light: { text: "#4b5563", grid: "#e5e7eb", line: "#1863dc", border: "#d1d5db" },
@@ -93,7 +123,7 @@ function LwcPriceChartInner({
   candles,
   volume,
   volumeLabel,
-  height = 520,
+  height,
   timeFormatter,
   referenceLine,
   priceFormatter = defaultPrice,
@@ -105,6 +135,9 @@ function LwcPriceChartInner({
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
   const hasFittedRef = useRef(false);
   const [legend, setLegend] = useState<LegendState | null>(null);
+  const isMobile = useIsMobile();
+  const layout = LAYOUT[isMobile ? "mobile" : "desktop"];
+  const chartHeight = height ?? layout.height;
 
   // Latest time formatter for the crosshair handler without re-subscribing.
   const timeFormatterRef = useRef(timeFormatter);
@@ -126,15 +159,17 @@ function LwcPriceChartInner({
 
     const chart = createChart(container, {
       autoSize: true,
+      ...FIXED_INTERACTION,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
+        fontSize: layout.fontSize,
         textColor: initial.text,
         panes: { separatorColor: initial.border },
       },
       grid: { vertLines: { color: initial.grid }, horzLines: { color: initial.grid } },
       crosshair: { mode: CrosshairMode.Normal },
       rightPriceScale: { borderColor: initial.border },
-      timeScale: { borderColor: initial.border, rightOffset: 4 },
+      timeScale: { borderColor: initial.border, rightOffset: 2, fixLeftEdge: true, fixRightEdge: true, lockVisibleTimeRangeOnResize: true },
     });
 
     const priceSeries =
@@ -146,18 +181,19 @@ function LwcPriceChartInner({
             borderDownColor: DOWN_COLOR,
             wickUpColor: UP_COLOR,
             wickDownColor: DOWN_COLOR,
+            priceFormat: PRICE_AXIS_FORMAT,
           })
-        : chart.addSeries(LineSeries, { color: initial.line, lineWidth: 2 });
+        : chart.addSeries(LineSeries, { color: initial.line, lineWidth: 2, priceFormat: PRICE_AXIS_FORMAT });
     const volumeSeries = chart.addSeries(
       HistogramSeries,
       {
-        priceFormat: { type: "custom", formatter: compactVolume, minMove: 1 },
+        priceFormat: { type: "volume" },
         priceLineVisible: false,
         lastValueVisible: false,
       },
       1,
     );
-    chart.panes()[1]?.setHeight(VOLUME_PANE_HEIGHT);
+    chart.panes()[1]?.setHeight(layout.volumePane);
 
     chartRef.current = chart;
     priceSeriesRef.current = priceSeries;
@@ -198,7 +234,7 @@ function LwcPriceChartInner({
       priceSeriesRef.current = null;
       volumeSeriesRef.current = null;
     };
-  }, [mode]);
+  }, [mode, layout.fontSize, layout.volumePane]);
 
   // Theme + formatters.
   useEffect(() => {
@@ -216,12 +252,8 @@ function LwcPriceChartInner({
       },
       localization: { timeFormatter: axisFormatter },
     });
-    // Price format on the price series only, so the volume pane keeps its own K/M/B labels.
-    priceSeriesRef.current?.applyOptions({
-      priceFormat: { type: "custom", formatter: priceFormatter, minMove: PRICE_MIN_MOVE },
-    });
     if (mode === "line") priceSeriesRef.current?.applyOptions({ color: palette.line });
-  }, [palette, timeFormatter, priceFormatter, mode]);
+  }, [palette, timeFormatter, mode]);
 
   // Data. Keep the user's scroll/zoom when polling replaces the dataset.
   useEffect(() => {
@@ -267,7 +299,7 @@ function LwcPriceChartInner({
   const tone = legend?.up === undefined ? undefined : legend.up ? UP_COLOR : DOWN_COLOR;
 
   return (
-    <div className="relative w-full" style={{ height }}>
+    <div className="relative w-full" style={{ height: chartHeight }}>
       <div ref={containerRef} className="h-full w-full" />
       <div className="pointer-events-none absolute left-3 top-2 z-10 flex flex-wrap items-center gap-x-3 gap-y-0.5 rounded-md bg-background/80 px-2 py-1 text-xs tabular-nums backdrop-blur-sm">
         {legend ? (
@@ -303,7 +335,8 @@ function LwcPriceChartInner({
   );
 }
 
-/** Remounts on mode change so the series type (line/candles) is rebuilt cleanly. */
+/** Remounts on mode or breakpoint change so series type and sizing are rebuilt cleanly. */
 export function LwcPriceChart(props: LwcPriceChartProps) {
-  return <LwcPriceChartInner key={props.mode} {...props} />;
+  const isMobile = useIsMobile();
+  return <LwcPriceChartInner key={`${props.mode}-${isMobile}`} {...props} />;
 }

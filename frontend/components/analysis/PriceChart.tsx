@@ -119,6 +119,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
 
         {!isLive && !isIntraday && rangeOptions.length > 1 && (
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="max-w-full overflow-x-auto">
             <Tabs value={range} onValueChange={(v: string) => setRange(v as PriceRangeId)}>
               <TabsList>
                 {rangeOptions.map((id) => (
@@ -128,6 +129,7 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
                 ))}
               </TabsList>
             </Tabs>
+            </div>
             <p className="text-sm text-muted-foreground tabular-nums">
               {labels.dataRange}：{stats.start_date} → {stats.end_date}
             </p>
