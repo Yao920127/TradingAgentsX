@@ -134,6 +134,7 @@ function LwcPriceChartInner({
   const priceSeriesRef = useRef<ISeriesApi<"Line"> | ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
   const hasFittedRef = useRef(false);
+  const datasetKeyRef = useRef("");
   const [legend, setLegend] = useState<LegendState | null>(null);
   const isMobile = useIsMobile();
   const layout = LAYOUT[isMobile ? "mobile" : "desktop"];
@@ -262,7 +263,15 @@ function LwcPriceChartInner({
     const volumeSeries = volumeSeriesRef.current;
     if (!chart || !priceSeries || !volumeSeries) return;
 
-    const saved: LogicalRange | null = hasFittedRef.current ? chart.timeScale().getVisibleLogicalRange() : null;
+    // Polling appends/updates bars of the same dataset (same first bar) → keep the user's view.
+    // A different dataset (e.g. another time range) must be refitted, or the old logical range
+    // would point at the wrong bars.
+    const points = mode === "candlestick" ? candles : line;
+    const datasetKey = points.length > 0 ? `${mode}:${String(points[0].time)}` : "";
+    const sameDataset = datasetKey !== "" && datasetKey === datasetKeyRef.current;
+    const saved: LogicalRange | null =
+      hasFittedRef.current && sameDataset ? chart.timeScale().getVisibleLogicalRange() : null;
+    datasetKeyRef.current = datasetKey;
     if (mode === "candlestick") {
       (priceSeries as ISeriesApi<"Candlestick">).setData(candles);
     } else {

@@ -30,10 +30,11 @@ export function PriceChart({ priceData, priceStats, ticker, marketType }: PriceC
   const rangeOptions = useMemo(() => availableRanges(priceData), [priceData]);
   const rangeData = useMemo(() => sliceByRange(priceData, range), [priceData, range]);
   const series = useMemo(() => buildHistorySeries(rangeData), [rangeData]);
-  // "全部" keeps the backend's own stats; shorter ranges are derived from the visible bars.
+  // Every range (including 全部) is derived from the visible bars so the numbers stay consistent
+  // across tabs; intraday new listings keep the backend's own stats.
   const stats = useMemo(
-    () => (range === "ALL" ? priceStats : (statsForRange(rangeData) ?? priceStats)),
-    [range, rangeData, priceStats],
+    () => (priceStats.is_new_listing ? priceStats : (statsForRange(rangeData) ?? priceStats)),
+    [rangeData, priceStats],
   );
 
   // 格式化數字
