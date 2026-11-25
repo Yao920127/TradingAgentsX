@@ -28,7 +28,7 @@ def create_risk_manager(llm, memory, language: str = "zh-TW"):
         news_report = state["news_report"]
         fundamentals_report = state["fundamentals_report"]
         sentiment_report = state["sentiment_report"]
-        trader_plan = state["investment_plan"]
+        trader_plan = state["trader_investment_plan"]
 
         curr_situation = f"{market_research_report}\n\n{sentiment_report}\n\n{news_report}\n\n{fundamentals_report}"
         

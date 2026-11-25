@@ -171,14 +171,17 @@ function decision(action: string, signal: DecisionSignal): ExtractedDecision {
 }
 
 /**
- * Match an explicit "最終交易提案：X" / "Final Trading Proposal: X" statement.
+ * Match an explicit "最終交易決策：X" / "Final Trading Decision: X" (Risk Manager)
+ * or "最終交易提案：X" / "Final Trading Proposal: X" (Trader) statement.
  * Reports repeat the phrase, so the LAST match is the binding one.
  */
 function findFinalProposal(text: unknown): ExtractedDecision | null {
   if (!text || typeof text !== "string") return null;
 
   const zhMatches = [
-    ...text.matchAll(/\*{0,2}最終交易提案[：:]\s*\*{0,2}(買入|賣出|持有)\*{0,2}/g),
+    ...text.matchAll(
+      /\*{0,2}最終交易(?:提案|決策)[：:]\s*\*{0,2}(買入|賣出|持有)\*{0,2}/g,
+    ),
   ];
   if (zhMatches.length > 0) {
     const found = zhMatches[zhMatches.length - 1][1];
@@ -189,7 +192,7 @@ function findFinalProposal(text: unknown): ExtractedDecision | null {
 
   const enMatches = [
     ...text.matchAll(
-      /\*{0,2}Final Trading Proposal\*{0,2}[：:]\s*\*{0,2}(BUY|SELL|HOLD)\*{0,2}/gi,
+      /\*{0,2}Final Trading (?:Proposal|Decision)\*{0,2}[：:]\s*\*{0,2}(BUY|SELL|HOLD)\*{0,2}/gi,
     ),
   ];
   if (enMatches.length > 0) {
@@ -225,27 +228,19 @@ function findOtherDecision(text: unknown): ExtractedDecision | null {
 
 /**
  * Resolve the final BUY/SELL/HOLD call for an analysis result.
- * Priority: trader plan → final_trade_decision → risk manager → decision.action → analyst reports.
+ * The Risk Manager (Risk Judge) makes the final call; the Trader only proposes.
+ * Priority: explicit marker in final_trade_decision → decision.action (backend signal
+ * extracted from final_trade_decision) → looser phrasing in final_trade_decision /
+ * risk judge → trader plan (legacy reports without a Risk Manager verdict) → analyst reports.
  */
 export function extractDecisionFromResult(
   result: DecisionSource | null | undefined,
 ): ExtractedDecision {
   const reports = result?.reports;
 
-  const fromTrader = findFinalProposal(reports?.trader_investment_plan);
-  if (fromTrader) return fromTrader;
-
   const finalTrade = reports?.final_trade_decision;
-  if (finalTrade) {
-    const found = findFinalProposal(finalTrade) || findOtherDecision(finalTrade);
-    if (found) return found;
-  }
-
-  const riskJudge = reports?.risk_debate_state?.judge_decision;
-  if (riskJudge) {
-    const found = findOtherDecision(riskJudge);
-    if (found) return found;
-  }
+  const fromFinalMarker = findFinalProposal(finalTrade);
+  if (fromFinalMarker) return fromFinalMarker;
 
   const action = result?.decision?.action;
   if (typeof action === "string" && action) {
@@ -257,6 +252,14 @@ export function extractDecisionFromResult(
         : "hold";
     return decision(action, signal);
   }
+
+  const fromRiskText =
+    findOtherDecision(finalTrade) ||
+    findOtherDecision(reports?.risk_debate_state?.judge_decision);
+  if (fromRiskText) return fromRiskText;
+
+  const fromTrader = findFinalProposal(reports?.trader_investment_plan);
+  if (fromTrader) return fromTrader;
 
   for (const text of [
     reports?.market_report,
@@ -286,9 +289,9 @@ export function extractConfidence(
   }
 
   const sources = [
-    result?.reports?.trader_investment_plan,
     result?.reports?.final_trade_decision,
     result?.reports?.risk_debate_state?.judge_decision,
+    result?.reports?.trader_investment_plan,
   ];
   for (const text of sources) {
     if (!text || typeof text !== "string") continue;

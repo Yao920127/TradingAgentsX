@@ -96,9 +96,9 @@ export const zhTW = {
       dataCollection: { title: "資料收集階段", description: "從 yfinance、FinMind 取得股價與財報，同時查詢 Finnhub、Marketaux、NewsAPI、GDELT 等新聞來源與 StockTwits、Reddit、PTT 等社群，並以 Jina AI 讀取全文" },
       analysts: { title: "分析師團隊分析", description: "市場、情緒、新聞、基本面四大分析師依序評估並產出專業報告，再由報告總結分析師整合為精簡摘要" },
       researchers: { title: "研究團隊辯論", description: "看漲與看跌研究員進行結構化辯論，研究經理綜合雙方觀點" },
-      trader: { title: "交易員整合分析", description: "審查所有分析師與研究團隊報告，制定具體交易執行計劃" },
-      risk: { title: "風險管理評估", description: "激進、保守、中立三方風險分析師評估策略，風險經理做出風控決策" },
-      finalDecision: { title: "最終決策輸出", description: "產生包含交易方向、倉位大小、風險控制的完整投資建議" },
+      trader: { title: "交易員整合分析", description: "審查所有分析師與研究團隊報告，提出具體交易提案（尚非最終決策）" },
+      risk: { title: "風險管理評估", description: "激進、保守、中立三方風險分析師評估交易員提案，風險經理綜合辯論後做出最終買入／持有／賣出決策" },
+      finalDecision: { title: "最終決策輸出", description: "輸出風險經理的最終決策，包含交易方向、倉位大小、風險控制的完整投資建議" },
     },
     
     // LLM 支援
@@ -189,8 +189,8 @@ export const zhTW = {
     
     // Trader
     trader: "交易員",
-    trader_role: "交易執行",
-    trader_desc: "制定最終交易建議，包含進場、出場與倉位規模",
+    trader_role: "交易提案",
+    trader_desc: "提出交易提案，包含進場、出場與倉位規模，交由風險團隊審議",
   },
 
   // Analysis progress
@@ -272,7 +272,8 @@ export const zhTW = {
     balancedRisk: "平衡風險報酬",
     lowRiskVol: "低風險低波動",
     integrateRisk: "整合風險辯論結果",
-    executeTrade: "執行最終交易決策",
+    proposeTrade: "提出交易提案，交由風險團隊審議",
+    handoffPlan: "交付投資計畫",
     
     // Tasks
     rsiIndicator: "RSI 指標",
@@ -483,7 +484,7 @@ export const zhTW = {
 
     // Full-report section labels
     reportSections: {
-      trader: "交易員結論",
+      trader: "交易員提案",
       riskDecision: "風險決策",
       investmentPlan: "投資計畫",
       technical: "技術面",

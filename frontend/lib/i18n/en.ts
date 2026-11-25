@@ -198,17 +198,17 @@ export const en = {
       trader: {
         title: "Trader Integration",
         description:
-          "Reviews all analyst and research reports, formulates specific trading execution plan",
+          "Reviews all analyst and research reports and drafts a specific trade proposal (not yet the final decision)",
       },
       risk: {
         title: "Risk Management Assessment",
         description:
-          "Aggressive, Conservative, and Neutral risk analysts evaluate strategy, Risk Manager makes final call",
+          "Aggressive, Conservative, and Neutral risk analysts evaluate the Trader's proposal, then the Risk Manager makes the final Buy / Hold / Sell decision",
       },
       finalDecision: {
         title: "Final Decision Output",
         description:
-          "Produces complete investment recommendation with trading direction, position size, and risk controls",
+          "Outputs the Risk Manager's final decision as a complete investment recommendation with trading direction, position size, and risk controls",
       },
     },
 
@@ -327,9 +327,9 @@ export const en = {
 
     // Trader
     trader: "Trader",
-    trader_role: "Trade Execution",
+    trader_role: "Trade Proposal",
     trader_desc:
-      "Formulates final trading recommendation with entry, exit, and position sizing",
+      "Drafts a trade proposal with entry, exit, and position sizing for the risk team to review",
   },
 
   // Analysis progress
@@ -411,7 +411,8 @@ export const en = {
     balancedRisk: "Balanced Risk/Return",
     lowRiskVol: "Low Risk/Low Volatility",
     integrateRisk: "Integrate Risk Debate Results",
-    executeTrade: "Execute Final Trading Decision",
+    proposeTrade: "Draft Trade Proposal for Risk Review",
+    handoffPlan: "Hand Off Investment Plan",
 
     // Tasks
     rsiIndicator: "RSI Indicator",
@@ -625,7 +626,7 @@ export const en = {
 
     // Full-report section labels
     reportSections: {
-      trader: "Trader Verdict",
+      trader: "Trader Proposal",
       riskDecision: "Risk Decision",
       investmentPlan: "Investment Plan",
       technical: "Technical",

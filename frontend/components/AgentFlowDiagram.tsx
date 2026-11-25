@@ -224,6 +224,20 @@ export function AgentFlowDiagram() {
       </div>
 
       {/* Arrow */}
+      <FlowArrow label={t.flowDiagram.handoffPlan} color="green" />
+
+      {/* Trader: proposes only — the Risk Manager makes the final call */}
+      <div className="max-w-md mx-auto">
+        <ManagerCard
+          name={t.flowDiagram.trader}
+          tone="yellow"
+          icon={<Target className="w-6 h-6" />}
+          description={t.flowDiagram.proposeTrade}
+          tasks={[t.flowDiagram.tradeSignal, t.flowDiagram.targetPrice, t.flowDiagram.tradeQuantity]}
+        />
+      </div>
+
+      {/* Arrow */}
       <FlowArrow label={t.flowDiagram.riskDebate} color="orange" />
 
       {/* Risk Debators Layer - 3 agents */}
@@ -257,30 +271,16 @@ export function AgentFlowDiagram() {
       </div>
 
       {/* Arrow */}
-      <FlowArrow label={t.flowDiagram.riskDebate} color="red" />
+      <FlowArrow label={t.flowDiagram.finalDecision} color="red" />
 
-      {/* Risk Manager */}
+      {/* Risk Manager: makes the final BUY/SELL/HOLD decision */}
       <div className="max-w-md mx-auto">
-        <ManagerCard
+        <FinalDecisionCard
           name={t.flowDiagram.riskManager}
           tone="rose"
-          icon={<Shield className="w-6 h-6" />}
+          icon={<Shield className="w-7 h-7" />}
           description={t.flowDiagram.integrateRisk}
-          tasks={[t.flowDiagram.riskRating, t.flowDiagram.stopLossSettings, t.flowDiagram.finalRiskControl]}
-        />
-      </div>
-
-      {/* Arrow */}
-      <FlowArrow label={t.flowDiagram.finalDecision} color="green" />
-
-      {/* Trader */}
-      <div className="max-w-md mx-auto">
-        <TraderCard
-          name={t.flowDiagram.trader}
-          tone="yellow"
-          icon={<Target className="w-7 h-7" />}
-          description={t.flowDiagram.executeTrade}
-          outputs={[t.flowDiagram.tradeSignal, t.flowDiagram.targetPrice, t.flowDiagram.tradeQuantity, t.flowDiagram.riskParams]}
+          outputs={[t.flowDiagram.tradeSignal, t.flowDiagram.riskRating, t.flowDiagram.stopLossSettings, t.flowDiagram.finalRiskControl]}
         />
       </div>
 
@@ -426,7 +426,7 @@ function ManagerCard({
   );
 }
 
-function TraderCard({
+function FinalDecisionCard({
   name,
   icon,
   description,

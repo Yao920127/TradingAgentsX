@@ -70,11 +70,11 @@ Analysis flows through four sequential phases, each modeled as LangGraph nodes:
 1. **Propagation** — 4 analysts run in parallel: `market_analyst` (technical), `news_analyst`, `social_media_analyst`, `fundamentals_analyst`. Results stored in `AgentState.messages`.
 2. **Research** — `bull_researcher` and `bear_researcher` debate; `research_manager` synthesizes into `InvestDebateState.research_decision`.
 3. **Risk** — 3 debaters (aggressive/conservative/neutral) argue; `risk_manager` produces final risk decision in `RiskDebateState`.
-4. **Trader** — Synthesizes all prior state into a BUY/SELL/HOLD recommendation with confidence score.
+4. **Trader** — Synthesizes the research decision into a trade *proposal* (`trader_investment_plan`). The final BUY/SELL/HOLD decision (`final_trade_decision`) is made by the `risk_manager` (Risk Judge) after the risk debate; `SignalProcessor` (`graph/signal_processing.py`) then extracts the single BUY/SELL/HOLD signal from that text.
 
 The graph is defined in `tradingagents/graph/trading_graph.py` (main class `TradingAgentsXGraph`). Node/edge wiring is in `graph/setup.py`; routing logic in `graph/conditional_logic.py`.
 
-Fast mode skips the debate phases (researchers + risk debaters), cutting runtime to 15–25 min. Deep mode runs all 12 agents.
+There is no fast/deep mode switch. Runtime is controlled by `research_depth` (1–5, frontend default 3), which `trading_service.py` maps to both `max_debate_rounds` and `max_risk_discuss_rounds`. Debates always run; a lower depth just means fewer rounds before `conditional_logic.py` hands off to Research Manager / Risk Judge.
 
 ### Backend Service Layer
 
