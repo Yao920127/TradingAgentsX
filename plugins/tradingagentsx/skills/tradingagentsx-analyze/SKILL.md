@@ -108,10 +108,10 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 - 每次發言的輸入：`analyst_summary.md`、辯論歷史、對方最近一次論點。第一位發言時辯論歷史與對方論點皆為空。
 - 發言前綴：中文「看漲分析師：」「看跌分析師：」；英文 "Bull Analyst:" "Bear Analyst:"。
 - 辯論歷史變長時，較早的發言只保留開頭摘錄，最近 2 次發言保留全文。
-- 把整個辯論逐次追加存成 `WORK/debate_investment.md`。
+- 把整個辯論逐次追加存成 `WORK/debate_investment.md`。每次發言追加到檔案末尾後，再另起一行加標記 `<!-- 第 N 次 / 共 2×depth 次 -->`（N 從 1 起），讓發言數可以事後驗證；標記數必須等於 `2 × depth`，不足就繼續辯論，不可提前進入研究經理。
 - 存檔：`reports/bull.md` 放看漲方**最後一次**發言（不含前綴）；`reports/bear.md` 放看跌方最後一次發言。
 
-**研究經理**（`research_manager.md`）：輸入只有完整辯論歷史，做出投資決策 → `reports/research_manager.md`。
+**研究經理**（`research_manager.md`）：輸入只有完整辯論歷史，做出投資決策 → `reports/research_manager.md`。**必須重新讀完整的 `WORK/debate_investment.md`（不可用發言時的摘錄版），並寫成與網頁版相當的完整報告**：逐一評估雙方論點與證據，不要縮成結論摘要。**有子代理工具時（Claude Code 的 Agent 工具、Claude app 若提供子代理），把這一步交給全新的子代理**，讓它在乾淨的 context 獨立完成，更接近網頁版「每個 agent 獨立呼叫」：給它的 prompt 只含提示詞檔路徑、`debate_investment.md` 路徑、輸出路徑 `reports/research_manager.md` 與語言，由它自己讀檔、寫檔。沒有子代理工具就在主對話照做，但仍須重新讀檔。
 
 **交易員**（`trader.md`）：輸入是研究經理的決策，產出交易提案，結尾必須是「最終交易提案：**買入/持有/賣出**」（英文 "Final Trading Proposal: **Buy/Hold/Sell**"）→ `reports/trader.md`。
 
@@ -122,9 +122,10 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 - 提示詞：`aggressive_debator.md`、`conservative_debator.md`、`neutral_debator.md`。
 - 每次發言的輸入：交易員提案、`analyst_summary.md`、辯論歷史、另外兩位最近的發言。歷史較早的發言只留開頭摘錄，最近 3 次保留全文。
 - 前綴：「激進分析師：」「保守分析師：」「中立分析師：」；英文 "Aggressive Analyst:" "Conservative Analyst:" "Neutral Analyst:"。
-- 逐次追加存成 `WORK/debate_risk.md`；`reports/aggressive.md`、`conservative.md`、`neutral.md` 各放該方最後一次發言（不含前綴）。
+- 逐次追加存成 `WORK/debate_risk.md`。每次發言追加到檔案末尾後，再另起一行加標記 `<!-- 第 N 次 / 共 3×depth 次 -->`（N 從 1 起），讓發言數可以事後驗證；標記數必須等於 `3 × depth`，不足就繼續辯論，不可提前進入風險經理。
+- `reports/aggressive.md`、`conservative.md`、`neutral.md` 各放該方最後一次發言（不含前綴）。
 
-**風險經理**（`risk_manager.md`）：輸入是交易員提案與完整風險辯論歷史。**最終買賣決策由它做出**，結尾必須是「最終交易決策：**買入/持有/賣出**」（英文 "Final Trading Decision: **Buy/Hold/Sell**"）→ `reports/risk_manager.md`。
+**風險經理**（`risk_manager.md`）：輸入是交易員提案與完整風險辯論歷史。**必須重新讀完整的 `WORK/debate_risk.md`（不可用發言時的摘錄版），並寫成與網頁版相當的完整報告**：綜合三方觀點、審查交易員提案、給出倉位與停損停利計畫，不要縮成結論摘要。**有子代理工具時，同樣交給全新的子代理執行**：prompt 只含提示詞檔路徑、`reports/trader.md` 與 `debate_risk.md` 路徑、輸出路徑 `reports/risk_manager.md` 與語言；沒有子代理工具就在主對話照做，但仍須重新讀檔。**最終買賣決策由它做出**，結尾必須是「最終交易決策：**買入/持有/賣出**」（英文 "Final Trading Decision: **Buy/Hold/Sell**"）→ `reports/risk_manager.md`。
 
 ## 8. 產生 PDF
 
