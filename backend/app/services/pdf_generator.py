@@ -95,6 +95,7 @@ PDF_LABELS = {
         'meta_date': 'ANALYSIS DATE',
         'meta_deep': 'DEEP-THINK MODEL',
         'meta_quick': 'QUICK-THINK MODEL',
+        'meta_model': 'ANALYSIS MODEL',
         'cover_box_label': 'ABOUT THIS REPORT',
         'section': 'SECTION',
         'disclaimer': 'AI-generated analysis for reference only. Not investment advice.',
@@ -139,6 +140,7 @@ PDF_LABELS = {
         'meta_date': '分析日期',
         'meta_deep': '深度思維模型',
         'meta_quick': '快速思維模型',
+        'meta_model': '分析模型',
         'cover_box_label': '關於本報告',
         'section': '第',
         'disclaimer': 'AI 生成分析，僅供參考，不構成投資建議。',
@@ -298,14 +300,20 @@ class PDFGenerator:
         '🏅': '*', '🥇': '#1', '🥈': '#2', '🥉': '#3',
     }
 
-    def __init__(self):
-        """Initialize with NotoSerifTC font paths"""
+    def __init__(self, font_dir: str | None = None):
+        """Initialize with NotoSerifTC font paths.
+
+        字型目錄優先順序：參數 font_dir > 環境變數 TA_FONT_DIR > 專案內建路徑。
+        （skill 版把字型放在自己的 assets 目錄，因此需要能指定。）
+        """
         import os
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__)))))
-        font_dir = os.path.join(
-            base_dir, 'Cactus_Classical_Serif,Noto_Serif_TC',
-            'Noto_Serif_TC', 'static')
+        font_dir = font_dir or os.environ.get('TA_FONT_DIR')
+        if not font_dir:
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.dirname(os.path.abspath(__file__)))))
+            font_dir = os.path.join(
+                base_dir, 'Cactus_Classical_Serif,Noto_Serif_TC',
+                'Noto_Serif_TC', 'static')
 
         font_regular = os.path.join(font_dir, 'NotoSerifTC-Regular.ttf')
         font_bold = os.path.join(font_dir, 'NotoSerifTC-Bold.ttf')
@@ -744,7 +752,8 @@ class PDFGenerator:
             })
         return ha_data
 
-    def _generate_price_chart(self, price_data: List[Dict], ticker: str) -> bytes:
+    def _generate_price_chart(self, price_data: List[Dict], ticker: str,
+                              currency: str = '$') -> bytes:
         """Generate Heikin Ashi candlestick + volume chart as PNG bytes"""
         if not price_data or len(price_data) < 2:
             return None # type: ignore
@@ -772,7 +781,7 @@ class PDFGenerator:
                               facecolor=color, edgecolor=color, linewidth=0.5)
             ax1.add_patch(rect)
 
-        ax1.set_ylabel('Price ($)', fontsize=10)
+        ax1.set_ylabel(f'Price ({currency})', fontsize=10)
         ax1.set_title(f'{ticker} Heikin Ashi Chart', fontsize=12, fontweight='bold', color='#0B2545')
         ax1.grid(True, alpha=0.3, color='#C9A55C')
         for ax in (ax1, ax2):
@@ -922,10 +931,14 @@ class PDFGenerator:
         columns = [
             (get_pdf_label('meta_ticker', language), ticker),
             (get_pdf_label('meta_date', language), analysis_date),
-            (get_pdf_label('meta_deep', language), deep_name),
-            (get_pdf_label('meta_quick', language), quick_name),
         ]
-        col_w = 174 / 4
+        if deep_name == quick_name:
+            # Same model for both roles: one column instead of a duplicated pair.
+            columns.append((get_pdf_label('meta_model', language), deep_name))
+        else:
+            columns.append((get_pdf_label('meta_deep', language), deep_name))
+            columns.append((get_pdf_label('meta_quick', language), quick_name))
+        col_w = 174 / len(columns)
         for idx, (label, value) in enumerate(columns):
             x = 18 + idx * col_w
             self._spaced_text(pdf, x, 207, col_w - 3, label, 7, GOLD_TEXT, 0.5)
@@ -992,7 +1005,7 @@ class PDFGenerator:
         pdf.set_text_color(*INK)
 
     def _build_chart_page(self, pdf: _ReportPDF, ticker: str, price_data: list,
-                          price_stats: dict, language: str):
+                          price_stats: dict, language: str, currency: str = '$'):
         """Price chart + statistics page"""
         fn = self._fn()
         pdf.add_page(kind='content')
@@ -1000,7 +1013,7 @@ class PDFGenerator:
 
         if price_data and len(price_data) >= 5:
             try:
-                chart_bytes = self._generate_price_chart(price_data, ticker)
+                chart_bytes = self._generate_price_chart(price_data, ticker, currency)
                 if chart_bytes:
                     chart_buf = io.BytesIO(chart_bytes)
                     pdf.image(chart_buf, w=pdf.epw, h=pdf.epw * 0.6)
@@ -1025,8 +1038,8 @@ class PDFGenerator:
                  f"{duration} {get_pdf_label('days', language)}"],
                 [get_pdf_label('start_date', language), price_stats.get('start_date', '')],
                 [get_pdf_label('end_date', language), price_stats.get('end_date', '')],
-                [get_pdf_label('start_price', language), f"${price_stats.get('start_price', 0):.2f}"],
-                [get_pdf_label('end_price', language), f"${price_stats.get('end_price', 0):.2f}"],
+                [get_pdf_label('start_price', language), f"{currency}{price_stats.get('start_price', 0):.2f}"],
+                [get_pdf_label('end_price', language), f"{currency}{price_stats.get('end_price', 0):.2f}"],
             ]
             self._add_table(pdf, stats_rows)
 
@@ -1117,6 +1130,7 @@ class PDFGenerator:
         deep_think_llm: str = None, # type: ignore
         quick_think_llm: str = None, # type: ignore
         company_name: str = None, # type: ignore
+        currency: str = '$',
     ) -> bytes:
         """
         Generate a combined PDF containing all analyst reports.
@@ -1129,6 +1143,7 @@ class PDFGenerator:
             price_stats: Optional dict with growth_rate, duration_days, etc.
             language: 'en' or 'zh-TW'
             company_name: Optional company full name shown on the cover page
+            currency: Symbol for the price axis and price statistics (default '$')
 
         Returns:
             PDF file content as bytes
@@ -1183,7 +1198,7 @@ class PDFGenerator:
         # 3. Content pages start here (footer shows page numbers)
         # Chart page
         if has_chart:
-            self._build_chart_page(pdf, ticker, price_data, price_stats, language)
+            self._build_chart_page(pdf, ticker, price_data, price_stats, language, currency)
 
         # Team separator + analyst sections
         section_idx = 0
