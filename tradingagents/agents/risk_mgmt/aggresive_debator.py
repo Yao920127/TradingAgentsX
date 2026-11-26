@@ -3,7 +3,7 @@ from langchain_core.messages import HumanMessage
 from tradingagents.agents.utils.agent_utils import make_cached_system_message
 from tradingagents.agents.utils.debate_history import compact_debate_history
 from tradingagents.agents.utils.output_filter import fix_common_llm_errors, validate_and_warn
-from tradingagents.agents.utils.prompts import get_aggressive_debator_prompt
+from tradingagents.agents.prompts import get_aggressive_debator_prompt
 
 
 def create_risky_debator(llm, language: str = "zh-TW"):

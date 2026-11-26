@@ -17,7 +17,7 @@ from langchain_core.messages import HumanMessage
 
 from tradingagents.agents.utils.agent_utils import make_cached_system_message
 from tradingagents.agents.utils.output_filter import _normalize_content
-from tradingagents.agents.utils.prompts import (
+from tradingagents.agents.prompts import (
     get_section_summarizer_prompt,
     get_section_summary_title,
 )

@@ -1,7 +1,7 @@
 import time
 import json
 from tradingagents.agents.utils.agent_utils import get_news, get_social_sentiment, make_cached_system_message
-from tradingagents.agents.utils.prompts import get_social_analyst_prompt, get_agent_role_instruction, get_context_message
+from tradingagents.agents.prompts import get_social_analyst_prompt, get_agent_role_instruction, get_context_message
 from tradingagents.dataflows.config import get_config
 from tradingagents.agents.utils.output_filter import report_text
 

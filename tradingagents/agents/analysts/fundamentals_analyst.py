@@ -1,7 +1,7 @@
 import time
 import json
 from tradingagents.agents.utils.agent_utils import get_fundamentals, get_balance_sheet, get_cashflow, get_income_statement, get_insider_sentiment, get_insider_transactions, make_cached_system_message
-from tradingagents.agents.utils.prompts import get_fundamentals_analyst_prompt, get_agent_role_instruction, get_context_message
+from tradingagents.agents.prompts import get_fundamentals_analyst_prompt, get_agent_role_instruction, get_context_message
 from tradingagents.dataflows.config import get_config
 from tradingagents.agents.utils.output_filter import report_text
 

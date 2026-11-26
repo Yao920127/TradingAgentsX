@@ -2,7 +2,7 @@
 import time
 import json
 from tradingagents.agents.utils.output_filter import fix_common_llm_errors, validate_and_warn
-from tradingagents.agents.utils.prompts import get_risk_manager_prompt, get_language_closing_instruction
+from tradingagents.agents.prompts import get_risk_manager_prompt, get_language_closing_instruction
 
 
 def create_risk_manager(llm, memory, language: str = "zh-TW"):

@@ -12,7 +12,7 @@ from tenacity import (
 )
 from anthropic._exceptions import OverloadedError
 from tradingagents.agents.utils.output_filter import fix_common_llm_errors, validate_and_warn
-from tradingagents.agents.utils.prompts import get_research_manager_prompt, get_language_closing_instruction
+from tradingagents.agents.prompts import get_research_manager_prompt, get_language_closing_instruction
 
 logger = logging.getLogger(__name__)
 

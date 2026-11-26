@@ -2,7 +2,7 @@
 import functools
 import time
 import json
-from tradingagents.agents.utils.prompts import get_trader_prompt, get_language_closing_instruction
+from tradingagents.agents.prompts import get_trader_prompt, get_language_closing_instruction
 from tradingagents.agents.utils.output_filter import report_text
 
 
