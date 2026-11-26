@@ -411,6 +411,16 @@ Optional script-mode dependencies and keys: `pip install -r` the skill's `requir
 
 **Claude app (zip upload)**: run `python scripts/build_skill.py` to create `dist/tradingagentsx-analyze.zip`, then upload it in the skills settings. The Claude app sandbox cannot reach market-data hosts, so Claude collects data with its own web tools.
 
+**Screenshots**
+
+Claude Code (terminal) analyzing SKHY, reporting the final decision, data gaps and the PDF path when done:
+
+![Claude Code in action](web_screenshot/skill.png)
+
+Claude app analyzing NVDA, with the generated PDF report previewed on the right:
+
+![Claude app in action](web_screenshot/skill2.png)
+
 **Maintainers**: after changing prompts, `pdf_generator.py`, dataflows or `skills/`, run `python scripts/build_skill.py --plugin` and commit `plugins/tradingagentsx/` (a test checks that it is in sync).
 
 ## 🐳 Docker Deployment

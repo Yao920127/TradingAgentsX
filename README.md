@@ -411,6 +411,16 @@ python -m tui.main
 
 **Claude app（zip 上傳）**：`python scripts/build_skill.py` 產生 `dist/tradingagentsx-analyze.zip`，到設定的 skill 頁面上傳。Claude app 容器連不到資料來源，改由 Claude 用自己的網頁工具蒐集資料。
 
+**執行畫面**
+
+Claude Code（終端機）分析 SKHY，完成後回報最終決策、資料缺口與 PDF 路徑：
+
+![Claude Code 執行畫面](web_screenshot/skill.png)
+
+Claude app 分析 NVDA，右側直接預覽產出的 PDF 報告：
+
+![Claude app 執行畫面](web_screenshot/skill2.png)
+
 **維護者**：修改提示詞、`pdf_generator.py`、dataflows 或 `skills/` 後，執行 `python scripts/build_skill.py --plugin` 重建並提交 `plugins/tradingagentsx/`（測試會檢查是否同步）。
 
 ## 🐳 Docker 部署
