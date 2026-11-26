@@ -135,8 +135,10 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 ## 8. 產生 PDF
 
 ```bash
-python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date <DATE> --lang <LANG> --company "<公司名稱>"
+python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date <DATE> --lang <LANG> --company "<公司名稱>" --depth <DEPTH>
 ```
+
+`--depth` 一定要帶：腳本會檢查 `debate_investment.md` 與 `debate_risk.md` 的發言標記是否恰為 `2×depth`、`3×depth` 個（編號 1 到總數各一個），不符就不產生 PDF。
 
 | 結束碼 | 處理 |
 |---|---|
@@ -144,6 +146,7 @@ python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date 
 | 2 | `reports/` 沒有報告，檢查是否漏存檔 |
 | 4 | 找不到中文字型（`assets/NotoSerifTC-Regular.ttf`）；改用 `--lang en`，並告知原因 |
 | 5 | `price_data.json` 格式錯，回第 3 節重做 |
+| 7 | 辯論發言次數與 depth 不符（stderr 會說明哪個檔、缺哪幾次）；回第 6／7 節繼續辯論補足、補上標記，再重跑，**不可改標記或降低 depth 來過關** |
 
 把 PDF 放到使用者拿得到的位置（Claude app 若有輸出資料夾就放那裡；Claude Code 則在工作資料夾並告知路徑）。
 

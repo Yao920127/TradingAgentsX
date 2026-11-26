@@ -292,3 +292,88 @@ def test_cover_merges_identical_models_into_one_column(render_pdf, tmp_path, mon
 
     assert "分析模型" in labels
     assert "深度思維模型" not in labels and "快速思維模型" not in labels
+
+
+# ── 辯論發言標記驗證（--depth）──────────────────────────────────────────────
+
+def _write_debate(workdir: Path, name: str, count: int, total: int, skip: tuple = ()) -> None:
+    parts = []
+    for n in range(1, count + 1):
+        if n in skip:
+            continue
+        parts.append(f"發言內容 {n}\n<!-- 第 {n} 次 / 共 {total} 次 -->\n")
+    (workdir / f"{name}.md").write_text("\n".join(parts), encoding="utf-8")
+
+
+def _setup_debates(workdir: Path, depth: int, invest: int = None, risk: int = None, **kw) -> None:
+    _write_reports(workdir, ZH_REPORT, keys=["market", "risk_manager"])
+    _write_debate(workdir, "debate_investment", 2 * depth if invest is None else invest, 2 * depth, **kw)
+    _write_debate(workdir, "debate_risk", 3 * depth if risk is None else risk, 3 * depth)
+
+
+def test_depth_with_complete_debate_markers_renders(render_pdf, tmp_path):
+    _setup_debates(tmp_path, depth=2)
+
+    result = render_pdf.render(tmp_path, "NVDA", "2026-11-26", depth=2)
+
+    assert Path(result["pdf"]).read_bytes().startswith(b"%PDF")
+
+
+def test_depth_not_given_skips_debate_check(render_pdf, tmp_path):
+    _write_reports(tmp_path, ZH_REPORT, keys=["market"])
+
+    assert render_pdf.render(tmp_path, "NVDA", "2026-11-26")["included_reports"]
+
+
+@pytest.mark.parametrize("invest,risk,needle", [
+    (3, None, "debate_investment"),   # 深度 2 應有 4 次，只有 3 次
+    (None, 5, "debate_risk"),         # 深度 2 應有 6 次，只有 5 次
+    (5, None, "debate_investment"),   # 多出來也算不符
+])
+def test_wrong_marker_count_raises_exit_code_7(render_pdf, tmp_path, invest, risk, needle):
+    _setup_debates(tmp_path, depth=2, invest=invest, risk=risk)
+
+    with pytest.raises(render_pdf.RenderError) as exc:
+        render_pdf.render(tmp_path, "NVDA", "2026-11-26", depth=2)
+    assert exc.value.code == 7
+    assert needle in str(exc.value)
+
+
+def test_skipped_marker_number_raises_exit_code_7(render_pdf, tmp_path):
+    # 數量夠但編號跳號（缺第 2 次、多一個重複的 4）：不可視為通過
+    _setup_debates(tmp_path, depth=2, skip=(2,))
+    text = (tmp_path / "debate_investment.md").read_text(encoding="utf-8")
+    (tmp_path / "debate_investment.md").write_text(text + "<!-- 第 4 次 / 共 4 次 -->\n", encoding="utf-8")
+
+    with pytest.raises(render_pdf.RenderError) as exc:
+        render_pdf.render(tmp_path, "NVDA", "2026-11-26", depth=2)
+    assert exc.value.code == 7
+
+
+def test_missing_debate_file_raises_exit_code_7(render_pdf, tmp_path):
+    _write_reports(tmp_path, ZH_REPORT, keys=["market"])
+
+    with pytest.raises(render_pdf.RenderError) as exc:
+        render_pdf.render(tmp_path, "NVDA", "2026-11-26", depth=1)
+    assert exc.value.code == 7
+    assert "debate_investment.md" in str(exc.value)
+
+
+@pytest.mark.parametrize("bad", [0, 6, -1])
+def test_depth_out_of_range_raises_exit_code_6(render_pdf, tmp_path, bad):
+    _write_reports(tmp_path, ZH_REPORT, keys=["market"])
+
+    with pytest.raises(render_pdf.RenderError) as exc:
+        render_pdf.render(tmp_path, "NVDA", "2026-11-26", depth=bad)
+    assert exc.value.code == 6
+
+
+def test_cli_depth_flag_returns_exit_code_7_on_short_debate(render_pdf, tmp_path, capsys):
+    _setup_debates(tmp_path, depth=1, invest=1)
+
+    code = render_pdf.main(["--workdir", str(tmp_path), "--ticker", "NVDA", "--date", "2026-11-26", "--depth", "1"])
+
+    captured = capsys.readouterr()
+    assert code == 7
+    assert captured.out == ""
+    assert "debate_investment" in captured.err

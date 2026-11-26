@@ -1,7 +1,7 @@
 {
   "name": "tradingagentsx",
   "description": "TradingAgentsX 12 位 AI 分析師股票分析流程（美股／台股）：分析、辯論、最終決策與 PDF 報告。Multi-agent stock analysis with bull/bear and risk debates, bilingual zh-TW/en, PDF report.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": {
     "name": "Yao920127"
   },

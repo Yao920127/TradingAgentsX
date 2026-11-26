@@ -3,16 +3,23 @@
 
 用法：
   python render_pdf.py --workdir <資料夾> --ticker 2330 --date 2026-11-26 \
-      [--lang zh-TW|en] [--company 公司名稱] [--model Claude] [--output 路徑]
+      [--lang zh-TW|en] [--company 公司名稱] [--model Claude] [--output 路徑] \
+      [--depth 1-5]
+
+--depth 有給時，會先驗證辯論檔的發言標記：debate_investment.md 必須恰有
+2×depth 個、debate_risk.md 必須恰有 3×depth 個 `<!-- 第 N 次 / 共 M 次 -->`，
+且編號為 1..總數；不符就以結束碼 7 結束，不產出 PDF。
 
 工作資料夾結構：
   reports/<key>.md   各 agent 報告；key 見 REPORTS（缺少或空白的會略過）
+  debate_investment.md / debate_risk.md
+                     辯論全文；只有給 --depth 時才會檢查
   price_data.json    選用。{"price_data": [{Date,Open,High,Low,Close,Volume}, ...],
                      "price_stats": {...}}；price_stats 缺少時自動計算
 
 stdout 只輸出一份 JSON 摘要；訊息與錯誤都走 stderr。
 結束碼：0 成功；2 沒有任何報告；3 找不到 pdf_generator；4 繁中缺字型；
-        5 價格資料格式錯誤；6 參數不合法。
+        5 價格資料格式錯誤；6 參數不合法；7 辯論發言次數與 --depth 不符。
 """
 from __future__ import annotations
 
@@ -34,6 +41,10 @@ FONT_FILE = "NotoSerifTC-Regular.ttf"
 LANGUAGES = ("zh-TW", "en")
 REQUIRED_PRICE_COLUMNS = ("Date", "Open", "High", "Low", "Close")
 MIN_CHART_ROWS = 5  # 與 pdf_generator 的繪圖門檻一致
+DEPTH_RANGE = range(1, 6)
+# (檔名, 每個深度的發言次數)；與 SKILL.md 的辯論規則一致
+DEBATE_FILES = (("debate_investment.md", 2), ("debate_risk.md", 3))
+_DEBATE_MARKER = re.compile(r"<!--\s*第\s*(\d+)\s*次\s*/\s*共\s*\d+\s*次\s*-->")
 
 # (報告檔名 key, pdf_generator 的標籤鍵)；順序即 PDF 內的章節順序
 REPORTS = (
@@ -79,6 +90,22 @@ def _validate_args(ticker: str, date: str, lang: str) -> None:
         datetime.strptime(date, "%Y-%m-%d")
     except ValueError as exc:
         raise RenderError(6, f"--date 必須是 YYYY-MM-DD，收到：{date!r}") from exc
+
+
+def _check_debate_markers(workdir: Path, depth: int) -> None:
+    """辯論檔的發言標記必須恰為 1..(每深度次數 × depth)；否則視為辯論沒跑完。"""
+    for name, per_depth in DEBATE_FILES:
+        expected = per_depth * depth
+        path = workdir / name
+        if not path.is_file():
+            raise RenderError(7, f"找不到 {path}；depth={depth} 需要 {expected} 次發言")
+        numbers = [int(n) for n in _DEBATE_MARKER.findall(path.read_text(encoding="utf-8"))]
+        if sorted(numbers) != list(range(1, expected + 1)):
+            raise RenderError(
+                7,
+                f"{name} 的發言標記不符：depth={depth} 應為第 1–{expected} 次各一個，"
+                f"實際找到 {len(numbers)} 個（{numbers or '無'}）；請繼續辯論補足後再產生 PDF",
+            )
 
 
 def _find_generator_path() -> Path:
@@ -189,10 +216,15 @@ def render(
     model: str = "Claude",
     output: Optional[Path] = None,
     font_dir: Optional[Path] = None,
+    depth: Optional[int] = None,
 ) -> dict[str, Any]:
     """產出 PDF 並回傳摘要；失敗時拋出 RenderError。"""
     workdir = Path(workdir)
     _validate_args(ticker, date, lang)
+    if depth is not None:
+        if depth not in DEPTH_RANGE:
+            raise RenderError(6, f"--depth 必須是 1–5，收到：{depth!r}")
+        _check_debate_markers(workdir, depth)
 
     generator_path = _find_generator_path()
     with contextlib.redirect_stdout(sys.stderr):  # 產生器會 print 訊息，不可污染 stdout 的 JSON
@@ -250,11 +282,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--model", default="Claude")
     parser.add_argument("--output", default=None, type=Path)
     parser.add_argument("--font-dir", default=None, type=Path)
+    parser.add_argument("--depth", default=None, type=int, help="研究深度 1–5；給了就驗證辯論發言標記")
     try:
         args = parser.parse_args(argv)
         result = render(
             args.workdir, args.ticker, args.date, lang=args.lang, company=args.company,
-            model=args.model, output=args.output, font_dir=args.font_dir,
+            model=args.model, output=args.output, font_dir=args.font_dir, depth=args.depth,
         )
     except RenderError as exc:
         print(f"錯誤：{exc}", file=sys.stderr)
