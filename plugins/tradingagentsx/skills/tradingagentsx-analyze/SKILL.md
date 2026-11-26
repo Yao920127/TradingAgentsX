@@ -22,6 +22,7 @@ description: 以 TradingAgentsX 的 12 位 AI 分析師流程分析單一股票�
 | market | `us` 美股；`twse` 上市；`tpex` 上櫃／興櫃。台股預設 `twse`，使用者說上櫃才用 `tpex` |
 | lang | 使用者用繁體中文提問 → `zh-TW`；用英文 → `en`。使用者明說要哪種就照做。**所有報告、辯論、最終回覆都用同一種語言** |
 | depth | 研究深度 1–5，預設 3（辯論輪數）。使用者要快就用 1 |
+| analysts | 要納入的分析師，從 `market`（技術面）、`social`（社群）、`news`（新聞）、`fundamentals`（基本面）選，至少 1 位，預設全 4 位。使用者可用自然語言指定，例如「只要技術面和新聞」。**沒選的分析師不蒐集資料、不寫報告、不摘要**；但價格與技術指標（第 3 節）一律要做，走勢圖需要 |
 
 代碼或市場無法判斷（例如同時像美股與台股）時，才問使用者一次；其餘用預設值直接開始，並在開頭一行告知所採用的參數。
 
@@ -70,7 +71,7 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 
 ## 4. 四位分析師（各寫一份報告）
 
-每位分析師：先讀 `references/prompts/<lang>/_common.md`（角色、情境、語言與格式規則）與該 agent 的提示詞，再**只根據下表的資料**寫報告，存成 `WORK/reports/<key>.md`。
+**只寫 `analysts` 選到的**（預設全 4 位），沒選的不寫、不存檔。每位分析師：先讀 `references/prompts/<lang>/_common.md`（角色、情境、語言與格式規則）與該 agent 的提示詞，再**只根據下表的資料**寫報告，存成 `WORK/reports/<key>.md`。
 
 | key | 提示詞 | 輸入資料 |
 |---|---|---|
@@ -89,7 +90,7 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 
 ## 5. 摘要（Report Summarizer）
 
-對上面四份報告**各自**做摘要（四次獨立壓縮，避免數字互相污染），提示詞是 `references/prompts/<lang>/_summarizer_<section>.md`：
+對上面**已寫的**報告**各自**做摘要（每份獨立壓縮，避免數字互相污染；沒選的分析師不摘要），提示詞是 `references/prompts/<lang>/_summarizer_<section>.md`：
 
 | section | 來源報告 |
 |---|---|
@@ -98,7 +99,9 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 | `news` | `reports/news.md` |
 | `fundamentals` | `reports/fundamentals.md` |
 
-把四段摘要依序合併存成 `WORK/analyst_summary.md`（每段前加該摘要提示詞規定的標題）。辯論與交易員階段都讀這份摘要，而不是全文。
+把各段摘要依序合併存成 `WORK/analyst_summary.md`（每段前加該摘要提示詞規定的標題）。辯論與交易員階段都讀這份摘要，而不是全文。
+
+沒選的分析師，在之後的辯論、經理、交易員階段一律視為「**未納入分析**」：不是資料缺口，也不要自行補寫那一面的分析；各角色只就摘要裡有的內容論述，必要時可說明該面向未納入。
 
 ## 6. 多空辯論 → 研究經理 → 交易員
 
@@ -106,6 +109,7 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 
 - 看漲用 `bull_researcher.md`，看跌用 `bear_researcher.md`。
 - 每次發言的輸入：`analyst_summary.md`、辯論歷史、對方最近一次論點。第一位發言時辯論歷史與對方論點皆為空。
+- **篇幅要求（每一次發言，包含最後幾輪）**：提示詞的字數是上限，也是目標。看漲與看跌各約 600–800 字，並照提示詞列出的每個段落各寫到標示的大約字數。每段都要引用具體數字並點名反駁對方最強的論點，後期輪次也要寫出新的證據或計算，不可只寫結論。
 - 發言前綴：中文「看漲分析師：」「看跌分析師：」；英文 "Bull Analyst:" "Bear Analyst:"。
 - 辯論歷史變長時，較早的發言只保留開頭摘錄，最近 2 次發言保留全文。
 - 把整個辯論逐次追加存成 `WORK/debate_investment.md`。每次發言追加到檔案末尾後，再另起一行加標記 `<!-- 第 N 次 / 共 2×depth 次 -->`（N 從 1 起），讓發言數可以事後驗證；標記數必須等於 `2 × depth`，不足就繼續辯論，不可提前進入研究經理。
@@ -121,6 +125,7 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 
 - 提示詞：`aggressive_debator.md`、`conservative_debator.md`、`neutral_debator.md`。
 - 每次發言的輸入：交易員提案、`analyst_summary.md`、辯論歷史、另外兩位最近的發言。歷史較早的發言只留開頭摘錄，最近 3 次保留全文。
+- **篇幅要求（每一次發言，包含最後幾輪）**：提示詞的字數是上限，也是目標。激進約 300–400 字，保守與中立約 450–600 字，並照提示詞列出的每個段落各寫到標示的大約字數（例如保守：核心風險診斷約 150 字、下行風險論證約 250 字）。每段都要引用輸入資料中的具體數字，並點名反駁另外兩位最強的論點；不可只寫一兩句結論或倉位數字。後期輪次雙方立場趨近時，也要寫出新的證據或計算，而不是重複「已收斂」。
 - 前綴：「激進分析師：」「保守分析師：」「中立分析師：」；英文 "Aggressive Analyst:" "Conservative Analyst:" "Neutral Analyst:"。
 - 逐次追加存成 `WORK/debate_risk.md`。每次發言追加到檔案末尾後，再另起一行加標記 `<!-- 第 N 次 / 共 3×depth 次 -->`（N 從 1 起），讓發言數可以事後驗證；標記數必須等於 `3 × depth`，不足就繼續辯論，不可提前進入風險經理。
 - `reports/aggressive.md`、`conservative.md`、`neutral.md` 各放該方最後一次發言（不含前綴）。
@@ -135,7 +140,7 @@ python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date 
 
 | 結束碼 | 處理 |
 |---|---|
-| 0 | 成功，stdout JSON 的 `pdf` 是檔案路徑；`missing_reports` 非空要告知使用者 |
+| 0 | 成功，stdout JSON 的 `pdf` 是檔案路徑；`missing_reports` 裡**使用者沒選的分析師屬預期**，不必提；其餘（預期要有卻缺少的）要告知使用者 |
 | 2 | `reports/` 沒有報告，檢查是否漏存檔 |
 | 4 | 找不到中文字型（`assets/NotoSerifTC-Regular.ttf`）；改用 `--lang en`，並告知原因 |
 | 5 | `price_data.json` 格式錯，回第 3 節重做 |
@@ -150,14 +155,14 @@ python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date 
 2. 交易員的提案與風險經理決策不一致時，說明差異。
 3. 資料缺口與哪些內容是 Claude 搜尋補充的。
    資料來源要寫**真實的來源名稱與網址**（例如 FinMind、Yahoo Finance、公司法說會新聞稿、新聞媒體網址），不要列 `data/*.md`、`reports/` 這類內部檔案路徑；查不到網址就只寫來源名稱。
-4. PDF 路徑、使用參數（代碼、日期、市場、語言、depth）。
+4. PDF 路徑、使用參數（代碼、日期、市場、語言、depth、實際納入的分析師）。只選了部分分析師時，要明講結論未涵蓋沒選的面向。
 5. 一句免責聲明。
 
 不要把十二份報告全文貼回對話，除非使用者要求。
 
 ## 工作量與節奏
 
-depth=3 約需 26 次獨立撰寫（4 份報告、4 份摘要、6 次投資辯論、研究經理、交易員、9 次風險辯論、風險經理）。開始前用一句話告知使用者大概的規模與所選 depth；使用者想快可改 depth=1。過程中每完成一個階段簡短報告進度即可。Claude Code 可把互不相依的四位分析師交給子代理平行處理，但辯論與裁決必須依序進行。
+撰寫次數約為 `3 + 2×N + 5×depth`（N 是納入的分析師數）。全 4 位、depth=3 約 26 次（4 份報告、4 份摘要、6 次投資辯論、研究經理、交易員、9 次風險辯論、風險經理）；只選 1 位則少 6 次。開始前用一句話告知使用者大概的規模與所選 depth；使用者想快可改 depth=1。過程中每完成一個階段簡短報告進度即可。Claude Code 可把互不相依的四位分析師交給子代理平行處理，但辯論與裁決必須依序進行。
 
 ## 檔案一覽
 

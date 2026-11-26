@@ -128,6 +128,27 @@ def test_missing_reports_are_skipped_and_listed(render_pdf, tmp_path):
     assert len(result["missing_reports"]) == 10
 
 
+@pytest.mark.parametrize("selected", [
+    ["market", "news"],
+    ["social"],
+    ["fundamentals", "market", "news"],
+])
+def test_renders_with_only_selected_analysts(render_pdf, tmp_path, selected):
+    # 使用者只選部分分析師：辯論與決策 8 份報告齊全，沒選的分析師不寫
+    downstream = [k for k in REPORT_KEYS if k not in ("market", "social", "news", "fundamentals")]
+    _write_reports(tmp_path, ZH_REPORT, keys=selected + downstream)
+
+    result = render_pdf.render(tmp_path, "NVDA", "2026-11-26", lang="zh-TW")
+
+    unselected = [k for k in ("market", "social", "news", "fundamentals") if k not in selected]
+    assert sorted(result["missing_reports"]) == sorted(unselected)
+    assert len(result["included_reports"]) == len(selected) + len(downstream)
+    pdf = Path(result["pdf"])
+    assert pdf.read_bytes().startswith(b"%PDF")
+    # 封面 + 目錄 + 3 個團隊分隔頁 + 已納入的報告
+    assert _page_count(pdf) >= 5 + len(result["included_reports"])
+
+
 def test_blank_report_file_counts_as_missing(render_pdf, tmp_path):
     _write_reports(tmp_path, ZH_REPORT, keys=["market"])
     (tmp_path / "reports" / "news.md").write_text("   \n", encoding="utf-8")

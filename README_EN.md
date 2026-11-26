@@ -419,6 +419,7 @@ Plain language works. Ticker and date are required; everything else has a defaul
 analyze NVDA on 2026-11-26
 analyze 2330 on 2026-11-26, depth 1
 analyze 5274 on 2026-11-26 (OTC), depth 3
+analyze NVDA on 2026-11-26, technical and news analysts only
 分析 NVDA 2026-11-26，用繁體中文
 ```
 
@@ -429,6 +430,7 @@ analyze 5274 on 2026-11-26 (OTC), depth 3
 | Market | US / Taiwan listed (`twse`) / Taiwan OTC (`tpex`); numeric Taiwan tickers default to listed, say so for OTC | Auto-detected |
 | Language | Ask in Traditional Chinese for a Chinese report, in English for an English one | Follows your prompt |
 | Research depth | 1–5, see below | 3 |
+| Analysts | Any of technical, social, news and fundamentals, at least one, same as the web app's analyst team checkboxes. Unselected ones are not researched or written and the conclusion does not cover that angle. The price chart is always included | All 4 |
 
 ### What data it can use
 
