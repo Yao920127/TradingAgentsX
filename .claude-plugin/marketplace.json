@@ -1,0 +1,20 @@
+{
+  "name": "tradingagentsx",
+  "owner": {
+    "name": "Yao920127",
+    "url": "https://github.com/Yao920127"
+  },
+  "metadata": {
+    "description": "TradingAgentsX：12 位 AI 分析師的股票分析流程（Claude Code skill）",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "tradingagentsx",
+      "description": "輸入股票代碼與日期，完成四位分析師、多空辯論、風險辯論與最終決策，並產出 PDF（美股／台股，繁中／英文）",
+      "source": "./plugins/tradingagentsx",
+      "category": "finance",
+      "strict": true
+    }
+  ]
+}

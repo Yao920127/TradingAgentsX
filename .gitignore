@@ -17,3 +17,10 @@ eval_results/
 *.egg-info/
 .env
 !frontend/public/demo/*.json
+
+# Claude Code plugin / marketplace 清單必須提交（否則 /plugin marketplace add 會失敗）
+!.claude-plugin/marketplace.json
+!plugins/**/.claude-plugin/plugin.json
+
+# skill 建置產物（scripts/build_skill.py 產生）
+dist/

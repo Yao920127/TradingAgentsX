@@ -1,0 +1,14 @@
+# tradingagentsx-analyze 腳本模式（fetch_data.py）需要的套件；Claude app 容器不需要
+requests
+pandas
+numpy
+polars
+yfinance
+stockstats
+tenacity
+beautifulsoup4
+python-dateutil
+tqdm
+openai
+praw
+git+https://github.com/toon-format/toon-python.git

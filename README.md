@@ -394,6 +394,25 @@ python -m tui.main
 
 ---
 
+## 🧩 Claude Code / Claude Skill
+
+把 12 位分析師的完整流程（資料蒐集 → 四位分析師 → 多空辯論 → 風險辯論 → 最終決策 → PDF）做成 skill，由 Claude 本身擔任模型，不需要任何 LLM 金鑰。輸入股票代碼與日期即可，例如「分析 NVDA 2026-11-26」或「分析 2330 2026-11-26」。
+
+**Claude Code（plugin）**
+
+```
+/plugin marketplace add Yao920127/TradingAgentsX
+/plugin install tradingagentsx@tradingagentsx
+```
+
+終端機版：`claude plugin marketplace add Yao920127/TradingAgentsX`、`claude plugin install tradingagentsx@tradingagentsx`。
+
+腳本模式的相依與金鑰（選用）：`pip install -r ~/.claude/plugins/.../skills/tradingagentsx-analyze/requirements.txt`；台股需環境變數 `FINMIND_API_TOKEN`，美股新聞可設 `FINNHUB_API_KEY` / `MARKETAUX_API_KEY` / `NEWSAPI_API_KEY`。缺少時該類資料會標示「資料缺口」，Claude 會自行搜尋補充。
+
+**Claude app（zip 上傳）**：`python scripts/build_skill.py` 產生 `dist/tradingagentsx-analyze.zip`，到設定的 skill 頁面上傳。Claude app 容器連不到資料來源，改由 Claude 用自己的網頁工具蒐集資料。
+
+**維護者**：修改提示詞、`pdf_generator.py`、dataflows 或 `skills/` 後，執行 `python scripts/build_skill.py --plugin` 重建並提交 `plugins/tradingagentsx/`（測試會檢查是否同步）。
+
 ## 🐳 Docker 部署
 
 ```bash

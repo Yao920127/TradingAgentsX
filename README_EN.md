@@ -394,6 +394,25 @@ python -m tui.main
 
 ---
 
+## 🧩 Claude Code / Claude Skill
+
+The full 12-agent flow (data collection → four analysts → bull/bear debate → risk debate → final decision → PDF) is packaged as a skill. Claude itself acts as the model, so no LLM API key is needed. Just give a ticker and a date, e.g. "analyze NVDA on 2026-11-26" or "analyze 2330 on 2026-11-26".
+
+**Claude Code (plugin)**
+
+```
+/plugin marketplace add Yao920127/TradingAgentsX
+/plugin install tradingagentsx@tradingagentsx
+```
+
+CLI: `claude plugin marketplace add Yao920127/TradingAgentsX`, `claude plugin install tradingagentsx@tradingagentsx`.
+
+Optional script-mode dependencies and keys: `pip install -r` the skill's `requirements.txt`; Taiwan stocks need `FINMIND_API_TOKEN`; US news can use `FINNHUB_API_KEY` / `MARKETAUX_API_KEY` / `NEWSAPI_API_KEY`. Missing data is flagged as a data gap and Claude searches the web to fill it.
+
+**Claude app (zip upload)**: run `python scripts/build_skill.py` to create `dist/tradingagentsx-analyze.zip`, then upload it in the skills settings. The Claude app sandbox cannot reach market-data hosts, so Claude collects data with its own web tools.
+
+**Maintainers**: after changing prompts, `pdf_generator.py`, dataflows or `skills/`, run `python scripts/build_skill.py --plugin` and commit `plugins/tradingagentsx/` (a test checks that it is in sync).
+
 ## 🐳 Docker Deployment
 
 ```bash

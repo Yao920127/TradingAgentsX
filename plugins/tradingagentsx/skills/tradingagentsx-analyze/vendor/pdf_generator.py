@@ -1,0 +1,1273 @@
+# -*- coding: utf-8 -*-
+"""
+PDF Generation Service for Analyst Reports
+Uses fpdf2 for reliable cross-platform CJK (Chinese/Japanese/Korean) font rendering.
+
+ReportLab's TTFont subsetting produces corrupted zlib streams on Linux (Railway Docker),
+causing garbled Chinese characters. fpdf2 uses direct Unicode-to-glyph mapping without
+the subsetting compression issue, ensuring correct rendering on all platforms.
+"""
+import io
+import re
+import warnings
+from typing import Optional, List, Dict
+from datetime import datetime
+
+# Suppress matplotlib font warnings globally
+warnings.filterwarnings('ignore', category=UserWarning, module='matplotlib')
+import logging
+logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
+
+# Matplotlib for chart generation
+import matplotlib # type: ignore
+matplotlib.use('Agg')  # Use non-interactive backend for server
+import matplotlib.pyplot as plt # type: ignore
+import matplotlib.dates as mdates # type: ignore
+from matplotlib.patches import Rectangle # type: ignore
+import numpy as np # type: ignore
+
+# Configure matplotlib to use available system fonts
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Liberation Sans', 'FreeSans', 'Helvetica', 'Arial', 'sans-serif']
+plt.rcParams['axes.unicode_minus'] = False
+
+# fpdf2 for PDF generation — reliable cross-platform Unicode/CJK support
+from fpdf import FPDF # type: ignore
+
+# ============================================
+# DESIGN TOKENS (navy / gold / cream memo style)
+# ============================================
+NAVY = (11, 37, 69)
+NAVY_SOFT = (22, 52, 92)
+GOLD = (201, 165, 92)
+GOLD_TEXT = (160, 130, 66)
+CREAM = (249, 247, 242)
+ROW_ALT = (242, 241, 237)
+RULE_GRAY = (217, 217, 217)
+INK = (26, 32, 48)
+MUTED = (136, 140, 150)
+ICE = (170, 186, 214)
+WHITE = (255, 255, 255)
+PAGE_W, PAGE_H = 210.0, 297.0
+ZH_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
+
+# ============================================
+# PDF LABELS FOR INTERNATIONALIZATION
+# ============================================
+PDF_LABELS = {
+    'en': {
+        'cover_title': 'TradingAgentsX Analysis Report',
+        'cover_subtitle': 'AI-Powered Multi-Perspective Investment Analysis',
+        'toc_title': 'Table of Contents',
+        'report_content': 'Report Content',
+        'price_chart': 'Price Chart & Volume',
+        'price_stats': 'Price Statistics',
+        'item': 'Item',
+        'value': 'Value',
+        'total_return': 'Total Return',
+        'analysis_period': 'Analysis Period',
+        'days': 'days',
+        'start_date': 'Start Date',
+        'end_date': 'End Date',
+        'start_price': 'Start Price',
+        'end_price': 'End Price',
+        'chart_failed': 'Chart generation failed',
+        'analysts_team': 'Analysts Team',
+        'research_team': 'Research Team',
+        'trading_risk_team': 'Trading & Risk Team',
+        'members': 'members',
+        'market_analyst': 'Market Analyst',
+        'fundamentals_analyst': 'Fundamentals Analyst',
+        'social_analyst': 'Social Media Analyst',
+        'news_analyst': 'News Analyst',
+        'bull_researcher': 'Bull Researcher',
+        'bear_researcher': 'Bear Researcher',
+        'research_manager': 'Research Manager',
+        'aggressive_analyst': 'Aggressive Analyst',
+        'conservative_analyst': 'Conservative Analyst',
+        'neutral_analyst': 'Neutral Analyst',
+        'risk_manager': 'Risk Manager',
+        'trader': 'Trader',
+        'cover_kicker': 'INVESTMENT ANALYSIS REPORT',
+        'brand_tagline': 'Multi-Agent AI Trading Analysis',
+        'meta_ticker': 'TICKER',
+        'meta_date': 'ANALYSIS DATE',
+        'meta_deep': 'DEEP-THINK MODEL',
+        'meta_quick': 'QUICK-THINK MODEL',
+        'meta_model': 'ANALYSIS MODEL',
+        'cover_box_label': 'ABOUT THIS REPORT',
+        'section': 'SECTION',
+        'disclaimer': 'AI-generated analysis for reference only. Not investment advice.',
+        'header_right': 'Analysis Report',
+    },
+    'zh-TW': {
+        'cover_title': 'TradingAgentsX 分析報告',
+        'cover_subtitle': 'AI 驅動多角度投資分析',
+        'toc_title': '目錄',
+        'report_content': '報告內容',
+        'price_chart': '價格走勢圖 & 交易量柱狀圖',
+        'price_stats': '價格統計',
+        'item': '項目',
+        'value': '數值',
+        'total_return': '總報酬',
+        'analysis_period': '分析期間',
+        'days': '天',
+        'start_date': '開始日期',
+        'end_date': '結束日期',
+        'start_price': '起始價格',
+        'end_price': '結束價格',
+        'chart_failed': '圖表生成失敗',
+        'analysts_team': '分析師團隊',
+        'research_team': '研究團隊',
+        'trading_risk_team': '交易與風險團隊',
+        'members': '位',
+        'market_analyst': '市場分析師',
+        'fundamentals_analyst': '基本面分析師',
+        'social_analyst': '社群媒體分析師',
+        'news_analyst': '新聞分析師',
+        'bull_researcher': '看漲研究員',
+        'bear_researcher': '看跌研究員',
+        'research_manager': '研究經理',
+        'aggressive_analyst': '激進分析師',
+        'conservative_analyst': '保守分析師',
+        'neutral_analyst': '中立分析師',
+        'risk_manager': '風險經理',
+        'trader': '交易員',
+        'cover_kicker': '投資分析報告',
+        'brand_tagline': '多代理人 AI 交易分析',
+        'meta_ticker': '股票代號',
+        'meta_date': '分析日期',
+        'meta_deep': '深度思維模型',
+        'meta_quick': '快速思維模型',
+        'meta_model': '分析模型',
+        'cover_box_label': '關於本報告',
+        'section': '第',
+        'disclaimer': 'AI 生成分析，僅供參考，不構成投資建議。',
+        'header_right': '分析報告',
+    },
+}
+
+
+def get_pdf_label(key: str, language: str = 'zh-TW') -> str:
+    """Get a localized PDF label"""
+    lang_labels = PDF_LABELS.get(language, PDF_LABELS['zh-TW'])
+    return lang_labels.get(key, PDF_LABELS['zh-TW'].get(key, key))
+
+
+# Model ID → human-readable display name mapping
+_MODEL_DISPLAY_NAMES: dict[str, str] = {
+    # Anthropic Claude
+    "claude-fable-5-2": "Claude Fable 5.2",
+    "claude-fable-5-1": "Claude Fable 5.1",
+    "claude-opus-5-5": "Claude Opus 5.5",
+    "claude-sonnet-5-5": "Claude Sonnet 5.5",
+    "claude-haiku-5-5": "Claude Haiku 5.5",
+    
+    # Google Gemini
+    "gemini-4-carbon": "Gemini 4 Carbon",
+    "gemini-4-argon": "Gemini 4 Argon",
+    "gemini-4-hydrogen": "Gemini 4 Hydrogen",
+    
+    # OpenAI
+    "gpt-6-astra": "GPT-6 Astra",
+    "gpt-6.1-sol": "GPT-6.1 Sol",
+    "gpt-6.1-terra": "GPT-6.1 Terra",
+    "gpt-6-luna": "GPT-6 Luna",
+    
+    # Grok
+    "grok-4.7": "Grok 4.7",
+    "grok-4.6":"Grok 4.6",
+    "grok-4.5": "Grok 4.5",
+    "grok-4.3": "Grok 4.3",
+    
+    # DeepSeek
+    "deepseek-v4-pro": "DeepSeek-V4-Pro",
+    "deepseek-flash": "DeepSeek-V4.1-Flash",
+    
+    # Tauric
+    "tauric": "Trading-R1",
+    # Qwen
+    "qwen3.8-max": "Qwen3.8-Max",
+    "qwen3.8-flash": "Qwen3.8-Flash",
+    "qwen3.7-plus": "Qwen3.7-Plus",
+}
+
+
+def get_model_display_name(model_id: str | None) -> str | None:
+    """Convert a model ID to a human-readable display name.
+    Falls back to the raw model_id if not in the mapping."""
+    if not model_id:
+        return None
+    return _MODEL_DISPLAY_NAMES.get(model_id, model_id)
+
+
+# ============================================
+# CUSTOM FPDF CLASS WITH AUTO PAGE NUMBERING
+# ============================================
+class _ReportPDF(FPDF):
+    """FPDF with memo-style running header/footer.
+
+    Page kind is passed as add_page(kind=...):
+      'cover' / 'divider' -> full-bleed pages, no header/footer
+      'content'           -> cream header band + footer with page number
+    """
+
+    def __init__(self, font_name: str, cover_toc_pages: int = 2, **kwargs):
+        super().__init__(orientation='P', unit='mm', format='A4', **kwargs)
+        self._fn = font_name
+        self._cover_toc_pages = cover_toc_pages
+        self.header_left = 'TRADINGAGENTSX'
+        self.header_right = ''
+        self.footer_note = ''
+        self._pending_kind = 'content'
+        self._kinds: dict = {}
+
+    def add_page(self, *args, kind: str = 'content', **kwargs):
+        # footer() of the page being closed still sees its own kind via _kinds
+        self._pending_kind = kind
+        super().add_page(*args, **kwargs)
+
+    def header(self):
+        self._kinds[self.page] = self._pending_kind
+        if self._pending_kind != 'content':
+            return
+        self.set_fill_color(*CREAM)
+        self.rect(0, 0, PAGE_W, 16, 'F')
+        self.set_draw_color(*GOLD)
+        self.set_line_width(0.3)
+        self.line(0, 16, PAGE_W, 16)
+        self.set_line_width(0.8)
+        self.line(self.l_margin, 16, self.l_margin + 13, 16)
+        self.set_line_width(0.2)
+
+        self.set_font(self._fn, size=8.5)
+        self.set_text_color(*NAVY)
+        self.set_xy(self.l_margin, 6)
+        self.set_char_spacing(0.8)
+        self.cell(self.epw / 2, 5, self.header_left)
+        self.set_char_spacing(0)
+        self.set_text_color(*MUTED)
+        self.set_xy(self.l_margin + self.epw / 2, 6)
+        self.cell(self.epw / 2, 5, self.header_right, align='R')
+        self.set_text_color(*INK)
+        self.set_y(26)
+
+    def footer(self):
+        if self._kinds.get(self.page, 'content') != 'content':
+            return
+        self.set_draw_color(*RULE_GRAY)
+        self.set_line_width(0.2)
+        self.line(self.l_margin, PAGE_H - 14, PAGE_W - self.r_margin, PAGE_H - 14)
+        self.set_font(self._fn, size=7.5)
+        self.set_text_color(*MUTED)
+        self.set_xy(self.l_margin, PAGE_H - 12)
+        self.cell(self.epw - 20, 5, self.footer_note)
+        content_page = self.page - self._cover_toc_pages
+        if content_page > 0:
+            self.set_text_color(*NAVY)
+            self.set_xy(PAGE_W - self.r_margin - 20, PAGE_H - 12)
+            self.cell(20, 5, f'{content_page:02d}', align='R')
+        self.set_text_color(*INK)
+
+
+# ============================================
+# PDF GENERATOR CLASS
+# ============================================
+class PDFGenerator:
+    """Generate PDF reports from markdown content using fpdf2"""
+
+    # Emoji → ASCII replacement map
+    EMOJI_TO_UNICODE = {
+        '✅': '[OK]', '❌': '[X]', '⚠️': '[!]', '⚡': '*', '🔔': 'o',
+        '☒': '[X]', '☑': '[V]', '☐': '[ ]', '✓': 'V', '✔': 'V',
+        '✗': 'X', '✘': 'X', '※': '*', '△': '^', '▽': 'v',
+        '▲': '^', '▼': 'v', '◆': '*', '◇': '*', '○': 'o',
+        '●': '*', '□': '[ ]', '■': '[*]', '⭐': '*', '🌟': '*',
+        '💎': '+', '🏆': '#', '📊': '', '📈': '^', '📉': 'v',
+        '📋': '-', '📌': '*', '💰': '$', '💵': '$', '💴': 'Y',
+        '💶': 'E', '💷': 'P', '💸': '$', '💹': '^', '🚀': '^^',
+        '⬆️': '^', '⬇️': 'v', '➡️': '>', '⬅️': '<', '🔼': '^',
+        '🔽': 'v', '🎯': 'o', '🔥': '*', '💡': '*', '⚙️': '*',
+        '🔧': '>', '🔨': '>', '🤖': '', '💻': '', '📱': '',
+        '🖥️': '', '👤': '', '👥': '', '🔬': '', '📚': '',
+        '⏰': 'o', '📅': '-', '⏱️': 'o', '✨': '*', '🎨': '',
+        '📝': '-', '📄': '-', '🗂️': '=', '🌐': 'o', '🔗': '~',
+        '💼': '', '🎪': '', '🎭': '', '🌍': 'o', '🌎': 'o',
+        '🌏': 'o', '🏦': '$', '🏢': '', '🏭': '', '🔑': '>',
+        '🔒': '[L]', '🔓': '[U]', '📢': '>', '📣': '>', '🔊': '>',
+        '🔈': 'o', '⚖️': '=', '⚔️': 'X', '🛡️': '[ ]', '🎖️': '*',
+        '🏅': '*', '🥇': '#1', '🥈': '#2', '🥉': '#3',
+    }
+
+    def __init__(self, font_dir: str | None = None):
+        """Initialize with NotoSerifTC font paths.
+
+        字型目錄優先順序：參數 font_dir > 環境變數 TA_FONT_DIR > 專案內建路徑。
+        （skill 版把字型放在自己的 assets 目錄，因此需要能指定。）
+        """
+        import os
+        font_dir = font_dir or os.environ.get('TA_FONT_DIR')
+        if not font_dir:
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.dirname(os.path.abspath(__file__)))))
+            font_dir = os.path.join(
+                base_dir, 'Cactus_Classical_Serif,Noto_Serif_TC',
+                'Noto_Serif_TC', 'static')
+
+        font_regular = os.path.join(font_dir, 'NotoSerifTC-Regular.ttf')
+        font_bold = os.path.join(font_dir, 'NotoSerifTC-Bold.ttf')
+
+        if os.path.exists(font_regular):
+            self._font_regular = font_regular
+            self._font_bold = font_bold if os.path.exists(font_bold) else font_regular
+            self._font_name = 'NotoSerifTC'
+            print('✅ NotoSerifTC found — fpdf2 CJK rendering enabled')
+        else:
+            self._font_regular = None
+            self._font_bold = None
+            self._font_name = 'Helvetica'
+            print('⚠️ NotoSerifTC not found, falling back to Helvetica')
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _new_pdf(self) -> _ReportPDF:
+        """Create a fresh PDF instance with fonts registered"""
+        pdf = _ReportPDF(font_name=self._font_name)
+        pdf.set_margins(18, 26, 18)
+        pdf.set_auto_page_break(True, margin=22)
+        if self._font_regular and self._font_name != 'Helvetica':
+            pdf.add_font(self._font_name, '', self._font_regular)
+            pdf.add_font(self._font_name, 'B', self._font_bold)
+        return pdf
+
+    def _fn(self) -> str:
+        return self._font_name
+
+    @staticmethod
+    def _hex_to_rgb(hex_color: str):
+        h = hex_color.lstrip('#')
+        return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+    def _set_color(self, pdf: FPDF, hex_color: str, is_text: bool = True):
+        r, g, b = self._hex_to_rgb(hex_color)
+        if is_text:
+            pdf.set_text_color(r, g, b)
+        else:
+            pdf.set_fill_color(r, g, b)
+
+    def _replace_emojis(self, text: str) -> str:
+        if not text:
+            return text
+        for emoji, replacement in self.EMOJI_TO_UNICODE.items():
+            text = text.replace(emoji, replacement)
+        return text
+
+    def _clean_markdown(self, text: str) -> str:
+        """Remove markdown formatting, return plain text"""
+        import unicodedata
+        text = unicodedata.normalize('NFKC', text)
+        # Remove links but keep text
+        text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
+        # Remove bold markers
+        for _ in range(3):
+            text = re.sub(r'\*\*([^*]+)\*\*', r'\1', text)
+            text = re.sub(r'__([^_]+)__', r'\1', text)
+        text = re.sub(r'\*\*', '', text)
+        text = re.sub(r'__', '', text)
+        # Remove italic markers
+        text = re.sub(r'(?<![*])\*([^*]+?)\*(?![*])', r'\1', text)
+        text = re.sub(r'(?<![_])_([^_]+?)_(?![_])', r'\1', text)
+        # Remove code
+        text = re.sub(r'```[^`]*?```', '', text, flags=re.DOTALL)
+        text = re.sub(r'`([^`]+?)`', r'\1', text)
+        # Normalize bullet points
+        text = re.sub(r'^\s*[\*\-\+]\s+', '- ', text, flags=re.MULTILINE)
+        # Remove horizontal rules
+        text = re.sub(r'^[\-\*_]{3,}\s*$', '', text, flags=re.MULTILINE)
+        # Remove heading markers
+        text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+        # Clean up spaces
+        text = re.sub(r' {2,}', ' ', text)
+        text = re.sub(r'\n{3,}', '\n\n', text)
+        return text.strip()
+
+    def _inline_markdown(self, text: str) -> str:
+        """Like _clean_markdown but keeps **bold** for fpdf2's markdown=True rendering.
+
+        Only key terms are bold inside body text; every other markup is removed.
+        fpdf2 treats "__" as italic (no italic font is registered) and "--" as
+        underline, so both are neutralised here.
+        """
+        import unicodedata
+        text = unicodedata.normalize('NFKC', text)
+        text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
+        text = re.sub(r'__([^_]+)__', r'\1', text).replace('__', '')
+        text = re.sub(r'(?<![*])\*([^*]+?)\*(?![*])', r'\1', text)
+        text = re.sub(r'`([^`]+?)`', r'\1', text)
+        text = text.replace('--', '\u2014')
+        text = re.sub(r'\*\*\s*\*\*', '', text)  # empty bold pairs
+        if text.count('**') % 2:
+            text = text.replace('**', '')  # unbalanced markers would bold the rest of the line
+        text = re.sub(r' {2,}', ' ', text)
+        return text.strip()
+
+    @staticmethod
+    def _is_special_line(stripped: str) -> bool:
+        """Return True if a line should NOT be merged with adjacent body text."""
+        if not stripped:
+            return True
+        if stripped.startswith('#'):
+            return True
+        if stripped.startswith('- ') or stripped.startswith('* '):
+            return True
+        # "· content" or "• content" — lone bullet chars (no content) are NOT special here;
+        # they are handled separately as dangling bullets in _merge_soft_newlines.
+        if stripped.startswith('· ') or stripped.startswith('\u2022 '):
+            return True
+        if len(stripped) > 1 and stripped[0] == '\u2022':
+            return True  # "•content" (no space) — treat as bullet item
+        if stripped.startswith('|'):
+            return True
+        if re.match(r'^\d+[\.、]\s', stripped):
+            return True
+        if re.match(r'^[一二三四五六七八九十百]+[、．。]\s*\S', stripped):
+            return True
+        return False
+
+    @staticmethod
+    def _is_bullet_line(stripped: str) -> bool:
+        """Return True if the line is a bullet item (allows continuation merging)."""
+        return (stripped.startswith('- ') or stripped.startswith('* ') or
+                stripped.startswith('· ') or stripped.startswith('\u2022'))
+
+    @staticmethod
+    def _merge_separator(left: str, right: str) -> str:
+        """Return the separator to use when joining two text segments.
+
+        CJK text does not use spaces between characters, so we skip the
+        space whenever either side of the junction is a CJK character.
+        """
+        if not left or not right:
+            return ''
+        def _is_cjk(c: str) -> bool:
+            cp = ord(c)
+            return (0x4E00 <= cp <= 0x9FFF or 0x3400 <= cp <= 0x4DBF or
+                    0x3000 <= cp <= 0x303F or 0xFF00 <= cp <= 0xFFEF or
+                    0x20000 <= cp <= 0x2A6DF)
+        if _is_cjk(left[-1]) or _is_cjk(right[0]):
+            return ''
+        return ' '
+
+    def _merge_soft_newlines(self, text: str) -> str:
+        """Join soft-wrapped lines within body paragraphs into a single line.
+
+        LLMs often insert \\n mid-sentence every ~40 characters (terminal-style
+        wrapping). The PDF renderer treats every \\n as a hard line break, so we
+        collapse those soft wraps into spaces while preserving intentional
+        structure: blank lines, headings, bullets, tables, numbered lists.
+
+        Special cases handled:
+        - Lone bullet char (• or · alone, no content) → merged forward with next content
+        - Dangling numbered prefix ("1." alone) → merged forward with next content
+        - Body text immediately following a bullet item → merged into the bullet (continuation)
+        """
+        lines = text.split('\n')
+        result: list[str] = []
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            stripped = line.strip()
+
+            # ── Lone bullet character with no content (• · ‧) ──────────────────
+            # These are orphaned bullet markers the LLM placed on their own line.
+            # Merge them forward with the next non-empty, non-special content line.
+            if stripped in ('\u2022', '\u00b7', '\u2027', '·', '•'):
+                j = i + 1
+                while j < len(lines) and not lines[j].strip():
+                    j += 1
+                if j < len(lines) and not self._is_special_line(lines[j].strip()):
+                    # Rebuild as a proper "• content" bullet line
+                    result.append('\u2022 ' + lines[j].strip())
+                    i = j + 1
+                    continue
+                # No following content — drop the lone bullet entirely
+                i += 1
+                continue
+
+            # ── Dangling numbered prefix: "1.", "(1)", "(2)" etc. alone on a line ─
+            if re.match(r'^\d+[\.、]$', stripped) or re.match(r'^\(\d+\)$', stripped):
+                j = i + 1
+                while j < len(lines) and not lines[j].strip():
+                    j += 1
+                if j < len(lines) and not self._is_special_line(lines[j].strip()):
+                    result.append(stripped + ' ' + lines[j].strip())
+                    i = j + 1
+                    continue
+
+            # ── Blank line after an incomplete bullet — skip to allow merge ──────
+            if not stripped and result:
+                prev_s = result[-1].strip()
+                SENTENCE_END = frozenset('。！？…；;」』）)')
+                if (prev_s and self._is_bullet_line(prev_s) and
+                        prev_s[-1] not in SENTENCE_END and len(prev_s) < 30):
+                    i += 1
+                    continue
+
+            # ── Normal merge logic ───────────────────────────────────────────────
+            if self._is_special_line(stripped):
+                result.append(line)
+            elif result and result[-1].strip() and (
+                not self._is_special_line(result[-1].strip())
+                or self._is_bullet_line(result[-1].strip())
+            ):
+                # Previous output line was body text OR a bullet item → merge
+                # (bullet items allow continuation lines to be appended)
+                prev = result[-1].rstrip()
+                result[-1] = prev + self._merge_separator(prev, stripped) + stripped
+            else:
+                result.append(line)
+            i += 1
+        return '\n'.join(result)
+
+    def _parse_markdown_table(self, lines: list, start_idx: int) -> tuple:
+        """Parse markdown table. Returns (table_data, end_idx)."""
+        table_rows = []
+        i = start_idx
+        while i < len(lines):
+            line = lines[i].strip()
+            if line.startswith('|') and line.endswith('|'):
+                cells = [c.strip() for c in line.split('|')[1:-1]]
+                is_sep = all(c.replace('-', '').replace(':', '').strip() == '' for c in cells)
+                if not is_sep:
+                    table_rows.append(cells)
+                i += 1
+            elif '|' in line and not line.startswith('#'):
+                cells = [c.strip() for c in line.split('|')]
+                is_sep = all(c.replace('-', '').replace(':', '').strip() == '' for c in cells)
+                if not is_sep and cells:
+                    table_rows.append(cells)
+                i += 1
+            else:
+                break
+        return table_rows, i
+
+    def _add_table(self, pdf: FPDF, table_data: list):
+        """Render a parsed markdown table using fpdf2's Table class.
+        Cells auto-expand in height — text is never truncated or clipped."""
+        if not table_data or len(table_data) < 1:
+            return
+
+        # Filter out empty rows
+        table_data = [row for row in table_data if any(c.strip() for c in row)]
+        if not table_data:
+            return
+
+        fn = self._fn()
+        num_cols = max(len(row) for row in table_data)
+        if num_cols == 0:
+            return
+
+        pdf.set_font(fn, size=9)
+        pdf.set_text_color(*INK)
+        pdf.set_draw_color(*RULE_GRAY)
+        pdf.set_fill_color(*WHITE)  # un-striped rows inherit the current fill colour
+        pdf.set_line_width(0.2)
+
+        try:
+            from fpdf.table import FontFace # type: ignore
+            from fpdf.enums import TableCellFillMode # type: ignore
+
+            headings_style = FontFace(
+                fill_color=NAVY,
+                color=WHITE,
+            )
+
+            with pdf.table(
+                width=pdf.epw, # type: ignore
+                col_widths=tuple([1] * num_cols),  # equal proportional widths
+                line_height=5,
+                borders_layout="ALL",
+                first_row_as_headings=True,
+                headings_style=headings_style,
+                cell_fill_color=ROW_ALT,
+                cell_fill_mode=TableCellFillMode.EVEN_ROWS,
+                padding=1.6,
+                text_align="LEFT",
+                wrapmode="CHAR",  # character-level wrap — required for CJK text # type: ignore
+            ) as table:
+                for row_data in table_data:
+                    row_data_padded = (list(row_data) + [''] * num_cols)[:num_cols]
+                    row = table.row()
+                    for cell_text in row_data_padded:
+                        text = self._clean_markdown(str(cell_text))
+                        text = self._replace_emojis(text)
+                        row.cell(text)
+
+        except Exception as e:
+            # Fallback: single-line cells with truncation (backup only)
+            print(f"⚠️  Table class error ({e}), falling back to cell() rendering")
+            col_w = pdf.epw / num_cols
+            for row_idx, row_data in enumerate(table_data):
+                row_data_padded = (list(row_data) + [''] * num_cols)[:num_cols]
+                if row_idx == 0:
+                    pdf.set_font(fn, size=9)
+                    pdf.set_fill_color(*NAVY)
+                    pdf.set_text_color(*WHITE)
+                else:
+                    pdf.set_font(fn, size=9)
+                    pdf.set_text_color(*INK)
+                    pdf.set_fill_color(*(ROW_ALT if row_idx % 2 == 0 else WHITE))
+                for cell_text in row_data_padded:
+                    text = self._clean_markdown(str(cell_text))
+                    text = self._replace_emojis(text)
+                    avail = col_w - 2.0
+                    if pdf.get_string_width(text) > avail:
+                        while len(text) > 1 and pdf.get_string_width(text + '..') > avail:
+                            text = text[:-1]
+                        text = text + '..'
+                    pdf.cell(col_w, 7, text, border=1, fill=True, align='L')
+                pdf.ln()
+
+        pdf.set_text_color(*INK)
+        pdf.set_fill_color(*WHITE)
+        pdf.ln(4)
+
+    def _add_section_line(self, pdf: FPDF, line: str):
+        """Render a single line of markdown text with appropriate formatting"""
+        fn = self._fn()
+        line_stripped = line.strip()
+
+        if not line_stripped:
+            pdf.ln(3)
+            return
+
+        # Always reset to left margin before rendering
+        pdf.set_x(pdf.l_margin)
+        w = pdf.epw  # safe explicit width
+
+        text = self._replace_emojis(line_stripped)
+        # Horizontal rules (---, ***, —-) are dropped: sections are separated by headings
+        if re.match(r'^[-\u2014\u2013*_=]{2,}$', text):
+            return
+        # Markdown blockquote: render the quoted text as regular body text
+        if text.startswith('>'):
+            text = text.lstrip('> ').strip() or text
+
+        # Heading levels
+        if text.startswith('### '):
+            content = self._clean_markdown(text[4:])
+            pdf.set_font(fn, 'B', size=11)
+            pdf.set_text_color(*NAVY_SOFT)
+            pdf.multi_cell(w, 6, content, align='L')
+            pdf.ln(1)
+            pdf.set_text_color(*INK)
+        elif text.startswith('## '):
+            content = self._clean_markdown(text[3:])
+            pdf.ln(2)
+            pdf.set_font(fn, 'B', size=13)
+            pdf.set_text_color(*NAVY)
+            pdf.multi_cell(w, 7, content, align='L')
+            pdf.ln(2)
+            pdf.set_text_color(*INK)
+        elif text.startswith('# '):
+            content = self._clean_markdown(text[2:])
+            pdf.ln(3)
+            pdf.set_font(fn, 'B', size=15)
+            pdf.set_text_color(*NAVY)
+            pdf.multi_cell(w, 8, content, align='L')
+            y = pdf.get_y()
+            pdf.set_draw_color(*RULE_GRAY)
+            pdf.line(pdf.l_margin, y, pdf.l_margin + pdf.epw, y)
+            pdf.ln(3)
+            pdf.set_text_color(*INK)
+        elif (text.startswith('- ') or text.startswith('* ') or
+              text.startswith('· ') or text.startswith('\u2022 ') or
+              (len(text) > 1 and text[0] == '\u2022')):
+            # Strip bullet prefix (1 or 2 chars depending on format)
+            if text.startswith('- ') or text.startswith('* ') or text.startswith('· '):
+                raw = text[2:]
+            elif text.startswith('\u2022 '):
+                raw = text[2:]
+            else:
+                raw = text[1:].lstrip()
+            content = self._inline_markdown(raw)
+            pdf.set_font(fn, size=10)
+            # Hanging indent: temporarily shift left margin so wrapped lines
+            # align with the text after the bullet marker, not the page edge.
+            BULLET_INDENT = 6  # mm
+            orig_left = pdf.l_margin
+            pdf.set_left_margin(orig_left + BULLET_INDENT)
+            pdf.set_x(orig_left + BULLET_INDENT)
+            pdf.multi_cell(pdf.epw, 5.5, '\u2022 ' + content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
+            pdf.set_left_margin(orig_left)
+            pdf.set_x(orig_left)
+        else:
+            # Body text: normal weight; only key terms marked **bold** are bold.
+            # Headings come exclusively from ## / ### (see report_format.normalize_report_markdown).
+            content = self._inline_markdown(text)
+            num_match = re.match(r'^(\d+[\.、]\s*|\(\d+\)\s*)', content)
+            pdf.set_font(fn, size=10)
+            if num_match and len(content) > len(num_match.group(1)):
+                # Hanging indent for numbered items
+                NUM_INDENT = 5  # mm
+                orig_left = pdf.l_margin
+                pdf.set_left_margin(orig_left + NUM_INDENT)
+                pdf.set_x(orig_left + NUM_INDENT)
+                pdf.multi_cell(pdf.epw, 5.5, content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
+                pdf.set_left_margin(orig_left)
+                pdf.set_x(orig_left)
+            else:
+                pdf.multi_cell(w, 5.5, content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
+
+    # ------------------------------------------------------------------
+    # Price chart (unchanged from original)
+    # ------------------------------------------------------------------
+
+    def _calculate_heikin_ashi(self, price_data: List[Dict]) -> List[Dict]:
+        """Calculate Heikin Ashi values from regular OHLC data"""
+        if not price_data:
+            return []
+        ha_data = []
+        for i, candle in enumerate(price_data):
+            open_price = candle.get('Open', 0)
+            high_price = candle.get('High', 0)
+            low_price = candle.get('Low', 0)
+            close_price = candle.get('Adj Close', candle.get('Close', 0))
+            volume = candle.get('Volume', 0)
+            ha_close = (open_price + high_price + low_price + close_price) / 4
+            if i == 0:
+                ha_open = (open_price + close_price) / 2
+            else:
+                ha_open = (ha_data[i-1]['HA_Open'] + ha_data[i-1]['HA_Close']) / 2
+            ha_high = max(high_price, ha_open, ha_close)
+            ha_low = min(low_price, ha_open, ha_close)
+            ha_data.append({
+                'Date': candle.get('Date', ''),
+                'HA_Open': ha_open, 'HA_High': ha_high,
+                'HA_Low': ha_low, 'HA_Close': ha_close,
+                'Volume': volume,
+            })
+        return ha_data
+
+    def _generate_price_chart(self, price_data: List[Dict], ticker: str,
+                              currency: str = '$') -> bytes:
+        """Generate Heikin Ashi candlestick + volume chart as PNG bytes"""
+        if not price_data or len(price_data) < 2:
+            return None # type: ignore
+        ha_data = self._calculate_heikin_ashi(price_data)
+        dates = list(range(len(ha_data)))
+        ha_opens = [d['HA_Open'] for d in ha_data]
+        ha_highs = [d['HA_High'] for d in ha_data]
+        ha_lows = [d['HA_Low'] for d in ha_data]
+        ha_closes = [d['HA_Close'] for d in ha_data]
+        volumes = [d['Volume'] for d in ha_data]
+
+        fig, (ax1, ax2) = plt.subplots(
+            2, 1, figsize=(10, 6),
+            gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
+        fig.patch.set_facecolor('#F9F7F2') # type: ignore
+
+        width = 0.8
+        for i in range(len(dates)):
+            color = '#22c55e' if ha_closes[i] >= ha_opens[i] else '#ef4444'
+            ax1.plot([dates[i], dates[i]], [ha_lows[i], ha_highs[i]],
+                     color=color, linewidth=1)
+            body_bottom = min(ha_opens[i], ha_closes[i])
+            body_height = abs(ha_closes[i] - ha_opens[i])
+            rect = Rectangle((dates[i] - width/2, body_bottom), width, body_height,
+                              facecolor=color, edgecolor=color, linewidth=0.5)
+            ax1.add_patch(rect)
+
+        ax1.set_ylabel(f'Price ({currency})', fontsize=10)
+        ax1.set_title(f'{ticker} Heikin Ashi Chart', fontsize=12, fontweight='bold', color='#0B2545')
+        ax1.grid(True, alpha=0.3, color='#C9A55C')
+        for ax in (ax1, ax2):
+            for spine in ax.spines.values():
+                spine.set_color('#D9D9D9')
+        ax1.set_facecolor('#FFFFFF')
+
+        vol_colors = ['#22c55e' if ha_closes[i] >= ha_opens[i] else '#ef4444'
+                      for i in range(len(dates))]
+        ax2.bar(dates, volumes, width=width, color=vol_colors, alpha=0.7)
+        ax2.set_ylabel('Volume', fontsize=10)
+        is_intraday = 'T' in str(price_data[0].get('Date', ''))
+        ax2.set_xlabel('Intraday Bars' if is_intraday else 'Trading Days', fontsize=10)
+        ax2.grid(True, alpha=0.3)
+        ax2.set_facecolor('#FFFFFF')
+        ax2.yaxis.set_major_formatter(plt.FuncFormatter( # type: ignore
+            lambda x, p: f'{x/1e6:.1f}M' if x >= 1e6 else f'{x/1e3:.0f}K' if x >= 1e3 else f'{x:.0f}'))
+
+        if ha_data:
+            label_indices = [0, len(ha_data)//2, len(ha_data)-1]
+            labels, positions = [], []
+            for idx in label_indices:
+                if idx < len(ha_data):
+                    date_str = ha_data[idx].get('Date', '')
+                    if date_str and len(date_str) >= 10:
+                        # 盤中 K 線（新上市股票）的 Date 為 YYYY-MM-DDTHH:MM，標上時間
+                        label = date_str[5:10]
+                        if 'T' in date_str and len(date_str) >= 16:
+                            label = f"{label} {date_str[11:16]}"
+                        labels.append(label)
+                        positions.append(idx)
+            if positions and labels:
+                ax2.set_xticks(positions)
+                ax2.set_xticklabels(labels)
+
+        plt.tight_layout()
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=150, bbox_inches='tight',
+                    facecolor='#F9F7F2', edgecolor='none')
+        plt.close(fig)
+        buf.seek(0)
+        return buf.getvalue()
+
+    # ------------------------------------------------------------------
+    # Page builders (navy / gold / cream memo style)
+    # ------------------------------------------------------------------
+
+    def _spaced_text(self, pdf: FPDF, x: float, y: float, w: float, text: str,
+                     size: float, color: tuple, spacing: float = 1.0, align: str = 'L'):
+        """Small letter-spaced label."""
+        pdf.set_font(self._fn(), size=size)
+        pdf.set_text_color(*color)
+        pdf.set_char_spacing(spacing)
+        pdf.set_xy(x, y)
+        pdf.cell(w, size * 0.5, text, align=align)
+        pdf.set_char_spacing(0)
+
+    @staticmethod
+    def _gold_rule(pdf: FPDF, x: float, y: float, length: float = 14, weight: float = 0.5):
+        pdf.set_draw_color(*GOLD)
+        pdf.set_line_width(weight)
+        pdf.line(x, y, x + length, y)
+        pdf.set_line_width(0.2)
+
+    def _title_block(self, pdf: FPDF, kicker: str, title: str):
+        """Gold short rule + gold kicker + navy title + hairline (content-page heading)."""
+        pdf.set_x(pdf.l_margin)
+        y = pdf.get_y()
+        self._gold_rule(pdf, pdf.l_margin, y)
+        self._spaced_text(pdf, pdf.l_margin, y + 2.5, pdf.epw, kicker, 8.5, GOLD_TEXT, 0.8)
+        pdf.set_xy(pdf.l_margin, y + 8)
+        pdf.set_font(self._fn(), size=22)
+        pdf.set_text_color(*NAVY)
+        pdf.multi_cell(pdf.epw, 11, title, align='L', wrapmode='CHAR',  # type: ignore
+                       new_x='LMARGIN', new_y='NEXT')
+        pdf.ln(1)
+        pdf.set_draw_color(*RULE_GRAY)
+        pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
+        pdf.ln(5)
+        pdf.set_text_color(*INK)
+
+    def _sub_heading(self, pdf: FPDF, text: str):
+        pdf.set_x(pdf.l_margin)
+        pdf.set_font(self._fn(), size=13)
+        pdf.set_text_color(*NAVY)
+        pdf.cell(0, 8, text, new_x='LMARGIN', new_y='NEXT')
+        y = pdf.get_y()
+        pdf.set_draw_color(*RULE_GRAY)
+        pdf.line(pdf.l_margin, y, pdf.l_margin + pdf.epw, y)
+        self._gold_rule(pdf, pdf.l_margin, y, 14, 0.6)
+        pdf.ln(3)
+        pdf.set_text_color(*INK)
+
+    def _build_cover_page(self, pdf: _ReportPDF, ticker: str, analysis_date: str, language: str,
+                          deep_think_llm: str = None, quick_think_llm: str = None, # type: ignore
+                          company_name: str = None, tagline: str = None): # type: ignore
+        """Navy hero + cream metadata area, mirroring an IC-memo cover."""
+        fn = self._fn()
+        pdf.header_right = f"{ticker}  ·  {get_pdf_label('header_right', language)}  ·  {analysis_date}"
+        pdf.footer_note = get_pdf_label('disclaimer', language)
+        pdf.set_auto_page_break(False)
+        pdf.add_page(kind='cover')
+
+        hero_h = 190
+        pdf.set_fill_color(*NAVY)
+        pdf.rect(0, 0, PAGE_W, hero_h, 'F')
+        pdf.set_fill_color(*CREAM)
+        pdf.rect(0, hero_h, PAGE_W, PAGE_H - hero_h, 'F')
+        pdf.set_fill_color(*GOLD)
+        pdf.rect(0, 0, 38, 2.6, 'F')
+        pdf.rect(0, 0, 1.6, 35, 'F')
+        pdf.set_draw_color(*GOLD)
+        pdf.set_line_width(0.8)
+        pdf.line(0, hero_h, PAGE_W, hero_h)
+        pdf.set_line_width(0.2)
+
+        # Brand block (top-left)
+        self._spaced_text(pdf, 18, 18, 120, 'TRADINGAGENTSX', 11, WHITE, 1.4)
+        self._spaced_text(pdf, 18, 25, 120, get_pdf_label('brand_tagline', language), 7.5, ICE, 0.3)
+
+        # Kicker + title
+        self._spaced_text(pdf, 18, 96, 170, get_pdf_label('cover_kicker', language), 9, GOLD, 1.0)
+        self._gold_rule(pdf, 18, 104, 18, 0.5)
+
+        pdf.set_xy(18, 110)
+        pdf.set_text_color(*WHITE)
+        has_company_name = bool(company_name) and company_name.strip().upper() != ticker.strip().upper()
+        if has_company_name:
+            pdf.set_font(fn, size=30)
+            pdf.multi_cell(174, 14, company_name.strip(), align='L', wrapmode='CHAR',  # type: ignore
+                           new_x='LMARGIN', new_y='NEXT')
+            pdf.set_font(fn, size=18)
+            pdf.set_text_color(*ICE)
+            pdf.cell(0, 11, ticker, new_x='LMARGIN', new_y='NEXT')
+        else:
+            pdf.set_font(fn, size=44)
+            pdf.cell(0, 20, ticker, new_x='LMARGIN', new_y='NEXT')
+        pdf.set_font(fn, size=11)
+        pdf.set_text_color(*ICE)
+        pdf.set_x(18)
+        pdf.multi_cell(174, 7, tagline or get_pdf_label('cover_subtitle', language),
+                       align='L', wrapmode='CHAR', new_x='LMARGIN', new_y='NEXT')  # type: ignore
+
+        # Metadata columns on cream
+        deep_name = get_model_display_name(deep_think_llm) or '—'
+        quick_name = get_model_display_name(quick_think_llm) or '—'
+        columns = [
+            (get_pdf_label('meta_ticker', language), ticker),
+            (get_pdf_label('meta_date', language), analysis_date),
+        ]
+        if deep_name == quick_name:
+            # Same model for both roles: one column instead of a duplicated pair.
+            columns.append((get_pdf_label('meta_model', language), deep_name))
+        else:
+            columns.append((get_pdf_label('meta_deep', language), deep_name))
+            columns.append((get_pdf_label('meta_quick', language), quick_name))
+        col_w = 174 / len(columns)
+        for idx, (label, value) in enumerate(columns):
+            x = 18 + idx * col_w
+            self._spaced_text(pdf, x, 207, col_w - 3, label, 7, GOLD_TEXT, 0.5)
+            self._gold_rule(pdf, x, 213, 8, 0.4)
+            pdf.set_xy(x, 216)
+            pdf.set_font(fn, size=10.5)
+            pdf.set_text_color(*NAVY)
+            pdf.multi_cell(col_w - 4, 5.5, value, align='L', wrapmode='CHAR')  # type: ignore
+
+        # Bottom callout box
+        box_y, box_h = 252, 24
+        pdf.set_draw_color(*GOLD)
+        pdf.set_line_width(0.4)
+        pdf.rect(18, box_y, 174, box_h)
+        pdf.set_line_width(0.2)
+        self._spaced_text(pdf, 23, box_y + 4, 160, get_pdf_label('cover_box_label', language), 7, GOLD_TEXT, 0.5)
+        pdf.set_xy(23, box_y + 10)
+        pdf.set_font(fn, size=10)
+        pdf.set_text_color(*NAVY)
+        pdf.multi_cell(164, 5.2, f"{get_pdf_label('cover_title', language)} — "
+                                 f"{get_pdf_label('cover_subtitle', language)}",
+                       align='L', wrapmode='CHAR')  # type: ignore
+
+        pdf.set_font(fn, size=7)
+        pdf.set_text_color(*MUTED)
+        pdf.set_xy(0, 283)
+        pdf.cell(PAGE_W, 4, get_pdf_label('disclaimer', language), align='C')
+
+        pdf.set_auto_page_break(True, margin=22)
+        pdf.set_text_color(*INK)
+
+    def _build_toc_page(self, pdf: _ReportPDF, reports: list, has_chart: bool,
+                        teams: list, language: str):
+        """Table of contents page"""
+        fn = self._fn()
+        pdf.add_page(kind='content')
+        self._title_block(pdf, get_pdf_label('report_content', language).upper(),
+                          get_pdf_label('toc_title', language))
+
+        report_analyst_names = [r.get('analyst_name', '') for r in reports]
+
+        def entry(text: str):
+            pdf.set_x(pdf.l_margin + 3)
+            pdf.set_font(fn, size=10.5)
+            pdf.set_text_color(*GOLD_TEXT)
+            pdf.cell(5, 6.5, '•')
+            pdf.set_text_color(*INK)
+            pdf.cell(0, 6.5, text, new_x='LMARGIN', new_y='NEXT')
+
+        if has_chart:
+            entry(get_pdf_label('price_chart', language))
+
+        for team in teams or []:
+            team_count = sum(1 for m in team['members'] if m in report_analyst_names)
+            if team_count == 0:
+                continue
+            pdf.ln(5)
+            members_label = get_pdf_label('members', language)
+            self._sub_heading(pdf, f"{team['name']} ({team_count} {members_label})")
+            for member in team['members']:
+                if member in report_analyst_names:
+                    entry(member)
+
+        pdf.set_text_color(*INK)
+
+    def _build_chart_page(self, pdf: _ReportPDF, ticker: str, price_data: list,
+                          price_stats: dict, language: str, currency: str = '$'):
+        """Price chart + statistics page"""
+        fn = self._fn()
+        pdf.add_page(kind='content')
+        self._title_block(pdf, ticker, get_pdf_label('price_chart', language))
+
+        if price_data and len(price_data) >= 5:
+            try:
+                chart_bytes = self._generate_price_chart(price_data, ticker, currency)
+                if chart_bytes:
+                    chart_buf = io.BytesIO(chart_bytes)
+                    pdf.image(chart_buf, w=pdf.epw, h=pdf.epw * 0.6)
+                    pdf.ln(6)
+            except Exception as e:
+                print(f'Chart generation failed: {e}')
+                pdf.set_font(fn, size=10)
+                pdf.cell(0, 6, get_pdf_label('chart_failed', language),
+                         new_x='LMARGIN', new_y='NEXT')
+
+        if price_stats:
+            self._sub_heading(pdf, get_pdf_label('price_stats', language))
+
+            growth_rate = price_stats.get('growth_rate', 0)
+            growth_text = f'+{growth_rate:.2f}%' if growth_rate >= 0 else f'{growth_rate:.2f}%'
+            duration = price_stats.get('duration_days', 0)
+
+            stats_rows = [
+                [get_pdf_label('item', language), get_pdf_label('value', language)],
+                [get_pdf_label('total_return', language), growth_text],
+                [get_pdf_label('analysis_period', language),
+                 f"{duration} {get_pdf_label('days', language)}"],
+                [get_pdf_label('start_date', language), price_stats.get('start_date', '')],
+                [get_pdf_label('end_date', language), price_stats.get('end_date', '')],
+                [get_pdf_label('start_price', language), f"{currency}{price_stats.get('start_price', 0):.2f}"],
+                [get_pdf_label('end_price', language), f"{currency}{price_stats.get('end_price', 0):.2f}"],
+            ]
+            self._add_table(pdf, stats_rows)
+
+        pdf.set_text_color(*INK)
+
+    def _build_team_separator_page(self, pdf: _ReportPDF, team_name: str,
+                                   member_count: int, language: str, index: int = 0):
+        """Full-bleed navy section divider"""
+        fn = self._fn()
+        pdf.set_auto_page_break(False)
+        pdf.add_page(kind='divider')
+        pdf.set_fill_color(*NAVY)
+        pdf.rect(0, 0, PAGE_W, PAGE_H, 'F')
+        pdf.set_fill_color(*GOLD)
+        pdf.rect(0, 0, 52, 2.6, 'F')
+
+        num = ROMAN[index % len(ROMAN)]
+        label = (f"{get_pdf_label('section', language)} {num}" if language == 'en'
+                 else f"第{ZH_NUM[index % len(ZH_NUM)]}部分")
+        self._spaced_text(pdf, 18, 156, 170, label, 9, GOLD, 1.0)
+        self._gold_rule(pdf, 18, 163, 14, 0.5)
+
+        pdf.set_xy(18, 168)
+        pdf.set_font(fn, size=34)
+        pdf.set_text_color(*WHITE)
+        pdf.multi_cell(174, 16, team_name, align='L', wrapmode='CHAR',  # type: ignore
+                       new_x='LMARGIN', new_y='NEXT')
+        pdf.set_x(18)
+        pdf.set_font(fn, size=13)
+        pdf.set_text_color(*ICE)
+        pdf.cell(0, 9, f"{member_count} {get_pdf_label('members', language)}",
+                 new_x='LMARGIN', new_y='NEXT')
+
+        pdf.set_font(fn, size=7)
+        pdf.set_text_color(*ICE)
+        pdf.set_xy(0, 284)
+        pdf.cell(PAGE_W, 4, get_pdf_label('disclaimer', language), align='C')
+
+        pdf.set_auto_page_break(True, margin=22)
+        pdf.set_text_color(*INK)
+
+    def _build_analyst_section(self, pdf: _ReportPDF, analyst_name: str,
+                                ticker: str, analysis_date: str,
+                                report_content: str):
+        """Analyst report page"""
+        pdf.add_page(kind='content')
+        self._title_block(pdf, f'{ticker}  ·  {analysis_date}', analyst_name)
+        pdf.set_text_color(*INK)
+
+        content = self._replace_emojis(report_content)
+        content = self._merge_soft_newlines(content)
+        lines = content.split('\n')
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            line_stripped = line.strip()
+
+            if not line_stripped:
+                pdf.ln(2)
+                i += 1
+                continue
+
+            if '|' in line_stripped and not line_stripped.startswith('#'):
+                table_data, end_idx = self._parse_markdown_table(lines, i)
+                if table_data and len(table_data) > 1:
+                    pdf.ln(2)
+                    self._add_table(pdf, table_data)
+                    i = end_idx
+                    continue
+
+            self._add_section_line(pdf, line)
+            i += 1
+
+        pdf.set_text_color(*INK)
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def generate_combined_report_pdf(
+        self,
+        ticker: str,
+        analysis_date: str,
+        reports: list,
+        price_data: list = None, # type: ignore
+        price_stats: dict = None, # type: ignore
+        language: str = 'zh-TW',
+        deep_think_llm: str = None, # type: ignore
+        quick_think_llm: str = None, # type: ignore
+        company_name: str = None, # type: ignore
+        currency: str = '$',
+    ) -> bytes:
+        """
+        Generate a combined PDF containing all analyst reports.
+
+        Args:
+            ticker: Stock ticker symbol
+            analysis_date: Date of analysis
+            reports: List of dicts with 'analyst_name' and 'report_content'
+            price_data: Optional list of OHLC price data dicts
+            price_stats: Optional dict with growth_rate, duration_days, etc.
+            language: 'en' or 'zh-TW'
+            company_name: Optional company full name shown on the cover page
+            currency: Symbol for the price axis and price statistics (default '$')
+
+        Returns:
+            PDF file content as bytes
+        """
+        if language == 'en':
+            TEAMS = [
+                {
+                    'name': 'Analysts Team',
+                    'members': ['Market Analyst', 'Social Media Analyst',
+                                'News Analyst', 'Fundamentals Analyst'],
+                },
+                {
+                    'name': 'Research Team',
+                    'members': ['Bull Researcher', 'Bear Researcher', 'Research Manager'],
+                },
+                {
+                    'name': 'Trading & Risk Team',
+                    'members': ['Trader', 'Aggressive Analyst', 'Conservative Analyst',
+                                'Neutral Analyst', 'Risk Manager'],
+                },
+            ]
+        else:
+            TEAMS = [
+                {
+                    'name': '分析師團隊',
+                    'members': ['市場分析師', '社群媒體分析師', '新聞分析師', '基本面分析師'],
+                },
+                {
+                    'name': '研究團隊',
+                    'members': ['看漲研究員', '看跌研究員', '研究經理'],
+                },
+                {
+                    'name': '交易與風險團隊',
+                    'members': ['交易員', '激進分析師', '保守分析師', '中立分析師', '風險經理'],
+                },
+            ]
+
+        report_map = {r.get('analyst_name', ''): r.get('report_content', '')
+                      for r in reports}
+        has_chart = bool(price_data and len(price_data) >= 5)
+
+        pdf = self._new_pdf()
+
+        # 1. Cover page (page 1 — no footer)
+        self._build_cover_page(pdf, ticker, analysis_date, language,
+                               deep_think_llm=deep_think_llm, quick_think_llm=quick_think_llm,
+                               company_name=company_name)
+
+        # 2. TOC page (page 2 — no footer)
+        self._build_toc_page(pdf, reports, has_chart, TEAMS, language)
+
+        # 3. Content pages start here (footer shows page numbers)
+        # Chart page
+        if has_chart:
+            self._build_chart_page(pdf, ticker, price_data, price_stats, language, currency)
+
+        # Team separator + analyst sections
+        section_idx = 0
+        for team in TEAMS:
+            team_reports = []
+            for member_name in team['members']:
+                if member_name in report_map and report_map[member_name]:
+                    team_reports.append({
+                        'analyst_name': member_name,
+                        'report_content': report_map[member_name],
+                    })
+
+            if not team_reports:
+                continue
+
+            self._build_team_separator_page(
+                pdf, team['name'], len(team_reports), language, index=section_idx)
+            section_idx += 1
+
+            for report in team_reports:
+                self._build_analyst_section(
+                    pdf=pdf,
+                    analyst_name=report['analyst_name'],
+                    ticker=ticker,
+                    analysis_date=analysis_date,
+                    report_content=report['report_content'],
+                )
+
+        return bytes(pdf.output())
+
+    def generate_analyst_report_pdf(
+        self,
+        analyst_name: str,
+        ticker: str,
+        analysis_date: str,
+        report_content: str,
+        price_data: list = None, # type: ignore
+        price_stats: dict = None, # type: ignore
+    ) -> bytes:
+        """
+        Generate a single-analyst PDF report.
+
+        Args:
+            analyst_name: Name of the analyst
+            ticker: Stock ticker symbol
+            analysis_date: Date of analysis
+            report_content: Markdown formatted report content
+            price_data: Optional OHLC price data
+            price_stats: Optional price statistics dict
+
+        Returns:
+            PDF file content as bytes
+        """
+        pdf = self._new_pdf()
+        pdf._cover_toc_pages = 1  # cover only; content pages numbered from 01
+
+        self._build_cover_page(pdf, ticker, analysis_date, 'zh-TW', tagline=analyst_name)
+
+        # Chart + stats page
+        if price_data and price_stats and len(price_data) >= 5:
+            self._build_chart_page(pdf, ticker, price_data, price_stats, language='zh-TW')
+
+        # Report content
+        self._build_analyst_section(
+            pdf=pdf,
+            analyst_name=analyst_name,
+            ticker=ticker,
+            analysis_date=analysis_date,
+            report_content=report_content,
+        )
+
+        return bytes(pdf.output())
