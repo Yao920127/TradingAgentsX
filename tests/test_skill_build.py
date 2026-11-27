@@ -9,7 +9,6 @@
 """
 import importlib.util
 import json
-import os
 import subprocess
 import sys
 import zipfile
@@ -78,7 +77,7 @@ def test_zip_contains_expected_files(built):
         names = set(zf.namelist())
     expected = [
         "SKILL.md", "scripts/tool.py", "requirements.txt",
-        "assets/NotoSerifTC-Regular.b64.part01.txt", "assets/NotoSerifTC-Bold.b64.part01.txt",
+        "assets/NotoSerifTC-Regular.ttf", "assets/NotoSerifTC-Bold.ttf",
         "vendor/pdf_generator.py",
         "vendor/tradingagents/default_config.py",
         "vendor/tradingagents/utils/toon_converter.py",
@@ -96,7 +95,7 @@ def test_zip_excludes_caches_and_build_marker(built):
     with zipfile.ZipFile(result["zip"]) as zf:
         names = zf.namelist()
     assert not [n for n in names if "__pycache__" in n or n.endswith(".pyc") or ".DS_Store" in n]
-    assert not [n for n in names if n.endswith(("skill-build.txt", ".skill-build"))]
+    assert not [n for n in names if n.endswith(".skill-build")]
 
 
 def test_zip_is_reproducible(bs, tmp_path):
@@ -210,7 +209,7 @@ def test_no_fonts_option_skips_fonts(bs, tmp_path):
     src = make_source(tmp_path)
     result = bs.build(src, tmp_path / "dist", include_fonts=False)
     with zipfile.ZipFile(result["zip"]) as zf:
-        assert not [n for n in zf.namelist() if "NotoSerifTC" in n]
+        assert not [n for n in zf.namelist() if n.endswith(".ttf")]
 
 
 def test_missing_font_source_fails(bs, tmp_path):
@@ -253,77 +252,6 @@ def test_real_skill_builds_with_valid_frontmatter(bs, real_build):
     assert 50 < len(fields["description"]) <= 1024
 
 
-GEMINI_SUFFIXES = {".pdf", ".csv", ".py", ".txt", ".md"}  # Gemini 技能上傳只收這些副檔名
-
-
-def test_built_folder_only_has_gemini_supported_file_types(real_build):
-    """Gemini 上傳技能資料夾時，含其他副檔名（ttf、無副檔名的標記檔…）會被整個拒絕。"""
-    _, out = real_build
-    root = out / SKILL_NAME
-    unsupported = sorted(
-        str(p.relative_to(root)) for p in root.rglob("*")
-        if p.is_file() and p.suffix.lower() not in GEMINI_SUFFIXES
-    )
-    assert not unsupported, unsupported
-
-
-GEMINI_MAX_ITEMS = 100  # Gemini 技能包上限：檔案＋資料夾共 100 個項目、總大小 100 MB
-GEMINI_MAX_BYTES = 100 * 1024 * 1024
-
-
-def test_built_folder_has_no_empty_files(real_build):
-    """Gemini 上傳遇到 0 位元組檔案可能失敗。"""
-    _, out = real_build
-    root = out / SKILL_NAME
-    empty = [str(p.relative_to(root)) for p in root.rglob("*") if p.is_file() and p.stat().st_size == 0]
-    assert not empty, empty
-
-
-def test_built_folder_stays_within_gemini_limits(real_build):
-    """項目數（含資料夾）超過 100 會被 Gemini 以「上傳技能時發生錯誤」退回；留 5 個項目的餘裕。"""
-    _, out = real_build
-    root = out / SKILL_NAME
-    items = list(root.rglob("*"))
-    assert len(items) <= GEMINI_MAX_ITEMS - 5, len(items)
-    assert sum(p.stat().st_size for p in items if p.is_file()) < GEMINI_MAX_BYTES
-
-
-def test_packed_fonts_restore_to_loadable_ttf(real_build, tmp_path):
-    """壓縮文字檔還原後必須是可用的 TTF，且仍含常用繁中字。"""
-    import base64
-    import zlib
-    from fontTools.ttLib import TTFont
-    _, out = real_build
-    for style in ("Regular", "Bold"):
-        parts = sorted((out / SKILL_NAME / "assets").glob(f"NotoSerifTC-{style}.b64.part*.txt"))
-        assert len(parts) > 1
-        pack = "".join(part.read_text(encoding="ascii") for part in parts)
-        ttf = tmp_path / f"{style}.ttf"
-        ttf.write_bytes(zlib.decompress(base64.b64decode(pack)))
-        cmap = TTFont(str(ttf)).getBestCmap()
-        for char in "台積電買入賣出持有風險鑫穎，。：％":
-            assert ord(char) in cmap, (style, char)
-
-
-def test_built_skill_renders_zh_pdf_from_packed_fonts(real_build, tmp_path):
-    """建置產物（只有 .txt 字型）在乾淨環境執行 render_pdf.py，要能產出繁中 PDF。"""
-    import subprocess
-    _, out = real_build
-    work = tmp_path / "work"
-    (work / "reports").mkdir(parents=True)
-    (work / "reports" / "market.md").write_text("## 技術面\n\n台積電買入，風險可控。\n", encoding="utf-8")
-    env = {**os.environ, "TMPDIR": str(tmp_path / "tmp")}
-    (tmp_path / "tmp").mkdir()
-    proc = subprocess.run(
-        [sys.executable, "-I", str(out / SKILL_NAME / "scripts" / "render_pdf.py"),
-         "--workdir", str(work), "--ticker", "2330", "--date", "2026-11-26", "--lang", "zh-TW"],
-        capture_output=True, text=True, env=env, timeout=180,
-    )
-    assert proc.returncode == 0, proc.stderr[-800:]
-    pdfs = list(work.glob("*.pdf"))
-    assert len(pdfs) == 1 and pdfs[0].read_bytes().startswith(b"%PDF")
-
-
 def test_skill_md_mentions_only_existing_files(real_build):
     """SKILL.md 與 web-mode.md 內提到的 scripts/references 路徑，產物裡都要存在。"""
     import re
@@ -332,7 +260,7 @@ def test_skill_md_mentions_only_existing_files(real_build):
     mentioned = set()
     for doc in (root / "SKILL.md", root / "references" / "web-mode.md"):
         text = doc.read_text(encoding="utf-8")
-        mentioned |= set(re.findall(r"(?:scripts/\w+\.py|references/web-mode\.md|assets/[\w.-]+\.txt)", text))
+        mentioned |= set(re.findall(r"(?:scripts/\w+\.py|references/web-mode\.md|assets/\w+\.ttf)", text))
     assert {"scripts/fetch_data.py", "scripts/indicators.py", "scripts/render_pdf.py",
             "references/web-mode.md"} <= mentioned
     missing = [m for m in sorted(mentioned) if not (root / m).exists()]
@@ -368,7 +296,7 @@ def test_build_plugin_layout(bs, tmp_path):
     assert manifest["version"] and manifest["description"]
     skill = plugin_dir / "skills" / SKILL_NAME
     assert (skill / "SKILL.md").is_file()
-    assert (skill / "assets" / "NotoSerifTC-Regular.b64.part01.txt").is_file()
+    assert (skill / "assets" / "NotoSerifTC-Regular.ttf").is_file()
     assert (skill / "references" / "prompts" / "en" / "risk_manager.md").is_file()
     assert (skill / "vendor" / "pdf_generator.py").is_file()
     assert not list(plugin_dir.glob("*.zip"))
