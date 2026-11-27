@@ -82,11 +82,11 @@ Depth sets how many turns the bull/bear and risk debates run: deeper is more tho
 
 | Depth | Bull/bear debate | Risk debate | Separate writing steps | Good for |
 | ----- | ---------------- | ----------- | ---------------------- | -------- |
-| 1 | 2 turns | 3 turns | about 16 | A quick look (about 8 minutes measured in Claude Code) |
-| 2 | 4 turns | 6 turns | about 21 | Everyday use |
-| 3 (default) | 6 turns | 9 turns | about 26 | Full debate |
-| 4 | 8 turns | 12 turns | about 31 | Before an important decision |
-| 5 | 10 turns | 15 turns | about 36 | Most thorough, slowest |
+| 1 | 2 turns | 3 turns | about 19 | A quick look (about 8 minutes measured in Claude Code) |
+| 2 | 4 turns | 6 turns | about 24 | Everyday use |
+| 3 (default) | 6 turns | 9 turns | about 29 | Full debate |
+| 4 | 8 turns | 12 turns | about 34 | Before an important decision |
+| 5 | 10 turns | 15 turns | about 39 | Most thorough, slowest |
 
 > Output is for research only and is not investment advice.
 
@@ -100,4 +100,16 @@ Claude app analyzing NVDA, with the generated PDF report previewed on the right:
 
 ![Claude app in action](../web_screenshot/skill2.png)
 
-**Maintainers**: build the zip yourself with `python scripts/build_skill.py` (outputs `dist/tradingagentsx-analyze.zip`). After changing prompts, `pdf_generator.py`, dataflows or `skills/`, run `python scripts/build_skill.py --plugin` and commit `plugins/tradingagentsx/` (a test checks that it is in sync).
+### Maintainers
+
+Build the zip yourself (outputs `dist/tradingagentsx-analyze.zip`):
+
+```bash
+python scripts/build_skill.py
+```
+
+After changing prompts, `pdf_generator.py`, dataflows or `skills/`, rebuild the plugin and commit `plugins/tradingagentsx/` (a test checks that it is in sync):
+
+```bash
+python scripts/build_skill.py --plugin
+```

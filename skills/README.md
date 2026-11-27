@@ -82,11 +82,11 @@ analyze NVDA on 2026-11-26, depth 2, in English
 
 | 深度 | 多空辯論 | 風險辯論 | 獨立撰寫次數 | 適合 |
 | ---- | -------- | -------- | ------------ | ---- |
-| 1 | 2 次發言 | 3 次發言 | 約 16 | 快速看一眼（Claude Code 實測約 8 分鐘） |
-| 2 | 4 次 | 6 次 | 約 21 | 日常使用 |
-| 3（預設） | 6 次 | 9 次 | 約 26 | 完整辯論 |
-| 4 | 8 次 | 12 次 | 約 31 | 重要決策前 |
-| 5 | 10 次 | 15 次 | 約 36 | 最完整，耗時最久 |
+| 1 | 2 次發言 | 3 次發言 | 約 19 | 快速看一眼（Claude Code 實測約 8 分鐘） |
+| 2 | 4 次 | 6 次 | 約 24 | 日常使用 |
+| 3（預設） | 6 次 | 9 次 | 約 29 | 完整辯論 |
+| 4 | 8 次 | 12 次 | 約 34 | 重要決策前 |
+| 5 | 10 次 | 15 次 | 約 39 | 最完整，耗時最久 |
 
 > 輸出僅供研究參考，不是投資建議。
 
@@ -100,4 +100,16 @@ Claude app 分析 NVDA，右側直接預覽產出的 PDF 報告：
 
 ![Claude app 執行畫面](../web_screenshot/skill2.png)
 
-**維護者**：自行產生 zip 用 `python scripts/build_skill.py`（輸出 `dist/tradingagentsx-analyze.zip`）。修改提示詞、`pdf_generator.py`、dataflows 或 `skills/` 後，執行 `python scripts/build_skill.py --plugin` 重建並提交 `plugins/tradingagentsx/`（測試會檢查是否同步）。
+### 維護者
+
+自行產生 zip（輸出 `dist/tradingagentsx-analyze.zip`）：
+
+```bash
+python scripts/build_skill.py
+```
+
+修改提示詞、`pdf_generator.py`、dataflows 或 `skills/` 後，重建 plugin 並提交 `plugins/tradingagentsx/`（測試會檢查是否同步）：
+
+```bash
+python scripts/build_skill.py --plugin
+```
