@@ -83,14 +83,37 @@ def _table_page_spans(gen, body, scale=1.0):
     return spans
 
 
-def test_table_that_fits_one_page_is_never_split(gen):
-    splits = []
-    for n in range(10, 45):
-        body = _body_with_overflow(gen, n) + "\n\n" + TABLE
-        for start, end in _table_page_spans(gen, body):
-            if start != end:
-                splits.append(n)
-    assert splits == []
+def _pdf_with_remaining(gen, remaining_mm):
+    pdf = gen._new_pdf()
+    pdf.add_page(kind='content')
+    pdf.set_y(pdf.h - pdf.b_margin - remaining_mm)
+    return pdf
+
+
+def _table_rows(data_lines):
+    return [[c.strip() for c in ln.strip("|").split("|")] for ln in data_lines]
+
+
+def test_table_splits_naturally_when_blank_would_be_large(gen):
+    data = _table_rows(["| a | b | c |"] + ["| 1 | 2 | 3 |"] * 12)
+    height = gen._table_height(data)
+    remaining = height - 10  # 只差一點會溢出，但剩餘空間遠大於可接受空白
+    pdf = _pdf_with_remaining(gen, max(remaining, gen._MAX_BLANK_MM + 20))
+    assert gen._table_needs_break(pdf, data) is False
+
+
+def test_table_moves_when_only_tiny_head_would_fit(gen):
+    data = _table_rows(["| a | b | c |"] + ["| 1 | 2 | 3 |"] * 12)
+    pdf = _pdf_with_remaining(gen, gen._HEADING_MIN_MM - 10)
+    assert gen._table_needs_break(pdf, data) is True
+
+
+def test_heading_lead_counts_toward_table_unit(gen):
+    data = _table_rows(["| a | b | c |"] + ["| 1 | 2 | 3 |"] * 3)
+    height = gen._table_height(data)
+    pdf = _pdf_with_remaining(gen, height + 1)
+    assert gen._table_needs_break(pdf, data) is False
+    assert gen._table_needs_break(pdf, data, lead=gen._HEADING_LEAD_MM) is True
 
 
 def test_table_moves_to_next_page_when_it_would_split(gen):

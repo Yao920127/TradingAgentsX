@@ -444,7 +444,13 @@ claude plugin marketplace update tradingagentsx
 claude plugin update tradingagentsx@tradingagentsx
 ```
 
-**Restart Claude Code** after updating so the new version loads, and check the version with `/plugin` or `claude plugin list`. If it still shows the old version, uninstall and reinstall:
+**Restart Claude Code** after updating so the new version loads, and check the version with `/plugin`, or show only this skill in the terminal:
+
+```bash
+claude plugin list | grep -A3 "tradingagentsx@tradingagentsx"
+```
+
+(`claude plugin list` takes no plugin-name argument — extra names are ignored and everything is listed, so filter with `grep`.) If it still shows the old version, uninstall and reinstall:
 
 ```bash
 claude plugin uninstall tradingagentsx@tradingagentsx

@@ -444,7 +444,13 @@ claude plugin marketplace update tradingagentsx
 claude plugin update tradingagentsx@tradingagentsx
 ```
 
-更新後**重開 Claude Code** 才會載入新版，可用 `/plugin` 或 `claude plugin list` 確認版本。若仍停在舊版，改成解除安裝再安裝：
+更新後**重開 Claude Code** 才會載入新版，可用 `/plugin` 確認版本，或在終端機只查這個 skill：
+
+```bash
+claude plugin list | grep -A3 "tradingagentsx@tradingagentsx"
+```
+
+（`claude plugin list` 不接受 plugin 名稱當參數，後面多加名稱仍會列出全部，所以要用 `grep` 篩選。）若仍停在舊版，改成解除安裝再安裝：
 
 ```bash
 claude plugin uninstall tradingagentsx@tradingagentsx

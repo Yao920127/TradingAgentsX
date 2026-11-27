@@ -1138,12 +1138,41 @@ class PDFGenerator:
             return float('inf')
         return scratch.get_y() - top
 
-    def _keep_table_on_one_page(self, pdf: _ReportPDF, table_data: list):
-        """表格放得進一頁卻會被切開時，整張換到下一頁，避免只剩幾列的尾頁。"""
+    # 標題至少要留這麼多空間給後續內容，否則整個標題換頁
+    _HEADING_MIN_MM = 40
+    # 表格換頁後，下一頁尾巴小於此值才視為孤頁；且原頁空白不超過 _MAX_BLANK_MM 才值得搬
+    _TABLE_TAIL_MM = 45
+    _MAX_BLANK_MM = 70
+    _HEADING_LEAD_MM = 16
+
+    def _table_needs_break(self, pdf: _ReportPDF, table_data: list, lead: float = 0) -> bool:
+        """表格（含前導標題 lead mm）是否應整組換到下一頁。
+
+        只在「會留下很小的碎片」且「換頁造成的空白不大」時才換頁，
+        否則讓表格自然跨頁，避免大片空白。
+        """
         height = self._table_height(table_data)
+        if height == float('inf'):
+            return False
         remaining = pdf.h - pdf.b_margin - pdf.get_y()
-        if height != float('inf') and height > remaining:
-            pdf.add_page(kind='content')
+        needed = height + lead
+        if needed <= remaining:
+            return False
+        if remaining < self._HEADING_MIN_MM:
+            return True
+        tail = needed - remaining
+        return tail < self._TABLE_TAIL_MM and remaining <= self._MAX_BLANK_MM
+
+    def _next_table(self, lines: list, start: int):
+        """從 start 起略過空行，若接著是表格回傳 (table_data, end_idx)。"""
+        j = start
+        while j < len(lines) and not lines[j].strip():
+            j += 1
+        if j < len(lines) and '|' in lines[j] and not lines[j].strip().startswith('#'):
+            data, end = self._parse_markdown_table(lines, j)
+            if data and len(data) > 1:
+                return data, end
+        return None, j
 
     def _render_analyst_section(self, pdf: _ReportPDF, analyst_name: str,
                                 ticker: str, analysis_date: str,
@@ -1169,10 +1198,20 @@ class PDFGenerator:
                 table_data, end_idx = self._parse_markdown_table(lines, i)
                 if table_data and len(table_data) > 1:
                     pdf.ln(self._lh(2))
-                    self._keep_table_on_one_page(pdf, table_data)
+                    if self._table_needs_break(pdf, table_data):
+                        pdf.add_page(kind='content')
                     self._add_table(pdf, table_data)
                     i = end_idx
                     continue
+
+            if line_stripped.startswith('#'):
+                next_data, _ = self._next_table(lines, i + 1)
+                if next_data:
+                    # 標題與其後表格視為一組，不讓標題孤立在頁底
+                    if self._table_needs_break(pdf, next_data, self._HEADING_LEAD_MM):
+                        pdf.add_page(kind='content')
+                elif pdf.h - pdf.b_margin - pdf.get_y() < self._HEADING_MIN_MM:
+                    pdf.add_page(kind='content')
 
             self._add_section_line(pdf, line)
             i += 1

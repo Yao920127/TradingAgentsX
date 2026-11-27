@@ -147,6 +147,8 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date <DATE> --lang <LANG> --company "<公司名稱>" --depth <DEPTH>
 ```
 
+`--company` 一定要填**公司正式全稱**（含 Corporation／Inc.／Co., Ltd. 等），封面才會顯示完整名稱，例如 `NVIDIA Corporation`、`Apple Inc.`、`台灣積體電路製造股份有限公司`；不可只填簡稱（如 `NVIDIA`、`台積電`）。全稱從基本面資料的公司名稱（如 yfinance 的 `longName`）取得；查不到才憑可靠知識補全。
+
 `--depth` 一定要帶：腳本會檢查 `debate_investment.md` 與 `debate_risk.md` 的發言標記是否恰為 `2×depth`、`3×depth` 個（編號 1 到總數各一個），不符就不產生 PDF。
 
 | 結束碼 | 處理 |

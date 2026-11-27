@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "TradingAgentsX：12 位 AI 分析師的股票分析流程（Claude Code skill）",
-    "version": "0.1.7"
+    "version": "0.1.8"
   },
   "plugins": [
     {
