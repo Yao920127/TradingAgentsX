@@ -59,7 +59,7 @@ FONT_EXTRA_RANGES = (
 )
 DEFAULT_PLUGIN_DIR = REPO_ROOT / "plugins" / "tradingagentsx"
 PLUGIN_NAME = "tradingagentsx"
-PLUGIN_VERSION = "0.2.1"
+PLUGIN_VERSION = "0.2.0"
 PLUGIN_MANIFEST = {
     "name": PLUGIN_NAME,
     "description": "TradingAgentsX 12 位 AI 分析師股票分析流程（美股／台股）：分析、辯論、最終決策與 PDF 報告。"
