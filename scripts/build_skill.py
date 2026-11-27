@@ -49,7 +49,7 @@ BUILD_MARKER = "skill-build.txt"  # Gemini 上傳只收 PDF/CSV/PY/TXT/MD，標�
 LEGACY_BUILD_MARKERS = (".skill-build",)  # 舊版產物的標記檔，仍視為先前建置的產物
 FONT_PACK_SUFFIX = ".b64.txt"
 FONT_PACK_WRAP = 100
-FONT_PACK_LINES_PER_PART = 6900  # 每份約 0.7 MB；Gemini 對單一檔案大小的上限未公布，切小較保險
+FONT_PACK_LINES_PER_PART = 19000  # 每份約 1.9 MB；Gemini 技能包上限是 100 個項目（檔案＋資料夾），切太碎會超標
 EMPTY_FILE_PLACEHOLDER = "# (intentionally empty)\n"  # Gemini 上傳遇到 0 位元組檔案可能失敗
 # 字型保留的 Unicode 範圍（除了 Big5 字集之外）：拉丁、標點、箭頭、數學、方框、符號、日文假名、全形
 FONT_EXTRA_RANGES = (

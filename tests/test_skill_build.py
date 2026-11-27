@@ -267,14 +267,25 @@ def test_built_folder_only_has_gemini_supported_file_types(real_build):
     assert not unsupported, unsupported
 
 
-def test_built_folder_has_no_empty_or_oversized_files(real_build):
-    """Gemini 上傳：0 位元組檔案可能失敗，單檔大小上限未公布，所以每個檔案都保持小於 1 MB。"""
+GEMINI_MAX_ITEMS = 100  # Gemini 技能包上限：檔案＋資料夾共 100 個項目、總大小 100 MB
+GEMINI_MAX_BYTES = 100 * 1024 * 1024
+
+
+def test_built_folder_has_no_empty_files(real_build):
+    """Gemini 上傳遇到 0 位元組檔案可能失敗。"""
     _, out = real_build
     root = out / SKILL_NAME
     empty = [str(p.relative_to(root)) for p in root.rglob("*") if p.is_file() and p.stat().st_size == 0]
-    big = [str(p.relative_to(root)) for p in root.rglob("*") if p.is_file() and p.stat().st_size > 1_000_000]
     assert not empty, empty
-    assert not big, big
+
+
+def test_built_folder_stays_within_gemini_limits(real_build):
+    """項目數（含資料夾）超過 100 會被 Gemini 以「上傳技能時發生錯誤」退回；留 5 個項目的餘裕。"""
+    _, out = real_build
+    root = out / SKILL_NAME
+    items = list(root.rglob("*"))
+    assert len(items) <= GEMINI_MAX_ITEMS - 5, len(items)
+    assert sum(p.stat().st_size for p in items if p.is_file()) < GEMINI_MAX_BYTES
 
 
 def test_packed_fonts_restore_to_loadable_ttf(real_build, tmp_path):
