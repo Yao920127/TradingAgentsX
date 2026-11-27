@@ -346,6 +346,15 @@ class PDFGenerator:
     def _fn(self) -> str:
         return self._font_name
 
+    # 行高縮放比例：避免少量文字被擠到新的一頁（見 _build_analyst_section）
+    _line_scale: float = 1.0
+    # 章節最後一頁至少要有這麼多內容（mm），否則視為孤頁
+    _MIN_TAIL_MM = 45
+    _COMPACT_SCALES = (1.0, 0.97, 0.94, 0.91, 0.88, 0.85)
+
+    def _lh(self, height: float) -> float:
+        return height * self._line_scale
+
     @staticmethod
     def _hex_to_rgb(hex_color: str):
         h = hex_color.lstrip('#')
@@ -588,7 +597,7 @@ class PDFGenerator:
             with pdf.table(
                 width=pdf.epw, # type: ignore
                 col_widths=tuple([1] * num_cols),  # equal proportional widths
-                line_height=5,
+                line_height=self._lh(5),
                 borders_layout="ALL",
                 first_row_as_headings=True,
                 headings_style=headings_style,
@@ -633,7 +642,7 @@ class PDFGenerator:
 
         pdf.set_text_color(*INK)
         pdf.set_fill_color(*WHITE)
-        pdf.ln(4)
+        pdf.ln(self._lh(4))
 
     def _add_section_line(self, pdf: FPDF, line: str):
         """Render a single line of markdown text with appropriate formatting"""
@@ -641,7 +650,7 @@ class PDFGenerator:
         line_stripped = line.strip()
 
         if not line_stripped:
-            pdf.ln(3)
+            pdf.ln(self._lh(3))
             return
 
         # Always reset to left margin before rendering
@@ -661,7 +670,7 @@ class PDFGenerator:
             content = self._clean_markdown(text[4:])
             pdf.set_font(fn, 'B', size=11)
             pdf.set_text_color(*NAVY_SOFT)
-            pdf.multi_cell(w, 6, content, align='L')
+            pdf.multi_cell(w, self._lh(6), content, align='L')
             pdf.ln(1)
             pdf.set_text_color(*INK)
         elif text.startswith('## '):
@@ -669,7 +678,7 @@ class PDFGenerator:
             pdf.ln(2)
             pdf.set_font(fn, 'B', size=13)
             pdf.set_text_color(*NAVY)
-            pdf.multi_cell(w, 7, content, align='L')
+            pdf.multi_cell(w, self._lh(7), content, align='L')
             pdf.ln(2)
             pdf.set_text_color(*INK)
         elif text.startswith('# '):
@@ -677,7 +686,7 @@ class PDFGenerator:
             pdf.ln(3)
             pdf.set_font(fn, 'B', size=15)
             pdf.set_text_color(*NAVY)
-            pdf.multi_cell(w, 8, content, align='L')
+            pdf.multi_cell(w, self._lh(8), content, align='L')
             y = pdf.get_y()
             pdf.set_draw_color(*RULE_GRAY)
             pdf.line(pdf.l_margin, y, pdf.l_margin + pdf.epw, y)
@@ -701,7 +710,7 @@ class PDFGenerator:
             orig_left = pdf.l_margin
             pdf.set_left_margin(orig_left + BULLET_INDENT)
             pdf.set_x(orig_left + BULLET_INDENT)
-            pdf.multi_cell(pdf.epw, 5.5, '\u2022 ' + content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
+            pdf.multi_cell(pdf.epw, self._lh(5.5), '\u2022 ' + content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
             pdf.set_left_margin(orig_left)
             pdf.set_x(orig_left)
         else:
@@ -716,11 +725,11 @@ class PDFGenerator:
                 orig_left = pdf.l_margin
                 pdf.set_left_margin(orig_left + NUM_INDENT)
                 pdf.set_x(orig_left + NUM_INDENT)
-                pdf.multi_cell(pdf.epw, 5.5, content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
+                pdf.multi_cell(pdf.epw, self._lh(5.5), content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
                 pdf.set_left_margin(orig_left)
                 pdf.set_x(orig_left)
             else:
-                pdf.multi_cell(w, 5.5, content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
+                pdf.multi_cell(w, self._lh(5.5), content, align='L', wrapmode='CHAR', markdown=True) # type: ignore
 
     # ------------------------------------------------------------------
     # Price chart (unchanged from original)
@@ -1084,7 +1093,44 @@ class PDFGenerator:
     def _build_analyst_section(self, pdf: _ReportPDF, analyst_name: str,
                                 ticker: str, analysis_date: str,
                                 report_content: str):
-        """Analyst report page"""
+        """Analyst report page.
+
+        若章節最後一頁只剩少量內容（例如單一標點或表格尾巴），
+        先在暫存 PDF 試排，逐步縮小行高直到不再產生孤頁，再正式輸出。
+        """
+        scale = self._pick_line_scale(analyst_name, ticker, analysis_date, report_content)
+        previous = self._line_scale
+        self._line_scale = scale
+        try:
+            self._render_analyst_section(pdf, analyst_name, ticker, analysis_date, report_content)
+        finally:
+            self._line_scale = previous
+
+    def _pick_line_scale(self, analyst_name: str, ticker: str, analysis_date: str,
+                         report_content: str) -> float:
+        """回傳不會產生孤頁的最大行高比例；都不行就選頁數最少者。"""
+        previous = self._line_scale
+        best = (None, 1.0)  # (pages, scale)
+        try:
+            for scale in self._COMPACT_SCALES:
+                self._line_scale = scale
+                scratch = self._new_pdf()
+                start_page = scratch.page + 1
+                self._render_analyst_section(scratch, analyst_name, ticker,
+                                             analysis_date, report_content)
+                pages = scratch.page - start_page + 1
+                tail = scratch.get_y() - scratch.t_margin
+                if pages == 1 or tail >= self._MIN_TAIL_MM:
+                    return scale
+                if best[0] is None or pages < best[0]:
+                    best = (pages, scale)
+        finally:
+            self._line_scale = previous
+        return best[1]
+
+    def _render_analyst_section(self, pdf: _ReportPDF, analyst_name: str,
+                                ticker: str, analysis_date: str,
+                                report_content: str):
         pdf.add_page(kind='content')
         self._title_block(pdf, f'{ticker}  ·  {analysis_date}', analyst_name)
         pdf.set_text_color(*INK)
@@ -1098,14 +1144,14 @@ class PDFGenerator:
             line_stripped = line.strip()
 
             if not line_stripped:
-                pdf.ln(2)
+                pdf.ln(self._lh(2))
                 i += 1
                 continue
 
             if '|' in line_stripped and not line_stripped.startswith('#'):
                 table_data, end_idx = self._parse_markdown_table(lines, i)
                 if table_data and len(table_data) > 1:
-                    pdf.ln(2)
+                    pdf.ln(self._lh(2))
                     self._add_table(pdf, table_data)
                     i = end_idx
                     continue
