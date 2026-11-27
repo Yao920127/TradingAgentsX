@@ -155,7 +155,7 @@ python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date 
 |---|---|
 | 0 | 成功，stdout JSON 的 `pdf` 是檔案路徑；`missing_reports` 裡**使用者沒選的分析師屬預期**，不必提；其餘（預期要有卻缺少的）要告知使用者 |
 | 2 | `reports/` 沒有報告，檢查是否漏存檔 |
-| 4 | 找不到或無法還原中文字型（`assets/NotoSerifTC-Regular.b64.txt`）；改用 `--lang en`，並告知原因 |
+| 4 | 找不到或無法還原中文字型（`assets/NotoSerifTC-Regular.b64.part01.txt` 等字型壓縮檔）；改用 `--lang en`，並告知原因 |
 | 5 | `price_data.json` 格式錯，回第 3 節重做 |
 | 7 | 辯論發言次數與 depth 不符（stderr 會說明哪個檔、缺哪幾次）；回第 6／7 節繼續辯論補足、補上標記，再重跑，**不可改標記或降低 depth 來過關** |
 

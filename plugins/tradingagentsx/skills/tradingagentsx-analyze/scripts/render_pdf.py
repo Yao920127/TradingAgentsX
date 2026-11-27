@@ -142,27 +142,31 @@ FONT_PACK_SUFFIX = ".b64.txt"
 
 
 def _unpack_fonts(assets: Path) -> Optional[Path]:
-    """把 assets/*.b64.txt（zlib＋base64 的字型）還原成暫存資料夾裡的 .ttf。
+    """把 assets/NotoSerifTC-<樣式>.b64.partNN.txt（zlib＋base64 的字型，切成多份）還原成暫存資料夾的 .ttf。
 
-    Gemini 技能上傳只收 PDF/CSV/PY/TXT/MD，所以字型以文字檔附帶；沒有壓縮包就回傳 None。
+    Gemini 技能上傳只收文字類副檔名，所以字型以文字檔附帶；沒有壓縮包就回傳 None。
     """
-    packs = sorted(assets.glob(f"NotoSerifTC-*{FONT_PACK_SUFFIX}"))
-    if not packs:
+    parts: dict[str, list[Path]] = {}
+    for pack in sorted(assets.glob(f"NotoSerifTC-*{FONT_PACK_SUFFIX[:-4]}.part*.txt")):
+        parts.setdefault(pack.name.split(FONT_PACK_SUFFIX[:-4])[0], []).append(pack)
+    if not parts:
         return None
-    signature = "|".join(f"{pack.name}:{pack.stat().st_size}" for pack in packs)
+    signature = "|".join(f"{p.name}:{p.stat().st_size}" for group in parts.values() for p in group)
     cache = Path(tempfile.gettempdir()) / f"tradingagentsx-fonts-{hashlib.sha1(signature.encode()).hexdigest()[:12]}"
+    style = ""
     try:
         cache.mkdir(parents=True, exist_ok=True)
-        for pack in packs:
-            target = cache / f"{pack.name[:-len(FONT_PACK_SUFFIX)]}.ttf"
+        for style, group in parts.items():
+            target = cache / f"{style}.ttf"
             if target.is_file() and target.stat().st_size > 0:
                 continue
-            data = zlib.decompress(base64.b64decode(pack.read_text(encoding="ascii")))
+            encoded = "".join(p.read_text(encoding="ascii") for p in group)
+            data = zlib.decompress(base64.b64decode(encoded))
             partial = target.with_suffix(f".tmp{os.getpid()}")
             partial.write_bytes(data)
             os.replace(partial, target)
     except (OSError, ValueError, zlib.error) as exc:
-        raise RenderError(4, f"字型壓縮檔 {pack.name} 無法還原：{exc}") from exc
+        raise RenderError(4, f"字型壓縮檔 {style} 無法還原：{exc}") from exc
     return cache
 
 

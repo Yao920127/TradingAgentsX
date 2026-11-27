@@ -11,7 +11,7 @@
   references/prompts/<lang>/*.md    由 tradingagents.agents.prompts 產生（12 個 agent＋共用＋摘要）
   vendor/pdf_generator.py           backend/app/services/pdf_generator.py 原樣複製
   vendor/tradingagents/             dataflows 與其內部相依（default_config、utils/toon_converter）
-  assets/NotoSerifTC-{Regular,Bold}.b64.txt  繁中 PDF 字型（容器沒有可用的 CJK 字型）。
+  assets/NotoSerifTC-{Regular,Bold}.b64.partNN.txt  繁中 PDF 字型（容器沒有可用的 CJK 字型）。
                                     為符合 Gemini 技能上傳只收 PDF/CSV/PY/TXT/MD 的限制，
                                     字型裁成 Big5 字集後以 zlib＋base64 存成 .txt，
                                     render_pdf.py 執行時還原成暫存的 .ttf
@@ -49,6 +49,8 @@ BUILD_MARKER = "skill-build.txt"  # Gemini 上傳只收 PDF/CSV/PY/TXT/MD，標�
 LEGACY_BUILD_MARKERS = (".skill-build",)  # 舊版產物的標記檔，仍視為先前建置的產物
 FONT_PACK_SUFFIX = ".b64.txt"
 FONT_PACK_WRAP = 100
+FONT_PACK_LINES_PER_PART = 6900  # 每份約 0.7 MB；Gemini 對單一檔案大小的上限未公布，切小較保險
+EMPTY_FILE_PLACEHOLDER = "# (intentionally empty)\n"  # Gemini 上傳遇到 0 位元組檔案可能失敗
 # 字型保留的 Unicode 範圍（除了 Big5 字集之外）：拉丁、標點、箭頭、數學、方框、符號、日文假名、全形
 FONT_EXTRA_RANGES = (
     (0x20, 0x7E), (0xA0, 0xFF), (0x2000, 0x206F), (0x2190, 0x21FF), (0x2200, 0x22FF),
@@ -57,7 +59,7 @@ FONT_EXTRA_RANGES = (
 )
 DEFAULT_PLUGIN_DIR = REPO_ROOT / "plugins" / "tradingagentsx"
 PLUGIN_NAME = "tradingagentsx"
-PLUGIN_VERSION = "0.1.9"
+PLUGIN_VERSION = "0.2.0"
 PLUGIN_MANIFEST = {
     "name": PLUGIN_NAME,
     "description": "TradingAgentsX 12 位 AI 分析師股票分析流程（美股／台股）：分析、辯論、最終決策與 PDF 報告。"
@@ -265,8 +267,19 @@ def copy_fonts(target: Path, font_dir: Path) -> None:
     assets.mkdir(exist_ok=True)
     for name in FONT_FILES:
         source = _require(Path(font_dir) / name, f"字型 {name}")
-        pack_name = f"{Path(name).stem}{FONT_PACK_SUFFIX}"
-        (assets / pack_name).write_text(pack_font(source), encoding="ascii")
+        lines = pack_font(source).splitlines(keepends=True)
+        for index in range(0, len(lines), FONT_PACK_LINES_PER_PART):
+            part = index // FONT_PACK_LINES_PER_PART + 1
+            part_name = f"{Path(name).stem}{FONT_PACK_SUFFIX[:-4]}.part{part:02d}.txt"
+            (assets / part_name).write_text("".join(lines[index:index + FONT_PACK_LINES_PER_PART]),
+                                            encoding="ascii")
+
+
+def fill_empty_files(target: Path) -> None:
+    """0 位元組的 .py（如 __init__.py）補一行註解，避免 Gemini 上傳失敗。"""
+    for path in target.rglob("*.py"):
+        if path.is_file() and path.stat().st_size == 0:
+            path.write_text(EMPTY_FILE_PLACEHOLDER, encoding="utf-8")
 
 
 def make_zip(folder: Path, zip_path: Path) -> int:
@@ -304,6 +317,7 @@ def assemble_skill(source: Path, target: Path, include_fonts: bool, fonts: Path)
     if include_fonts:
         copy_fonts(target, fonts)
     (target / "requirements.txt").write_text(REQUIREMENTS, encoding="utf-8")
+    fill_empty_files(target)
     return prompt_files
 
 

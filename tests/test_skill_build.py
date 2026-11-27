@@ -78,7 +78,7 @@ def test_zip_contains_expected_files(built):
         names = set(zf.namelist())
     expected = [
         "SKILL.md", "scripts/tool.py", "requirements.txt",
-        "assets/NotoSerifTC-Regular.b64.txt", "assets/NotoSerifTC-Bold.b64.txt",
+        "assets/NotoSerifTC-Regular.b64.part01.txt", "assets/NotoSerifTC-Bold.b64.part01.txt",
         "vendor/pdf_generator.py",
         "vendor/tradingagents/default_config.py",
         "vendor/tradingagents/utils/toon_converter.py",
@@ -267,6 +267,16 @@ def test_built_folder_only_has_gemini_supported_file_types(real_build):
     assert not unsupported, unsupported
 
 
+def test_built_folder_has_no_empty_or_oversized_files(real_build):
+    """Gemini 上傳：0 位元組檔案可能失敗，單檔大小上限未公布，所以每個檔案都保持小於 1 MB。"""
+    _, out = real_build
+    root = out / SKILL_NAME
+    empty = [str(p.relative_to(root)) for p in root.rglob("*") if p.is_file() and p.stat().st_size == 0]
+    big = [str(p.relative_to(root)) for p in root.rglob("*") if p.is_file() and p.stat().st_size > 1_000_000]
+    assert not empty, empty
+    assert not big, big
+
+
 def test_packed_fonts_restore_to_loadable_ttf(real_build, tmp_path):
     """壓縮文字檔還原後必須是可用的 TTF，且仍含常用繁中字。"""
     import base64
@@ -274,7 +284,9 @@ def test_packed_fonts_restore_to_loadable_ttf(real_build, tmp_path):
     from fontTools.ttLib import TTFont
     _, out = real_build
     for style in ("Regular", "Bold"):
-        pack = (out / SKILL_NAME / "assets" / f"NotoSerifTC-{style}.b64.txt").read_text(encoding="ascii")
+        parts = sorted((out / SKILL_NAME / "assets").glob(f"NotoSerifTC-{style}.b64.part*.txt"))
+        assert len(parts) > 1
+        pack = "".join(part.read_text(encoding="ascii") for part in parts)
         ttf = tmp_path / f"{style}.ttf"
         ttf.write_bytes(zlib.decompress(base64.b64decode(pack)))
         cmap = TTFont(str(ttf)).getBestCmap()
@@ -345,7 +357,7 @@ def test_build_plugin_layout(bs, tmp_path):
     assert manifest["version"] and manifest["description"]
     skill = plugin_dir / "skills" / SKILL_NAME
     assert (skill / "SKILL.md").is_file()
-    assert (skill / "assets" / "NotoSerifTC-Regular.b64.txt").is_file()
+    assert (skill / "assets" / "NotoSerifTC-Regular.b64.part01.txt").is_file()
     assert (skill / "references" / "prompts" / "en" / "risk_manager.md").is_file()
     assert (skill / "vendor" / "pdf_generator.py").is_file()
     assert not list(plugin_dir.glob("*.zip"))
