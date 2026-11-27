@@ -4,16 +4,41 @@
 
 把 12 位分析師的完整流程（資料蒐集 → 四位分析師 → 多空辯論 → 風險辯論 → 最終決策 → PDF）做成 skill，由 Claude 本身擔任模型，不需要任何 LLM 金鑰。輸入股票代碼與日期即可，例如「分析 NVDA 2026-11-26」或「分析 2330 2026-11-26」。
 
-**Claude Code（plugin）**
+### Claude Code（plugin）
+
+在 Claude Code 對話框中，**一次貼一行**：
+
+1. 加入 marketplace：
 
 ```
 /plugin marketplace add Yao920127/TradingAgentsX
+```
+
+2. 安裝 plugin：
+
+```
 /plugin install tradingagentsx@tradingagentsx
 ```
 
-終端機版：`claude plugin marketplace add Yao920127/TradingAgentsX`、`claude plugin install tradingagentsx@tradingagentsx`。
+**或在一般終端機執行：**
 
-腳本模式的相依與金鑰（選用）：`pip install -r ~/.claude/plugins/.../skills/tradingagentsx-analyze/requirements.txt`；台股需環境變數 `FINMIND_API_TOKEN`，美股新聞可設 `FINNHUB_API_KEY` / `MARKETAUX_API_KEY` / `NEWSAPI_API_KEY`。缺少時該類資料會標示「資料缺口」，Claude 會自行搜尋補充。
+```bash
+claude plugin marketplace add Yao920127/TradingAgentsX
+```
+
+```bash
+claude plugin install tradingagentsx@tradingagentsx
+```
+
+**腳本模式的相依與金鑰（選用）**
+
+```bash
+pip install -r ~/.claude/plugins/.../skills/tradingagentsx-analyze/requirements.txt
+```
+
+台股需環境變數 `FINMIND_API_TOKEN`，美股新聞可設 `FINNHUB_API_KEY` / `MARKETAUX_API_KEY` / `NEWSAPI_API_KEY`。缺少時該類資料會標示「資料缺口」，Claude 會自行搜尋補充。
+
+### Claude app
 
 **Claude app（下載 zip 上傳）**：[下載 tradingagentsx-analyze.zip](https://github.com/Yao920127/TradingAgentsX/releases/latest/download/tradingagentsx-analyze.zip)（約 12 MB，內含繁中字型），到 設定 → 功能 → Skills 上傳。所有版本見 [Releases](https://github.com/Yao920127/TradingAgentsX/releases)。Claude app 容器連不到資料來源，改由 Claude 用自己的網頁工具蒐集資料。
 

@@ -4,16 +4,41 @@
 
 The full 12-agent flow (data collection → four analysts → bull/bear debate → risk debate → final decision → PDF) is packaged as a skill. Claude itself acts as the model, so no LLM API key is needed. Just give a ticker and a date, e.g. "analyze NVDA on 2026-11-26" or "analyze 2330 on 2026-11-26".
 
-**Claude Code (plugin)**
+### Claude Code (plugin)
+
+In the Claude Code prompt, paste **one line at a time**:
+
+1. Add the marketplace:
 
 ```
 /plugin marketplace add Yao920127/TradingAgentsX
+```
+
+2. Install the plugin:
+
+```
 /plugin install tradingagentsx@tradingagentsx
 ```
 
-CLI: `claude plugin marketplace add Yao920127/TradingAgentsX`, `claude plugin install tradingagentsx@tradingagentsx`.
+**Or from a regular terminal:**
 
-Optional script-mode dependencies and keys: `pip install -r` the skill's `requirements.txt`; Taiwan stocks need `FINMIND_API_TOKEN`; US news can use `FINNHUB_API_KEY` / `MARKETAUX_API_KEY` / `NEWSAPI_API_KEY`. Missing data is flagged as a data gap and Claude searches the web to fill it.
+```bash
+claude plugin marketplace add Yao920127/TradingAgentsX
+```
+
+```bash
+claude plugin install tradingagentsx@tradingagentsx
+```
+
+**Optional script-mode dependencies and keys**
+
+```bash
+pip install -r ~/.claude/plugins/.../skills/tradingagentsx-analyze/requirements.txt
+```
+
+Taiwan stocks need `FINMIND_API_TOKEN`; US news can use `FINNHUB_API_KEY` / `MARKETAUX_API_KEY` / `NEWSAPI_API_KEY`. Missing data is flagged as a data gap and Claude searches the web to fill it.
+
+### Claude app
 
 **Claude app (download and upload the zip)**: [download tradingagentsx-analyze.zip](https://github.com/Yao920127/TradingAgentsX/releases/latest/download/tradingagentsx-analyze.zip) (about 12 MB, includes the Traditional Chinese font), then upload it under Settings → Capabilities → Skills. All versions are on the [Releases](https://github.com/Yao920127/TradingAgentsX/releases) page. The Claude app sandbox cannot reach market-data hosts, so Claude collects data with its own web tools.
 
