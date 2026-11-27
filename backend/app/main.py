@@ -7,13 +7,12 @@ from starlette.middleware.base import BaseHTTPMiddleware # type: ignore
 from pydantic import ValidationError # type: ignore
 import logging
 import sys
-import time
 from pathlib import Path
-from collections import defaultdict
 from datetime import datetime, timedelta
 
 from backend.app.core.config import settings
 from backend.app.core.cors import setup_cors
+from backend.app.core.rate_limit import RateLimitMiddleware
 from backend.app.api.routes import router
 from backend.app.api.auth import router as auth_router
 from backend.app.api.user import router as user_router
@@ -39,61 +38,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-        
-        return response
-
-
-class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Simple in-memory rate limiting middleware"""
-    
-    def __init__(self, app, max_requests: int = 30, window_seconds: int = 60):
-        super().__init__(app)
-        self.max_requests = max_requests
-        self.window_seconds = window_seconds
-        self.requests: dict[str, list[float]] = defaultdict(list)
-    
-    async def dispatch(self, request: Request, call_next):
-        # Skip rate limiting for health checks
-        if request.url.path == "/api/health":
-            return await call_next(request)
-        
-        # Get client IP
-        client_ip = request.client.host if request.client else "unknown"
-        forwarded_for = request.headers.get("X-Forwarded-For")
-        if forwarded_for:
-            client_ip = forwarded_for.split(",")[0].strip()
-        
-        # Clean old requests
-        now = time.time()
-        cutoff = now - self.window_seconds
-        self.requests[client_ip] = [
-            t for t in self.requests[client_ip] if t > cutoff
-        ]
-        
-        # Check rate limit
-        if len(self.requests[client_ip]) >= self.max_requests:
-            retry_after = int(self.window_seconds - (now - self.requests[client_ip][0]))
-            return JSONResponse(
-                status_code=429,
-                content={
-                    "error": "Too many requests",
-                    "message": f"Rate limit exceeded. Please wait {retry_after} seconds.",
-                    "retry_after": retry_after,
-                },
-                headers={"Retry-After": str(retry_after)},
-            )
-        
-        # Record this request
-        self.requests[client_ip].append(now)
-        
-        # Process request
-        response = await call_next(request)
-        
-        # Add rate limit headers
-        remaining = self.max_requests - len(self.requests[client_ip])
-        response.headers["X-RateLimit-Limit"] = str(self.max_requests)
-        response.headers["X-RateLimit-Remaining"] = str(max(0, remaining))
-        response.headers["X-RateLimit-Reset"] = str(int(now + self.window_seconds))
         
         return response
 

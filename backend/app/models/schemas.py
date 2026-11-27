@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field, field_validator # type: ignore
 from typing import List, Optional, Dict, Any, Literal, Union
 from datetime import date
 
+from backend.app.core.url_guard import validate_optional_outbound_url
+
 
 class AnalysisRequest(BaseModel):
     """Request model for trading analysis"""
@@ -49,6 +51,12 @@ class AnalysisRequest(BaseModel):
         description="Base URL for Embedding Model (only used for OpenAI embeddings)"
     )
     embedding_api_key: Optional[str] = Field(None, description="API Key for Embedding Model (only used for OpenAI embeddings)", min_length=0)
+
+    @field_validator("openai_base_url", "quick_think_base_url", "deep_think_base_url", "embedding_base_url")
+    @classmethod
+    def _check_base_urls(cls, v: Optional[str]) -> Optional[str]:
+        return validate_optional_outbound_url(v)
+
     embedding_model: Optional[str] = Field(
         default="all-mpnet-base-v2",
         description="Embedding model: 'all-mpnet-base-v2' (local, no API key), 'text-embedding-3-small' (OpenAI), etc."
@@ -227,6 +235,11 @@ class ChatRequest(BaseModel):
         default="https://api.openai.com/v1",
         description="LLM API base URL"
     )
+
+    @field_validator("base_url")
+    @classmethod
+    def _check_base_url(cls, v: str) -> str:
+        return validate_optional_outbound_url(v) or v
     language: Optional[Literal["en", "zh-TW"]] = Field(
         default="zh-TW",
         description="Response language"
@@ -251,6 +264,11 @@ class ValidateKeysRequest(BaseModel):
     qwen_api_key: Optional[str] = Field(None, min_length=0)
     tauric_api_key: Optional[str] = Field(None, min_length=0)
     custom_base_url: Optional[str] = Field(None, min_length=0)
+
+    @field_validator("custom_base_url")
+    @classmethod
+    def _check_custom_base_url(cls, v: Optional[str]) -> Optional[str]:
+        return validate_optional_outbound_url(v)
     custom_api_key: Optional[str] = Field(None, min_length=0)
     alpha_vantage_api_key: Optional[str] = Field(None, min_length=0)
     finmind_api_key: Optional[str] = Field(None, min_length=0)
