@@ -8,6 +8,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { clearApiSettings, saveApiSettingsAsync } from "@/lib/storage";
 import { clearAllReports, bulkSaveReports } from "@/lib/reports-db";
 import { getCloudSettings, getCloudReports } from "@/lib/user-api";
+import { createOAuthState } from "@/lib/oauth-state";
 
 // User interface
 export interface User {
@@ -167,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       scope: scope,
       access_type: "offline",
       prompt: "consent",
+      state: createOAuthState(),
     });
 
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

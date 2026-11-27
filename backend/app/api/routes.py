@@ -595,7 +595,7 @@ async def chat_with_report(request: ChatRequest):
     Returns:
         ChatResponse: Assistant's reply
     """
-    from backend.app.services.chat_service import chat_with_reports
+    from backend.app.services.chat_service import ChatServiceError, GENERIC_CHAT_ERROR, chat_with_reports
     
     try:
         reply = await chat_with_reports(
@@ -612,12 +612,12 @@ async def chat_with_report(request: ChatRequest):
         
         return ChatResponse(reply=reply)
         
-    except Exception as e:
+    except ChatServiceError as e:
         logger.error(f"Chat failed: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Chat failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+    except Exception as e:
+        logger.error(f"Chat failed unexpectedly: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Chat failed: {GENERIC_CHAT_ERROR}")
 
 
 @router.post("/validate-keys", response_model=ValidateKeysResponse)

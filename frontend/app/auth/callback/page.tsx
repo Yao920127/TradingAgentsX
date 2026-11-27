@@ -4,9 +4,10 @@
  */
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { consumeOAuthState } from "@/lib/oauth-state";
 
 function AuthCallbackContent() {
   const router = useRouter();
@@ -14,8 +15,13 @@ function AuthCallbackContent() {
   const { setAuthFromCallback } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
+  const handledRef = useRef(false);
 
   useEffect(() => {
+    // code 與 state 都只能使用一次；避免 StrictMode 重複執行造成誤判
+    if (handledRef.current) return;
+    handledRef.current = true;
+
     const handleCallback = async () => {
       // Check if we have a token directly (backend-handled flow).
       // The backend sends it in the URL fragment so it never reaches server logs;
@@ -35,6 +41,12 @@ function AuthCallbackContent() {
       if (!code) {
         const errorParam = searchParams.get("error");
         setError(errorParam || "No authorization code received");
+        setIsProcessing(false);
+        return;
+      }
+
+      if (!consumeOAuthState(searchParams.get("state"))) {
+        setError("登入驗證失敗（state 不符），請重新登入");
         setIsProcessing(false);
         return;
       }

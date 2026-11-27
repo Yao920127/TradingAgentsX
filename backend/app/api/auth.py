@@ -103,10 +103,8 @@ async def google_callback(
         )
         
         if token_response.status_code != 200:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Failed to exchange code: {token_response.text}"
-            )
+            logger.warning("Google code exchange failed: status=%s body=%s", token_response.status_code, token_response.text[:300])
+            raise HTTPException(status_code=400, detail="Failed to exchange authorization code")
         
         tokens = token_response.json()
         access_token = tokens.get("access_token")
@@ -199,11 +197,8 @@ async def exchange_google_token(
         )
         
         if token_response.status_code != 200:
-            error_detail = token_response.json() if token_response.headers.get("content-type", "").startswith("application/json") else token_response.text
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Failed to exchange code: {error_detail}"
-            )
+            logger.warning("Google code exchange failed: status=%s body=%s", token_response.status_code, token_response.text[:300])
+            raise HTTPException(status_code=400, detail="Failed to exchange authorization code")
         
         tokens = token_response.json()
         access_token = tokens.get("access_token")

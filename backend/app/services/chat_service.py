@@ -109,6 +109,13 @@ def _flatten_reports(reports: Dict[str, Any], language: str = "zh-TW") -> str:
     return "\n\n".join(sections) if sections else "(No reports available)"
 
 
+GENERIC_CHAT_ERROR = "對話服務暫時無法使用，請稍後再試。"
+
+
+class ChatServiceError(Exception):
+    """可安全顯示給使用者的對話錯誤訊息（不含上游原文）。"""
+
+
 async def chat_with_reports(
     message: str,
     reports: Dict[str, Any],
@@ -202,12 +209,12 @@ async def chat_with_reports(
         
         # Provide user-friendly error messages
         if "maximum context length" in error_msg.lower() or "token" in error_msg.lower():
-            raise Exception(f"報告內容過長，超出模型 token 限制。請嘗試縮短問題或清除對話歷史後重試。")
+            raise ChatServiceError(f"報告內容過長，超出模型 token 限制。請嘗試縮短問題或清除對話歷史後重試。")
         elif "rate_limit" in error_msg.lower() or "429" in error_msg:
-            raise Exception(f"API 速率限制，請稍後再試。")
+            raise ChatServiceError(f"API 速率限制，請稍後再試。")
         elif "401" in error_msg or "api_key" in error_msg.lower():
-            raise Exception(f"API Key 無效或已過期，請檢查設定。")
+            raise ChatServiceError(f"API Key 無效或已過期，請檢查設定。")
         elif "timeout" in error_msg.lower():
-            raise Exception(f"請求超時，請稍後再試。")
+            raise ChatServiceError(f"請求超時，請稍後再試。")
         else:
-            raise
+            raise ChatServiceError(GENERIC_CHAT_ERROR) from None

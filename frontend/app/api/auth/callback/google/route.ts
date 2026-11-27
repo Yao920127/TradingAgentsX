@@ -40,8 +40,12 @@ export async function GET(request: NextRequest) {
 
   // Redirect to callback page with code
   if (code) {
+    const state = searchParams.get("state") ?? "";
     return NextResponse.redirect(
-      new URL(`/auth/callback?code=${encodeURIComponent(code)}`, baseUrl)
+      new URL(
+        `/auth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
+        baseUrl
+      )
     );
   }
 

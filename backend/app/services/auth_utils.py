@@ -1,16 +1,52 @@
 """
 Authentication utilities - JWT and encryption
 """
+import logging
 import os
 import jwt # type: ignore
 import hashlib
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Mapping
 from cryptography.fernet import Fernet # type: ignore
 import base64
 
+logger = logging.getLogger(__name__)
+
+DEFAULT_DEV_JWT_SECRET = "dev-secret-please-change-in-production"
+MIN_PRODUCTION_SECRET_LENGTH = 32
+_PRODUCTION_ENV_VALUES = {"production", "prod"}
+
+
+def _is_production(env: Mapping[str, str]) -> bool:
+    if env.get("RAILWAY_ENVIRONMENT"):
+        return True
+    return any(env.get(key, "").strip().lower() in _PRODUCTION_ENV_VALUES for key in ("ENVIRONMENT", "APP_ENV", "ENV"))
+
+
+def resolve_jwt_secret(env: Mapping[str, str]) -> str:
+    """取得 JWT 簽章金鑰。
+
+    正式環境若沒設定、等於公開的預設值或長度不足，直接拒絕啟動，避免任何人都能偽造 token
+    （使用者設定的加密金鑰也由它衍生）。開發環境保留預設值，但會印出警告。
+    """
+    secret = env.get("JWT_SECRET", "")
+    is_default = not secret or secret == DEFAULT_DEV_JWT_SECRET
+
+    if _is_production(env):
+        if is_default or len(secret) < MIN_PRODUCTION_SECRET_LENGTH:
+            raise RuntimeError(
+                f"正式環境必須設定至少 {MIN_PRODUCTION_SECRET_LENGTH} 字元、且不同於預設值的 JWT_SECRET"
+            )
+        return secret
+
+    if is_default:
+        logger.warning("JWT_SECRET 未設定，使用公開的開發用預設值；請勿用於正式環境")
+        return DEFAULT_DEV_JWT_SECRET
+    return secret
+
+
 # JWT Configuration
-JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret-please-change-in-production")
+JWT_SECRET = resolve_jwt_secret(os.environ)
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24 * 7  # 7 days
 
