@@ -349,7 +349,7 @@ class PDFGenerator:
     # 行高縮放比例：避免少量文字被擠到新的一頁（見 _build_analyst_section）
     _line_scale: float = 1.0
     # 章節最後一頁至少要有這麼多內容（mm），否則視為孤頁
-    _MIN_TAIL_MM = 45
+    _MIN_TAIL_MM = 100
     _COMPACT_SCALES = (1.0, 0.97, 0.94, 0.91, 0.88, 0.85)
 
     def _lh(self, height: float) -> float:
@@ -1128,6 +1128,23 @@ class PDFGenerator:
             self._line_scale = previous
         return best[1]
 
+    def _table_height(self, table_data: list) -> float:
+        """在暫存 PDF 量測表格高度（mm）；超過一頁則回傳 inf。"""
+        scratch = self._new_pdf()
+        scratch.add_page(kind='content')
+        top = scratch.get_y()
+        self._add_table(scratch, table_data)
+        if scratch.page > 1:
+            return float('inf')
+        return scratch.get_y() - top
+
+    def _keep_table_on_one_page(self, pdf: _ReportPDF, table_data: list):
+        """表格放得進一頁卻會被切開時，整張換到下一頁，避免只剩幾列的尾頁。"""
+        height = self._table_height(table_data)
+        remaining = pdf.h - pdf.b_margin - pdf.get_y()
+        if height != float('inf') and height > remaining:
+            pdf.add_page(kind='content')
+
     def _render_analyst_section(self, pdf: _ReportPDF, analyst_name: str,
                                 ticker: str, analysis_date: str,
                                 report_content: str):
@@ -1152,6 +1169,7 @@ class PDFGenerator:
                 table_data, end_idx = self._parse_markdown_table(lines, i)
                 if table_data and len(table_data) > 1:
                     pdf.ln(self._lh(2))
+                    self._keep_table_on_one_page(pdf, table_data)
                     self._add_table(pdf, table_data)
                     i = end_idx
                     continue

@@ -424,6 +424,36 @@ claude plugin marketplace add Yao920127/TradingAgentsX
 claude plugin install tradingagentsx@tradingagentsx
 ```
 
+**Updating to a new version (no need to uninstall first)**, paste one line at a time in the Claude Code prompt:
+
+```
+/plugin marketplace update tradingagentsx
+```
+
+```
+/plugin update tradingagentsx@tradingagentsx
+```
+
+Or from a regular terminal:
+
+```bash
+claude plugin marketplace update tradingagentsx
+```
+
+```bash
+claude plugin update tradingagentsx@tradingagentsx
+```
+
+**Restart Claude Code** after updating so the new version loads, and check the version with `/plugin` or `claude plugin list`. If it still shows the old version, uninstall and reinstall:
+
+```bash
+claude plugin uninstall tradingagentsx@tradingagentsx
+```
+
+```bash
+claude plugin install tradingagentsx@tradingagentsx
+```
+
 **Optional script-mode dependencies and keys**
 
 ```bash

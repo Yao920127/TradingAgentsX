@@ -30,6 +30,36 @@ claude plugin marketplace add Yao920127/TradingAgentsX
 claude plugin install tradingagentsx@tradingagentsx
 ```
 
+**更新到新版（不需要先刪除）**，在 Claude Code 對話框一次貼一行：
+
+```
+/plugin marketplace update tradingagentsx
+```
+
+```
+/plugin update tradingagentsx@tradingagentsx
+```
+
+或在一般終端機：
+
+```bash
+claude plugin marketplace update tradingagentsx
+```
+
+```bash
+claude plugin update tradingagentsx@tradingagentsx
+```
+
+更新後**重開 Claude Code** 才會載入新版，可用 `/plugin` 或 `claude plugin list` 確認版本。若仍停在舊版，改成解除安裝再安裝：
+
+```bash
+claude plugin uninstall tradingagentsx@tradingagentsx
+```
+
+```bash
+claude plugin install tradingagentsx@tradingagentsx
+```
+
 **腳本模式的相依與金鑰（選用）**
 
 ```bash
