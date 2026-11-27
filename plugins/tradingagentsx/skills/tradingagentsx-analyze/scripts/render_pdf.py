@@ -24,12 +24,16 @@ stdout 只輸出一份 JSON 摘要；訊息與錯誤都走 stderr。
 from __future__ import annotations
 
 import argparse
+import base64
 import contextlib
+import hashlib
 import importlib.util
 import json
 import os
 import re
 import sys
+import tempfile
+import zlib
 from datetime import datetime
 from pathlib import Path
 from types import ModuleType
@@ -134,12 +138,42 @@ def _load_generator_module(path: Path) -> ModuleType:
     return module
 
 
+FONT_PACK_SUFFIX = ".b64.txt"
+
+
+def _unpack_fonts(assets: Path) -> Optional[Path]:
+    """把 assets/*.b64.txt（zlib＋base64 的字型）還原成暫存資料夾裡的 .ttf。
+
+    Gemini 技能上傳只收 PDF/CSV/PY/TXT/MD，所以字型以文字檔附帶；沒有壓縮包就回傳 None。
+    """
+    packs = sorted(assets.glob(f"NotoSerifTC-*{FONT_PACK_SUFFIX}"))
+    if not packs:
+        return None
+    signature = "|".join(f"{pack.name}:{pack.stat().st_size}" for pack in packs)
+    cache = Path(tempfile.gettempdir()) / f"tradingagentsx-fonts-{hashlib.sha1(signature.encode()).hexdigest()[:12]}"
+    try:
+        cache.mkdir(parents=True, exist_ok=True)
+        for pack in packs:
+            target = cache / f"{pack.name[:-len(FONT_PACK_SUFFIX)]}.ttf"
+            if target.is_file() and target.stat().st_size > 0:
+                continue
+            data = zlib.decompress(base64.b64decode(pack.read_text(encoding="ascii")))
+            partial = target.with_suffix(f".tmp{os.getpid()}")
+            partial.write_bytes(data)
+            os.replace(partial, target)
+    except (OSError, ValueError, zlib.error) as exc:
+        raise RenderError(4, f"字型壓縮檔 {pack.name} 無法還原：{exc}") from exc
+    return cache
+
+
 def _resolve_font_dir(font_dir: Optional[Path]) -> Optional[Path]:
-    """明確指定優先；否則用 skill 附帶的字型；都沒有就交給 pdf_generator 的預設。"""
+    """明確指定優先；否則用 skill 附帶的字型（ttf 或壓縮文字檔）；都沒有就交給 pdf_generator 的預設。"""
     if font_dir is not None:
         return font_dir
     bundled = SKILL_DIR / "assets"
-    return bundled if (bundled / FONT_FILE).is_file() else None
+    if (bundled / FONT_FILE).is_file():
+        return bundled
+    return _unpack_fonts(bundled)
 
 
 def _collect_reports(workdir: Path, module: ModuleType, lang: str) -> tuple[list[dict], list[str]]:

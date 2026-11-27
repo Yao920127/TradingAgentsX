@@ -11,7 +11,10 @@
   references/prompts/<lang>/*.md    由 tradingagents.agents.prompts 產生（12 個 agent＋共用＋摘要）
   vendor/pdf_generator.py           backend/app/services/pdf_generator.py 原樣複製
   vendor/tradingagents/             dataflows 與其內部相依（default_config、utils/toon_converter）
-  assets/NotoSerifTC-{Regular,Bold}.ttf   繁中 PDF 字型（容器沒有可用的 CJK 字型）
+  assets/NotoSerifTC-{Regular,Bold}.b64.txt  繁中 PDF 字型（容器沒有可用的 CJK 字型）。
+                                    為符合 Gemini 技能上傳只收 PDF/CSV/PY/TXT/MD 的限制，
+                                    字型裁成 Big5 字集後以 zlib＋base64 存成 .txt，
+                                    render_pdf.py 執行時還原成暫存的 .ttf
   requirements.txt                  Claude Code 腳本模式的 pip 相依
 
 --plugin 改為產生 Claude Code plugin（plugins/tradingagentsx/，需提交進 git，
@@ -25,11 +28,14 @@ zip 內容可重現（固定時間戳、排序）。stdout 只輸出一份 JSON 
 from __future__ import annotations
 
 import argparse
+import base64
+import io
 import json
 import re
 import shutil
 import sys
 import zipfile
+import zlib
 from pathlib import Path
 from typing import Any, Optional, Sequence
 
@@ -39,10 +45,19 @@ DEFAULT_OUT = REPO_ROOT / "dist"
 DEFAULT_FONT_DIR = REPO_ROOT / "Cactus_Classical_Serif,Noto_Serif_TC" / "Noto_Serif_TC" / "static"
 PDF_GENERATOR = REPO_ROOT / "backend" / "app" / "services" / "pdf_generator.py"
 FONT_FILES = ("NotoSerifTC-Regular.ttf", "NotoSerifTC-Bold.ttf")
-BUILD_MARKER = ".skill-build"
+BUILD_MARKER = "skill-build.txt"  # Gemini 上傳只收 PDF/CSV/PY/TXT/MD，標記檔也必須是 .txt
+LEGACY_BUILD_MARKERS = (".skill-build",)  # 舊版產物的標記檔，仍視為先前建置的產物
+FONT_PACK_SUFFIX = ".b64.txt"
+FONT_PACK_WRAP = 100
+# 字型保留的 Unicode 範圍（除了 Big5 字集之外）：拉丁、標點、箭頭、數學、方框、符號、日文假名、全形
+FONT_EXTRA_RANGES = (
+    (0x20, 0x7E), (0xA0, 0xFF), (0x2000, 0x206F), (0x2190, 0x21FF), (0x2200, 0x22FF),
+    (0x2460, 0x24FF), (0x2500, 0x25FF), (0x2600, 0x26FF), (0x3000, 0x30FF),
+    (0xFE30, 0xFE4F), (0xFF00, 0xFFEF),
+)
 DEFAULT_PLUGIN_DIR = REPO_ROOT / "plugins" / "tradingagentsx"
 PLUGIN_NAME = "tradingagentsx"
-PLUGIN_VERSION = "0.1.8"
+PLUGIN_VERSION = "0.1.9"
 PLUGIN_MANIFEST = {
     "name": PLUGIN_NAME,
     "description": "TradingAgentsX 12 位 AI 分析師股票分析流程（美股／台股）：分析、辯論、最終決策與 PDF 報告。"
@@ -139,7 +154,7 @@ def _require(path: Path, what: str) -> Path:
 def _prepare_output(target: Path) -> None:
     """只清除先前建置留下的資料夾，避免誤刪使用者的檔案。"""
     if target.exists():
-        if not (target / BUILD_MARKER).is_file():
+        if not any((target / marker).is_file() for marker in (BUILD_MARKER, *LEGACY_BUILD_MARKERS)):
             raise BuildError(3, f"{target} 已存在且不是先前建置的產物（缺少 {BUILD_MARKER}），不會覆寫")
         shutil.rmtree(target)
     target.mkdir(parents=True)
@@ -193,17 +208,71 @@ def copy_vendor(target: Path) -> None:
         shutil.copy2(_require(package / rel, f"tradingagents/{rel}"), destination)
 
 
+def _font_unicodes() -> list[int]:
+    """Big5 全字集（含常用與次常用字）＋標點符號等，供裁切字型用。"""
+    codepoints: set[int] = set()
+    for lead in range(0xA1, 0xFA):
+        for trail in (*range(0x40, 0x7F), *range(0xA1, 0xFF)):
+            try:
+                text = bytes([lead, trail]).decode("big5")
+            except UnicodeDecodeError:
+                continue
+            if len(text) == 1:
+                codepoints.add(ord(text))
+    for low, high in FONT_EXTRA_RANGES:
+        codepoints.update(range(low, high + 1))
+    return sorted(codepoints)
+
+
+_font_pack_cache: dict[tuple[str, int, int], str] = {}
+
+
+def pack_font(font_path: Path) -> str:
+    """把 ttf 裁成 Big5 字集，再 zlib 壓縮＋base64（每 100 字元換行）成純文字。
+
+    輸出可重現（不更新字型時間戳），同一個字型在同一次執行內只處理一次。
+    """
+    stat = font_path.stat()
+    key = (str(font_path), stat.st_size, stat.st_mtime_ns)
+    cached = _font_pack_cache.get(key)
+    if cached is not None:
+        return cached
+    try:
+        from fontTools import subset  # noqa: PLC0415
+        from fontTools.ttLib import TTFont  # noqa: PLC0415
+    except ImportError as exc:
+        raise BuildError(4, "裁切字型需要 fonttools：uv pip install fonttools") from exc
+    options = subset.Options()
+    options.layout_features = ["kern"]
+    options.notdef_outline = True
+    options.hinting = False
+    options.name_IDs = [1, 2]
+    font = TTFont(str(font_path), recalcTimestamp=False)
+    subsetter = subset.Subsetter(options)
+    subsetter.populate(unicodes=_font_unicodes())
+    subsetter.subset(font)
+    buffer = io.BytesIO()
+    font.save(buffer)
+    encoded = base64.b64encode(zlib.compress(buffer.getvalue(), 9)).decode("ascii")
+    lines = [encoded[i:i + FONT_PACK_WRAP] for i in range(0, len(encoded), FONT_PACK_WRAP)]
+    packed = "\n".join(lines) + "\n"
+    _font_pack_cache[key] = packed
+    return packed
+
+
 def copy_fonts(target: Path, font_dir: Path) -> None:
     assets = target / "assets"
     assets.mkdir(exist_ok=True)
     for name in FONT_FILES:
-        shutil.copy2(_require(Path(font_dir) / name, f"字型 {name}"), assets / name)
+        source = _require(Path(font_dir) / name, f"字型 {name}")
+        pack_name = f"{Path(name).stem}{FONT_PACK_SUFFIX}"
+        (assets / pack_name).write_text(pack_font(source), encoding="ascii")
 
 
 def make_zip(folder: Path, zip_path: Path) -> int:
     """可重現的 zip：排序、固定時間戳；回傳檔案數。"""
     root = folder.name
-    files = sorted(p for p in folder.rglob("*") if p.is_file() and p.name != BUILD_MARKER)
+    files = sorted(p for p in folder.rglob("*") if p.is_file() and p.name not in (BUILD_MARKER, *LEGACY_BUILD_MARKERS))
     dirs = sorted({d for p in files for d in p.relative_to(folder).parents if str(d) != "."})
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
         for rel in [Path()] + dirs:
