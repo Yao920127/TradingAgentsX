@@ -66,6 +66,52 @@ claude plugin uninstall tradingagentsx@tradingagentsx
 claude plugin install tradingagentsx@tradingagentsx
 ```
 
+### 用 npx 安裝（skills CLI；Claude Code、Codex、Cursor、OpenCode 等）
+
+需要 Node.js 22.20 以上。**請使用下面含 `plugins/` 路徑的網址**：`skills/` 資料夾只有原始碼（沒有提示詞、vendor 與字型），直接 `npx skills add Yao920127/TradingAgentsX` 會裝到不完整、無法執行的版本。
+
+**安裝**（預設裝在目前專案，執行後選擇要安裝到哪些 agent）：
+
+```bash
+npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze
+```
+
+全域安裝（所有專案都能用），加上 `-g`：
+
+```bash
+npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -g
+```
+
+執行後會互動詢問要安裝到哪些 agent（Claude Code、Codex、Cursor、OpenCode 等），不需要事先指定。
+
+**查看與檢查更新**：
+
+```bash
+npx skills list
+```
+
+```bash
+npx skills check
+```
+
+**更新**（指定名稱；`-p` 只更新專案、`-g` 只更新全域、`-y` 跳過確認）：
+
+```bash
+npx skills update tradingagentsx-analyze
+```
+
+**刪除**（`-g` 刪全域、`-a` 限定 agent、`-y` 跳過確認）：
+
+```bash
+npx skills remove tradingagentsx-analyze
+```
+
+```bash
+npx skills remove tradingagentsx-analyze -g
+```
+
+> 安裝位置：Claude Code 為 `.claude/skills/`（全域 `~/.claude/skills/`），其他 agent 多為 `.agents/skills/`。腳本模式的相依套件請對該目錄下的 `requirements.txt` 執行 `pip install -r`。
+
 **腳本模式的相依與金鑰（選用）**
 
 ```bash

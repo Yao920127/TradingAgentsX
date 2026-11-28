@@ -66,6 +66,52 @@ claude plugin uninstall tradingagentsx@tradingagentsx
 claude plugin install tradingagentsx@tradingagentsx
 ```
 
+### Install with npx (skills CLI; Claude Code, Codex, Cursor, OpenCode, …)
+
+Requires Node.js 22.20 or newer. **Use the URL below, which points into `plugins/`**: the `skills/` folder holds source only (no prompts, vendor or fonts), so a plain `npx skills add Yao920127/TradingAgentsX` installs an incomplete skill that cannot run.
+
+**Install** (into the current project by default; you choose which agents to install to when prompted):
+
+```bash
+npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze
+```
+
+Global install (available in every project), add `-g`:
+
+```bash
+npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -g
+```
+
+The CLI then asks which agents to install to (Claude Code, Codex, Cursor, OpenCode, …), so you do not need to specify one.
+
+**List and check for updates**:
+
+```bash
+npx skills list
+```
+
+```bash
+npx skills check
+```
+
+**Update** (by name; `-p` project only, `-g` global only, `-y` skip confirmation):
+
+```bash
+npx skills update tradingagentsx-analyze
+```
+
+**Remove** (`-g` removes the global copy, `-a` limits to one agent, `-y` skips confirmation):
+
+```bash
+npx skills remove tradingagentsx-analyze
+```
+
+```bash
+npx skills remove tradingagentsx-analyze -g
+```
+
+> Install location: `.claude/skills/` for Claude Code (global `~/.claude/skills/`), `.agents/skills/` for most other agents. For script mode, run `pip install -r` on the `requirements.txt` inside that folder.
+
 **Optional script-mode dependencies and keys**
 
 ```bash
