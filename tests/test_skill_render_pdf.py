@@ -420,3 +420,33 @@ def test_cli_unknown_model_falls_back_to_detected(render_pdf, tmp_path, monkeypa
     render_pdf.main(["--workdir", str(tmp_path), "--ticker", "2330", "--date", "2026-11-26", "--model", "Claude"])
 
     assert seen["model"] == "gpt-6-luna"
+
+
+def test_english_report_with_zh_lang_is_rejected(render_pdf, tmp_path):
+    _write_reports(tmp_path, EN_REPORT, keys=["market"])
+
+    with pytest.raises(render_pdf.RenderError) as exc:
+        render_pdf.render(tmp_path, "NVDA", "2026-11-26", lang="zh-TW")
+
+    assert exc.value.code == 8
+    assert "zh-TW" in str(exc.value)
+
+
+def test_chinese_report_with_en_lang_is_rejected(render_pdf, tmp_path):
+    _write_reports(tmp_path, ZH_REPORT, keys=["market"])
+
+    with pytest.raises(render_pdf.RenderError) as exc:
+        render_pdf.render(tmp_path, "NVDA", "2026-11-26", lang="en")
+
+    assert exc.value.code == 8
+
+
+@pytest.mark.parametrize("note", ["(80-100 words)", "（約 120 字）", "(~850 字)", "(~700 words)"])
+def test_word_count_annotation_is_rejected(render_pdf, tmp_path, note):
+    _write_reports(tmp_path, ZH_REPORT + f"\n## 結論 {note}\n", keys=["market"])
+
+    with pytest.raises(render_pdf.RenderError) as exc:
+        render_pdf.render(tmp_path, "2330", "2026-11-26", lang="zh-TW")
+
+    assert exc.value.code == 8
+    assert "字數" in str(exc.value)

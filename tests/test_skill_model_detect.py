@@ -41,6 +41,30 @@ def _opencode(home, sid, session_model, assistant_model=None):
     con.close()
 
 
+def _opencode_v2(home, sid, session_model, assistant_model=None):
+    db = home / ".local" / "share" / "opencode" / "opencode.db"
+    db.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(db)
+    con.execute("create table session_v2 (id text, model text)")
+    con.execute("create table session_message (session_id text, type text, seq int, data text)")
+    con.execute("insert into session_v2 values (?, ?)", (sid, json.dumps({"id": session_model})))
+    if assistant_model:
+        con.execute("insert into session_message values (?, 'assistant', 1, ?)",
+                    (sid, json.dumps({"model": {"id": assistant_model}})))
+    con.commit()
+    con.close()
+
+
+def test_opencode_v2_reads_assistant_message_model(md, tmp_path):
+    _opencode_v2(tmp_path, "ses_2", "nemotron-3-ultra-free", "nemotron-3.5-lightning-free")
+    assert md.detect_runtime_model(tmp_path, {"OPENCODE_SESSION_ID": "ses_2"}) == "nemotron-3.5-lightning-free"
+
+
+def test_opencode_v2_falls_back_to_session_v2_model(md, tmp_path):
+    _opencode_v2(tmp_path, "ses_2", "nemotron-3.5-lightning-free")
+    assert md.detect_runtime_model(tmp_path, {"OPENCODE_SESSION_ID": "ses_2"}) == "nemotron-3.5-lightning-free"
+
+
 def test_codex_uses_own_thread_not_newest_file(md, tmp_path):
     _codex(tmp_path, "aaa-111", "gpt-6-luna")
     _codex(tmp_path, "bbb-222", "gpt-6-astra")

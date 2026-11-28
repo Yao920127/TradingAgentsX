@@ -4,7 +4,7 @@
 所以 `--model` 為 unknown 時，改用 harness 傳給子行程的 session ID，精準對應到「這一次對話」：
   - Codex：環境變數 CODEX_THREAD_ID → ~/.codex/sessions/**/rollout-*-<id>.jsonl 最後一筆 turn_context 的 model
   - opencode：環境變數 OPENCODE_SESSION_ID → ~/.local/share/opencode/opencode.db
-    該 session 最新一則 assistant 訊息的 modelID（沒有就用 session.model）
+    該 session 最新 assistant 訊息的模型（2.x 在 session_message／session_v2，1.x 在 message／session）
 兩個變數都沒有（例如 Claude Code）就回傳 None，不去猜別的工具的紀錄。
 """
 from __future__ import annotations
@@ -44,19 +44,38 @@ def _opencode_model(home: Path, session_id: str) -> Optional[str]:
     try:
         con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
         try:
-            row = con.execute(
-                "select json_extract(data,'$.modelID') from message "
-                "where session_id=? and json_extract(data,'$.role')='assistant' "
-                "order by time_created desc limit 1",
-                (session_id,),
-            ).fetchone()
-            if row and row[0]:
-                return row[0]
-            row = con.execute("select model from session where id=?", (session_id,)).fetchone()
+            # opencode 2.x：session_message（type=assistant）的 data.model.id，其次 session_v2.model.id
+            queries = (
+                ("select json_extract(data,'$.model.id') from session_message "
+                 "where session_id=? and type='assistant' order by seq desc limit 1", False),
+                ("select model from session_v2 where id=?", True),
+                # opencode 1.x：message.data.modelID，其次 session.model.id
+                ("select json_extract(data,'$.modelID') from message "
+                 "where session_id=? and json_extract(data,'$.role')='assistant' "
+                 "order by time_created desc limit 1", False),
+                ("select model from session where id=?", True),
+            )
+            for sql, is_json in queries:
+                try:
+                    row = con.execute(sql, (session_id,)).fetchone()
+                except sqlite3.Error:
+                    continue  # 該版本沒有這張表
+                if not row or not row[0]:
+                    continue
+                found = _json_id(row[0]) if is_json else row[0]
+                if found:
+                    return found
         finally:
             con.close()
-        return json.loads(row[0]).get("id") if row and row[0] else None
-    except (sqlite3.Error, ValueError, AttributeError):
+    except sqlite3.Error:
+        return None
+    return None
+
+
+def _json_id(raw: str) -> Optional[str]:
+    try:
+        return json.loads(raw).get("id")
+    except (ValueError, AttributeError):
         return None
 
 

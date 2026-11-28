@@ -142,6 +142,35 @@ def _resolve_font_dir(font_dir: Optional[Path]) -> Optional[Path]:
     return bundled if (bundled / FONT_FILE).is_file() else None
 
 
+_WORD_COUNT_NOTE = re.compile(
+    r"[（(]\s*[~≈約]?\s*\d[\d,]*(?:\s*[–\-~]\s*\d[\d,]*)?\s*(?:字|words?)\s*[)）]", re.IGNORECASE
+)
+_PROCESS_TEXT = re.compile(r"字數自檢|結束檢核|word count check|self-check", re.IGNORECASE)
+_CJK = re.compile(r"[\u4e00-\u9fff]")
+_LATIN = re.compile(r"[A-Za-z]")
+_MIN_LANG_CHARS = 40  # 太短的報告不做語言比例判斷
+_ZH_MIN_CJK_RATIO = 0.2
+_EN_MAX_CJK_RATIO = 0.03
+
+
+def _lint_report(key: str, text: str, lang: str) -> None:
+    """報告檔只能是報告本身，且語言要與 --lang 一致；違規就報錯，讓模型重寫。"""
+    if _WORD_COUNT_NOTE.search(text) or _PROCESS_TEXT.search(text):
+        raise RenderError(
+            8, f"reports/{key}.md 含字數註記或自我檢核文字（如「(80-100 words)」）；請刪除這些過程文字後重新產生"
+        )
+    cjk, latin = len(_CJK.findall(text)), len(_LATIN.findall(text))
+    if cjk + latin < _MIN_LANG_CHARS:
+        return
+    ratio = cjk / (cjk + latin)
+    if lang == "zh-TW" and ratio < _ZH_MIN_CJK_RATIO:
+        raise RenderError(
+            8, f"reports/{key}.md 幾乎全是英文，但 --lang 是 zh-TW；語言須跟使用者提示詞一致，請改用繁體中文重寫"
+        )
+    if lang == "en" and ratio > _EN_MAX_CJK_RATIO:
+        raise RenderError(8, f"reports/{key}.md 含大量中文，但 --lang 是 en；請全文用英文重寫")
+
+
 def _collect_reports(workdir: Path, module: ModuleType, lang: str) -> tuple[list[dict], list[str]]:
     reports_dir = workdir / "reports"
     included: list[dict] = []
@@ -150,6 +179,7 @@ def _collect_reports(workdir: Path, module: ModuleType, lang: str) -> tuple[list
         path = reports_dir / f"{key}.md"
         text = path.read_text(encoding="utf-8") if path.is_file() else ""
         if text.strip():
+            _lint_report(key, text, lang)
             included.append({
                 "analyst_name": module.get_pdf_label(label_key, lang),
                 "report_content": text,
