@@ -267,6 +267,13 @@ def render(
     }
 
 
+def _detect_model() -> Optional[str]:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from model_detect import detect_runtime_model
+
+    return detect_runtime_model()
+
+
 _UNKNOWN_MODELS = {"", "unknown", "未知", "不明", "-", "—", "n/a"}
 
 
@@ -292,6 +299,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         args = parser.parse_args(argv)
         model = None if args.model.strip().lower() in _UNKNOWN_MODELS else args.model.strip()
+        if model is None or model.lower() == "claude":  # 光禿禿的「Claude」是模型誤報的典型
+            model = _detect_model() or model
         result = render(
             args.workdir, args.ticker, args.date, lang=args.lang, company=args.company,
             model=model, output=args.output, font_dir=args.font_dir, depth=args.depth,

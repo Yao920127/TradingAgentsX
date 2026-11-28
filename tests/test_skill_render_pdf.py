@@ -258,7 +258,8 @@ def test_cli_requires_model_exit_code_6(render_pdf, tmp_path, capsys):
     assert "--model" in capsys.readouterr().err
 
 
-def test_cli_unknown_model_renders_dash(render_pdf, tmp_path, capsys):
+def test_cli_unknown_model_renders_dash(render_pdf, tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr(render_pdf, "_detect_model", lambda: None)
     _write_reports(tmp_path, ZH_REPORT, keys=["market"])
 
     code = render_pdf.main(
@@ -407,3 +408,15 @@ def test_cli_depth_flag_returns_exit_code_7_on_short_debate(render_pdf, tmp_path
     assert code == 7
     assert captured.out == ""
     assert "debate_investment" in captured.err
+
+
+def test_cli_unknown_model_falls_back_to_detected(render_pdf, tmp_path, monkeypatch):
+    _write_reports(tmp_path, ZH_REPORT, keys=["market"])
+    seen = {}
+    monkeypatch.setattr(render_pdf, "_detect_model", lambda: "gpt-6-luna")
+    real = render_pdf.render
+    monkeypatch.setattr(render_pdf, "render", lambda *a, **k: seen.update(k) or real(*a, **k))
+
+    render_pdf.main(["--workdir", str(tmp_path), "--ticker", "2330", "--date", "2026-11-26", "--model", "Claude"])
+
+    assert seen["model"] == "gpt-6-luna"

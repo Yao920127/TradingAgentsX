@@ -185,6 +185,11 @@ _MODEL_DISPLAY_NAMES: dict[str, str] = {
     "deepseek-v4-pro": "DeepSeek-V4-Pro",
     "deepseek-flash": "DeepSeek-V4.1-Flash",
     
+    # NVIDIA Nemotron（opencode 免費模型）
+    "nemotron-3.5-lightning-free": "Nemotron 3.5 Lightning (Free)",
+    "nemotron-3-ultra-free": "Nemotron 3 Ultra (Free)",
+    "nemotron-3-super-free": "Nemotron 3 Super (Free)",
+
     # Tauric
     "tauric": "Trading-R1",
     # Qwen

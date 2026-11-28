@@ -154,7 +154,7 @@ python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date 
 1. 使用者在對話或平台選單明說的模型（例如「我用 GPT-6 Luna」）→ 用那個。
 2. 執行環境提供的模型資訊（系統提示、環境資訊、`--model` 旗標、設定檔中的模型 ID）→ 原樣照抄，例如 `claude-opus-5-5`、`gpt-6-luna`、`gemini-4-carbon`；已知的模型 ID 會自動轉成全名（`Claude Opus 5.5`、`GPT-6 Luna`、`Gemini 4 Carbon`），不在清單的就原樣顯示。
 3. 以上都沒有，才問使用者一次「你現在用的是哪個模型？」。
-4. 仍無法確認就填 `unknown`（封面顯示「—」），**不可填 `Claude` 或憑記憶編造**——模型常會誤報自己是 Claude 或舊版本。
+4. 仍無法確認就填 `unknown`，**不可填 `Claude` 或憑記憶編造**——模型常會誤報自己是 Claude 或舊版本。填 `unknown`（或裸的 `Claude`）時，腳本會自動讀 Codex／opencode 的本機紀錄偵測實際模型；偵測不到才在封面顯示「—」。
 
 `--depth` 一定要帶：腳本會檢查 `debate_investment.md` 與 `debate_risk.md` 的發言標記是否恰為 `2×depth`、`3×depth` 個（編號 1 到總數各一個），不符就不產生 PDF。
 
