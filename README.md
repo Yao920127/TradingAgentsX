@@ -464,19 +464,19 @@ claude plugin install tradingagentsx@tradingagentsx
 
 需要 Node.js 22.20 以上。**請使用下面含 `plugins/` 路徑的網址**：`skills/` 資料夾只有原始碼（沒有提示詞、vendor 與字型），直接 `npx skills add Yao920127/TradingAgentsX` 會裝到不完整、無法執行的版本。
 
-**安裝**（預設裝在目前專案；`-a` 指定 agent，省略則互動詢問）：
+**安裝**（預設裝在目前專案，執行後選擇要安裝到哪些 agent）：
 
 ```bash
-npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -a claude-code
+npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze
 ```
 
 全域安裝（所有專案都能用），加上 `-g`：
 
 ```bash
-npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -a claude-code -g
+npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -g
 ```
 
-其他 agent 把 `claude-code` 換成 `codex`、`cursor`、`opencode` 等；完整清單見 `npx skills add --help`。
+執行後會互動詢問要安裝到哪些 agent（Claude Code、Codex、Cursor、OpenCode 等），不需要事先指定。
 
 **查看與檢查更新**：
 

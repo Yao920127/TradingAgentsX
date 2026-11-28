@@ -464,19 +464,19 @@ claude plugin install tradingagentsx@tradingagentsx
 
 Requires Node.js 22.20 or newer. **Use the URL below, which points into `plugins/`**: the `skills/` folder holds source only (no prompts, vendor or fonts), so a plain `npx skills add Yao920127/TradingAgentsX` installs an incomplete skill that cannot run.
 
-**Install** (into the current project by default; `-a` picks the agent, omit it to be asked):
+**Install** (into the current project by default; you choose which agents to install to when prompted):
 
 ```bash
-npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -a claude-code
+npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze
 ```
 
 Global install (available in every project), add `-g`:
 
 ```bash
-npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -a claude-code -g
+npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -g
 ```
 
-For other agents replace `claude-code` with `codex`, `cursor`, `opencode`, etc.; see `npx skills add --help` for the full list.
+The CLI then asks which agents to install to (Claude Code, Codex, Cursor, OpenCode, …), so you do not need to specify one.
 
 **List and check for updates**:
 
