@@ -462,18 +462,18 @@ claude plugin install tradingagentsx@tradingagentsx
 
 ### Install with npx (skills CLI; Claude Code, Codex, Cursor, OpenCode, …)
 
-Requires Node.js 22.20 or newer. **Use the URL below, which points into `plugins/`**: the `skills/` folder holds source only (no prompts, vendor or fonts), so a plain `npx skills add Yao920127/TradingAgentsX` installs an incomplete skill that cannot run.
+Requires Node.js 22.20 or newer. The command pulls the pre-built version from this repo's `plugins/` folder (with prompts, vendor and the Traditional Chinese font).
 
 **Install** (into the current project by default; you choose which agents to install to when prompted):
 
 ```bash
-npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze
+npx skills add Yao920127/TradingAgentsX --skill tradingagentsx-analyze
 ```
 
 Global install (available in every project), add `-g`:
 
 ```bash
-npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -g
+npx skills add Yao920127/TradingAgentsX --skill tradingagentsx-analyze -g
 ```
 
 The CLI then asks which agents to install to (Claude Code, Codex, Cursor, OpenCode, …), so you do not need to specify one.
@@ -584,7 +584,7 @@ Build the zip yourself (outputs `dist/tradingagentsx-analyze.zip`):
 python scripts/build_skill.py
 ```
 
-After changing prompts, `pdf_generator.py`, dataflows or `skills/`, rebuild the plugin and commit `plugins/tradingagentsx/` (a test checks that it is in sync):
+After changing prompts, `pdf_generator.py`, dataflows or `skill-src/`, rebuild the plugin and commit `plugins/tradingagentsx/` (a test checks that it is in sync):
 
 ```bash
 python scripts/build_skill.py --plugin

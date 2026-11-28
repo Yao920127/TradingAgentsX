@@ -462,18 +462,18 @@ claude plugin install tradingagentsx@tradingagentsx
 
 ### 用 npx 安裝（skills CLI；Claude Code、Codex、Cursor、OpenCode 等）
 
-需要 Node.js 22.20 以上。**請使用下面含 `plugins/` 路徑的網址**：`skills/` 資料夾只有原始碼（沒有提示詞、vendor 與字型），直接 `npx skills add Yao920127/TradingAgentsX` 會裝到不完整、無法執行的版本。
+需要 Node.js 22.20 以上。指令會從本倉庫的 `plugins/` 抓取已建置完成的版本（含提示詞、vendor 與繁中字型）。
 
 **安裝**（預設裝在目前專案，執行後選擇要安裝到哪些 agent）：
 
 ```bash
-npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze
+npx skills add Yao920127/TradingAgentsX --skill tradingagentsx-analyze
 ```
 
 全域安裝（所有專案都能用），加上 `-g`：
 
 ```bash
-npx skills add https://github.com/Yao920127/TradingAgentsX/tree/main/plugins/tradingagentsx/skills/tradingagentsx-analyze -g
+npx skills add Yao920127/TradingAgentsX --skill tradingagentsx-analyze -g
 ```
 
 執行後會互動詢問要安裝到哪些 agent（Claude Code、Codex、Cursor、OpenCode 等），不需要事先指定。
@@ -584,7 +584,7 @@ Claude app 分析 NVDA，右側直接預覽產出的 PDF 報告：
 python scripts/build_skill.py
 ```
 
-修改提示詞、`pdf_generator.py`、dataflows 或 `skills/` 後，重建 plugin 並提交 `plugins/tradingagentsx/`（測試會檢查是否同步）：
+修改提示詞、`pdf_generator.py`、dataflows 或 `skill-src/` 後，重建 plugin 並提交 `plugins/tradingagentsx/`（測試會檢查是否同步）：
 
 ```bash
 python scripts/build_skill.py --plugin

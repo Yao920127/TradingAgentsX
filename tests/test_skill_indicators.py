@@ -1,4 +1,4 @@
-"""skills/tradingagentsx-analyze/scripts/indicators.py 的測試。
+"""skill-src/tradingagentsx-analyze/scripts/indicators.py 的測試。
 
 驗證：
   - OHLCV 讀取（JSON／CSV）與驗證（欄位、日期、順序、重複、高低價矛盾）
@@ -18,7 +18,7 @@ import pytest
 
 SCRIPT = (
     Path(__file__).resolve().parent.parent
-    / "skills" / "tradingagentsx-analyze" / "scripts" / "indicators.py"
+    / "skill-src" / "tradingagentsx-analyze" / "scripts" / "indicators.py"
 )
 
 

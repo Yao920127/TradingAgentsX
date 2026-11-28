@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""把 skills/<name>/ 組裝成可上傳的 skill 資料夾與 zip。
+"""把 skill-src/<name>/ 組裝成可上傳的 skill 資料夾與 zip。
 
 用法：
-  python scripts/build_skill.py [--source skills/tradingagentsx-analyze] [--out dist]
+  python scripts/build_skill.py [--source skill-src/tradingagentsx-analyze] [--out dist]
                                 [--font-dir <字型資料夾>] [--no-fonts]
   python scripts/build_skill.py --plugin [--plugin-dir plugins/tradingagentsx]
 
@@ -34,7 +34,7 @@ from pathlib import Path
 from typing import Any, Optional, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SOURCE = REPO_ROOT / "skills" / "tradingagentsx-analyze"
+DEFAULT_SOURCE = REPO_ROOT / "skill-src" / "tradingagentsx-analyze"
 DEFAULT_OUT = REPO_ROOT / "dist"
 DEFAULT_FONT_DIR = REPO_ROOT / "Cactus_Classical_Serif,Noto_Serif_TC" / "Noto_Serif_TC" / "static"
 PDF_GENERATOR = REPO_ROOT / "backend" / "app" / "services" / "pdf_generator.py"

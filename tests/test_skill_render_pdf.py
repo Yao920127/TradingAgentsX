@@ -1,4 +1,4 @@
-"""skills/tradingagentsx-analyze/scripts/render_pdf.py 的測試。
+"""skill-src/tradingagentsx-analyze/scripts/render_pdf.py 的測試。
 
 以合成的報告與價格資料實際產出 PDF，驗證：
   - 12 份報告、中英文兩種語言都能產出
@@ -16,7 +16,7 @@ import pytest
 
 SCRIPT = (
     Path(__file__).resolve().parent.parent
-    / "skills" / "tradingagentsx-analyze" / "scripts" / "render_pdf.py"
+    / "skill-src" / "tradingagentsx-analyze" / "scripts" / "render_pdf.py"
 )
 
 REPORT_KEYS = [

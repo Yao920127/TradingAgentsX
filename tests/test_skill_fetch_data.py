@@ -1,4 +1,4 @@
-"""skills/tradingagentsx-analyze/scripts/fetch_data.py 的測試。
+"""skill-src/tradingagentsx-analyze/scripts/fetch_data.py 的測試。
 
 以注入的假取資料函式驗證（不連網）：
   - 價格 CSV 解析（yfinance 帶註解標頭與補充段落、FinMind 小寫欄位）
@@ -17,7 +17,7 @@ import pytest
 
 SCRIPT = (
     Path(__file__).resolve().parent.parent
-    / "skills" / "tradingagentsx-analyze" / "scripts" / "fetch_data.py"
+    / "skill-src" / "tradingagentsx-analyze" / "scripts" / "fetch_data.py"
 )
 
 YF_TEXT = (
