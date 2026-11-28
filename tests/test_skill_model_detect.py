@@ -1,6 +1,6 @@
 import importlib.util
 import json
-import os
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -18,40 +18,54 @@ def md():
     return mod
 
 
-def _codex(home, model, mtime):
-    f = home / ".codex" / "sessions" / "2026" / "11" / "28" / "rollout-x.jsonl"
-    f.parent.mkdir(parents=True)
-    f.write_text(f'{{"model":"old"}}\n{{"turn_context":{{"model":"{model}"}}}}\n')
-    os.utime(f, (mtime, mtime))
+def _codex(home, thread, model):
+    f = home / ".codex" / "sessions" / "2026" / "11" / "28" / f"rollout-2026-11-28T20-00-00-{thread}.jsonl"
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(
+        '{"type":"session_meta","payload":{"model":"old"}}\n'
+        + f'{{"type":"turn_context","payload":{{"model":"{model}"}}}}\n'
+        + "x" * 600_000 + "\n"  # model 之後再塞大量內容，確認不是只讀檔尾
+    )
 
 
-def _opencode(home, model, mtime):
-    f = home / ".local" / "state" / "opencode" / "model.json"
-    f.parent.mkdir(parents=True)
-    f.write_text(json.dumps({"recent": [{"providerID": "opencode", "modelID": model}]}))
-    os.utime(f, (mtime, mtime))
+def _opencode(home, sid, session_model, assistant_model=None):
+    db = home / ".local" / "share" / "opencode" / "opencode.db"
+    db.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(db)
+    con.execute("create table session (id text, model text)")
+    con.execute("create table message (session_id text, time_created int, data text)")
+    con.execute("insert into session values (?, ?)", (sid, json.dumps({"id": session_model})))
+    if assistant_model:
+        con.execute("insert into message values (?, 1, ?)", (sid, json.dumps({"role": "assistant", "modelID": assistant_model})))
+    con.commit()
+    con.close()
 
 
-def test_codex_session_model_detected(md, tmp_path):
-    _codex(tmp_path, "gpt-6-luna", 1000)
-    assert md.detect_runtime_model(tmp_path, now=1001) == "gpt-6-luna"
+def test_codex_uses_own_thread_not_newest_file(md, tmp_path):
+    _codex(tmp_path, "aaa-111", "gpt-6-luna")
+    _codex(tmp_path, "bbb-222", "gpt-6-astra")
+    assert md.detect_runtime_model(tmp_path, {"CODEX_THREAD_ID": "aaa-111"}) == "gpt-6-luna"
 
 
-def test_opencode_recent_model_detected(md, tmp_path):
-    _opencode(tmp_path, "nemotron-3.5-lightning-free", 1000)
-    assert md.detect_runtime_model(tmp_path, now=1001) == "nemotron-3.5-lightning-free"
+def test_opencode_prefers_latest_assistant_model(md, tmp_path):
+    _opencode(tmp_path, "ses_1", "nemotron-3-ultra-free", "nemotron-3.5-lightning-free")
+    assert md.detect_runtime_model(tmp_path, {"OPENCODE_SESSION_ID": "ses_1"}) == "nemotron-3.5-lightning-free"
 
 
-def test_newest_source_wins(md, tmp_path):
-    _codex(tmp_path, "gpt-6-luna", 1000)
-    _opencode(tmp_path, "grok-code", 2000)
-    assert md.detect_runtime_model(tmp_path, now=2001) == "grok-code"
+def test_opencode_falls_back_to_session_model(md, tmp_path):
+    _opencode(tmp_path, "ses_1", "seaglass-alpha-free")
+    assert md.detect_runtime_model(tmp_path, {"OPENCODE_SESSION_ID": "ses_1"}) == "seaglass-alpha-free"
 
 
-def test_stale_record_ignored(md, tmp_path):
-    _codex(tmp_path, "gpt-6-luna", 1000)
-    assert md.detect_runtime_model(tmp_path, now=1000 + md.MAX_AGE_SECONDS + 1) is None
+def test_other_harness_returns_none_even_if_records_exist(md, tmp_path):
+    _codex(tmp_path, "aaa-111", "gpt-6-luna")
+    assert md.detect_runtime_model(tmp_path, {}) is None
 
 
-def test_nothing_found_returns_none(md, tmp_path):
-    assert md.detect_runtime_model(tmp_path) is None
+def test_missing_records_return_none(md, tmp_path):
+    assert md.detect_runtime_model(tmp_path, {"CODEX_THREAD_ID": "zzz"}) is None
+    assert md.detect_runtime_model(tmp_path, {"OPENCODE_SESSION_ID": "ses_x"}) is None
+
+
+def test_path_traversal_thread_id_rejected(md, tmp_path):
+    assert md.detect_runtime_model(tmp_path, {"CODEX_THREAD_ID": "../x"}) is None
