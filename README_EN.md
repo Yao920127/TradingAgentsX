@@ -396,7 +396,7 @@ python -m tui.main
 
 ## 🧩 Claude Code / Claude Skill
 
-The full 12-agent flow (data collection → four analysts → bull/bear debate → risk debate → final decision → PDF) is packaged as a skill. Claude itself acts as the model, so no LLM API key is needed. Just give a ticker and a date, e.g. "analyze NVDA on 2026-11-26" or "analyze 2330 on 2026-11-26".
+The full 12-agent flow (data collection → four analysts → bull/bear debate → risk debate → final decision → PDF) is packaged as a skill. the model running the skill (Claude, Gemini, etc.) acts as every agent, so no LLM API key is needed. Just give a ticker and a date, e.g. "analyze NVDA on 2026-11-26" or "analyze 2330 on 2026-11-26".
 
 ### Claude Code (plugin)
 

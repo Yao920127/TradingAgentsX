@@ -5,7 +5,7 @@ description: 以 TradingAgentsX 的 12 位 AI 分析師流程分析單一股票�
 
 # TradingAgentsX 股票分析（tradingagentsx-analyze）
 
-用 Claude 本身扮演 TradingAgentsX 的 12 位 agent，流程與網頁版相同：**蒐集資料 → 四位分析師 → 摘要 → 多空辯論 → 研究經理 → 交易員 → 風險辯論 → 風險經理 → PDF**。沒有模型選擇，也不需要任何 LLM 金鑰。
+由執行這個 skill 的模型本身（Claude、Gemini 等皆可）扮演 TradingAgentsX 的 12 位 agent，流程與網頁版相同：**蒐集資料 → 四位分析師 → 摘要 → 多空辯論 → 研究經理 → 交易員 → 風險辯論 → 風險經理 → PDF**。沒有模型選擇，也不需要任何 LLM 金鑰。
 
 本 skill 的提示詞由 TradingAgentsX 原始碼產生，放在 `references/prompts/`，**不要改寫提示詞**，照著用。
 
@@ -53,7 +53,7 @@ python3 SKILL_DIR/scripts/fetch_data.py --ticker <TICKER> --date <DATE> --market
 資料不齊時，**先自己想辦法補，補不到再標示，絕不編造**：
 
 1. 對每個缺口，用你自己的網頁搜尋／網頁讀取工具查（新聞、社群討論、財報重點、公司公告）。
-2. 補到的內容寫進對應的 `data/*.md`，每筆標明**來源、日期**，並註明「由 Claude 網路搜尋補充」。
+2. 補到的內容寫進對應的 `data/*.md`，每筆標明**來源、日期**，並註明「由模型網路搜尋補充」。
 3. 只採用日期在分析日以前的內容。查不到就保留「資料缺口」字樣，報告裡也要明講哪一塊沒有資料，並降低相應的結論力道。
 4. 價格不能用搜尋摘要補：價格一定要是完整日線，走第 3 節的驗證。
 
@@ -144,10 +144,12 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
 ## 8. 產生 PDF
 
 ```bash
-python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date <DATE> --lang <LANG> --company "<公司名稱>" --depth <DEPTH>
+python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date <DATE> --lang <LANG> --company "<公司名稱>" --depth <DEPTH> --model "<模型名稱>"
 ```
 
 `--company` 一定要填**公司正式全稱**（含 Corporation／Inc.／Co., Ltd. 等），封面才會顯示完整名稱，例如 `NVIDIA Corporation`、`Apple Inc.`、`台灣積體電路製造股份有限公司`；不可只填簡稱（如 `NVIDIA`、`台積電`）。全稱從基本面資料的公司名稱（如 yfinance 的 `longName`）取得；查不到才憑可靠知識補全。
+
+`--model` 一定要填**你自己（正在執行這個 skill 的模型）的名稱**，例如 `Claude Opus 4.8`、`Gemini 3 Pro`，會顯示在 PDF 封面的「分析模型」欄；不要沿用預設值 `Claude`，否則用別的模型分析時封面會寫錯。不確定確切版本時寫你知道的模型名稱即可，不可編造。
 
 `--depth` 一定要帶：腳本會檢查 `debate_investment.md` 與 `debate_risk.md` 的發言標記是否恰為 `2×depth`、`3×depth` 個（編號 1 到總數各一個），不符就不產生 PDF。
 
@@ -167,7 +169,7 @@ python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date 
 
 1. 最終決策（風險經理的買入／持有／賣出）與 2–4 點關鍵理由。
 2. 交易員的提案與風險經理決策不一致時，說明差異。
-3. 資料缺口與哪些內容是 Claude 搜尋補充的。
+3. 資料缺口與哪些內容是模型搜尋補充的。
    資料來源要寫**真實的來源名稱與網址**（例如 FinMind、Yahoo Finance、公司法說會新聞稿、新聞媒體網址），不要列 `data/*.md`、`reports/` 這類內部檔案路徑；查不到網址就只寫來源名稱。
 4. PDF 路徑、使用參數（代碼、日期、市場、語言、depth、實際納入的分析師）。只選了部分分析師時，要明講結論未涵蓋沒選的面向。
 5. 一句免責聲明。
