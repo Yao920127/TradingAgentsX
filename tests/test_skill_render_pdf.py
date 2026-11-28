@@ -233,7 +233,7 @@ def test_invalid_date_raises_exit_code_6(render_pdf, tmp_path, bad_date):
 def test_cli_prints_json_summary_and_returns_zero(render_pdf, tmp_path, capsys):
     _write_reports(tmp_path, ZH_REPORT, keys=["market"])
 
-    code = render_pdf.main(["--workdir", str(tmp_path), "--ticker", "2330", "--date", "2026-11-26"])
+    code = render_pdf.main(["--workdir", str(tmp_path), "--ticker", "2330", "--date", "2026-11-26", "--model", "gpt-6-luna"])
 
     out = capsys.readouterr().out
     assert code == 0
@@ -241,12 +241,42 @@ def test_cli_prints_json_summary_and_returns_zero(render_pdf, tmp_path, capsys):
 
 
 def test_cli_returns_error_code_and_message(render_pdf, tmp_path, capsys):
-    code = render_pdf.main(["--workdir", str(tmp_path), "--ticker", "2330", "--date", "2026-11-26"])
+    code = render_pdf.main(["--workdir", str(tmp_path), "--ticker", "2330", "--date", "2026-11-26", "--model", "gpt-6-luna"])
 
     captured = capsys.readouterr()
     assert code == 2
     assert captured.out == ""
     assert "reports" in captured.err
+
+
+def test_cli_requires_model_exit_code_6(render_pdf, tmp_path, capsys):
+    _write_reports(tmp_path, ZH_REPORT, keys=["market"])
+
+    code = render_pdf.main(["--workdir", str(tmp_path), "--ticker", "2330", "--date", "2026-11-26"])
+
+    assert code == 6
+    assert "--model" in capsys.readouterr().err
+
+
+def test_cli_unknown_model_renders_dash(render_pdf, tmp_path, capsys):
+    _write_reports(tmp_path, ZH_REPORT, keys=["market"])
+
+    code = render_pdf.main(
+        ["--workdir", str(tmp_path), "--ticker", "2330", "--date", "2026-11-26", "--model", "unknown"]
+    )
+
+    assert code == 0
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("claude-opus-5-5", "Claude Opus 5.5"),
+    ("GPT-6 Luna", "GPT-6 Luna"),
+    ("Gemini 4 Carbon", "Gemini 4 Carbon"),
+    ("nemotron-3.5", "nemotron-3.5"),
+])
+def test_model_display_name_is_tolerant(render_pdf, raw, expected):
+    module = _generator_module(render_pdf)
+    assert module.get_model_display_name(raw) == expected
 
 
 @pytest.mark.parametrize("ticker,expected", [
@@ -371,7 +401,7 @@ def test_depth_out_of_range_raises_exit_code_6(render_pdf, tmp_path, bad):
 def test_cli_depth_flag_returns_exit_code_7_on_short_debate(render_pdf, tmp_path, capsys):
     _setup_debates(tmp_path, depth=1, invest=1)
 
-    code = render_pdf.main(["--workdir", str(tmp_path), "--ticker", "NVDA", "--date", "2026-11-26", "--depth", "1"])
+    code = render_pdf.main(["--workdir", str(tmp_path), "--ticker", "NVDA", "--date", "2026-11-26", "--depth", "1", "--model", "gpt-6-luna"])
 
     captured = capsys.readouterr()
     assert code == 7

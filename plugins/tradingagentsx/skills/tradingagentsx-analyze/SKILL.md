@@ -20,7 +20,7 @@ description: 以 TradingAgentsX 的 12 位 AI 分析師流程分析單一股票�
 | ticker | 使用者給的代碼。純數字視為台股 |
 | date | 分析日期 `YYYY-MM-DD`；沒給就用今天。**只能使用該日以前的資料** |
 | market | `us` 美股；`twse` 上市；`tpex` 上櫃／興櫃。台股預設 `twse`，使用者說上櫃才用 `tpex` |
-| lang | 使用者用繁體中文提問 → `zh-TW`；用英文 → `en`。使用者明說要哪種就照做。**所有報告、辯論、最終回覆都用同一種語言** |
+| lang | 使用者用繁體中文提問 → `zh-TW`；用英文 → `en`。使用者明說要哪種就照做。**所有報告、辯論、最終回覆都用同一種語言，全文不得中英夾雜**（lang=`en` 時標題、表格欄位、小標與內文全部用英文；lang=`zh-TW` 時全用繁體中文，只有股票代碼、公司名、指標縮寫如 RSI／MACD 可保留英文）。**寫入報告檔的內容只能是報告本身**：不可出現字數統計（如「(~850 字)」「(~700 words)」）、自我檢核、「結束檢核」「字數自檢」之類的過程文字，這些只留在思考，不進檔案 |
 | depth | 研究深度 1–5，預設 3（辯論輪數）。使用者要快就用 1 |
 | analysts | 要納入的分析師，從 `market`（技術面）、`social`（社群）、`news`（新聞）、`fundamentals`（基本面）選，至少 1 位，預設全 4 位。使用者可用自然語言指定，例如「只要技術面和新聞」。**沒選的分析師不蒐集資料、不寫報告、不摘要**；但價格與技術指標（第 3 節）一律要做，走勢圖需要 |
 
@@ -137,6 +137,7 @@ python3 SKILL_DIR/scripts/indicators.py --input WORK/data/price.csv --workdir WO
   - 寫法：**有子代理工具時，三位各交給一個全新的子代理（可平行）**，prompt 只含該位的提示詞路徑、`reports/trader.md`、`analyst_summary.md`、完整的 `WORK/debate_risk.md` 路徑、輸出路徑與語言；沒有子代理工具就在主對話逐位寫，但每位都要重新讀完整的 `debate_risk.md`，不可只憑最後一輪的記憶。
   - 內容：以該位的視角，把整場辯論（不只最後一輪）整理成一份獨立、讀者不必看辯論過程就能懂的完整報告。篇幅：激進 700–900 字、保守與中立各 900–1,200 字（同樣覆寫提示詞的字數上限）。
   - 結構（標題格式照提示詞）：**開頭先給「結論與重點」**——一句話立場，加上 3 條最關鍵的理由（各附一個具體數字）；接著依序是核心論證（引用整場辯論中最有力的數字與推導）、對另外兩位最強論點的回應、讓步與立場演變（辯論中改變或放棄了什麼）、倉位與觸發條件（用表格列出進場／加碼／減碼／出場的價位與事件）。
+  - 標題語言：五個段落標題要跟 `--lang` 一致。`zh-TW`：結論與重點／核心論證／對其他立場的回應／讓步與立場演變／倉位與觸發條件；`en`：Conclusion & Key Points／Core Argument／Response to the Other Views／Concessions & Evolution of Position／Position Sizing & Triggers。標題不加字數或括號註記。
   - 禁止：只寫「最後陳述」「承認」這類收斂句；沒有數字的泛論；重複另一位的內容。寫完自檢字數，低於下限就補足。
 
 **風險經理**（`risk_manager.md`）：輸入是交易員提案與完整風險辯論歷史。**必須重新讀完整的 `WORK/debate_risk.md`（不可用發言時的摘錄版），並寫成與網頁版相當的完整報告**：綜合三方觀點、審查交易員提案、給出倉位與停損停利計畫，不要縮成結論摘要。**有子代理工具時，同樣交給全新的子代理執行**：prompt 只含提示詞檔路徑、`reports/trader.md` 與 `debate_risk.md` 路徑、輸出路徑 `reports/risk_manager.md` 與語言；沒有子代理工具就在主對話照做，但仍須重新讀檔。**最終買賣決策由它做出**，結尾必須是「最終交易決策：**買入/持有/賣出**」（英文 "Final Trading Decision: **Buy/Hold/Sell**"）→ `reports/risk_manager.md`。
@@ -149,7 +150,11 @@ python3 SKILL_DIR/scripts/render_pdf.py --workdir WORK --ticker <TICKER> --date 
 
 `--company` 一定要填**公司正式全稱**（含 Corporation／Inc.／Co., Ltd. 等），封面才會顯示完整名稱，例如 `NVIDIA Corporation`、`Apple Inc.`、`台灣積體電路製造股份有限公司`；不可只填簡稱（如 `NVIDIA`、`台積電`）。全稱從基本面資料的公司名稱（如 yfinance 的 `longName`）取得；查不到才憑可靠知識補全。
 
-`--model` 一定要填**你自己（正在執行這個 skill 的模型）的名稱**，例如 `Claude Opus 4.8`、`Gemini 3 Pro`，會顯示在 PDF 封面的「分析模型」欄；不要沿用預設值 `Claude`，否則用別的模型分析時封面會寫錯。不確定確切版本時寫你知道的模型名稱即可，不可編造。
+`--model` **必填**（漏填會以代碼 6 失敗），填的是**實際執行這次分析的模型**，會顯示在封面「分析模型」欄。依序判斷，不要憑自己的印象猜：
+1. 使用者在對話或平台選單明說的模型（例如「我用 GPT-6 Luna」）→ 用那個。
+2. 執行環境提供的模型資訊（系統提示、環境資訊、`--model` 旗標、設定檔中的模型 ID）→ 原樣照抄，例如 `claude-opus-5-5`、`gpt-6-luna`、`gemini-4-carbon`；已知的模型 ID 會自動轉成全名（`Claude Opus 5.5`、`GPT-6 Luna`、`Gemini 4 Carbon`），不在清單的就原樣顯示。
+3. 以上都沒有，才問使用者一次「你現在用的是哪個模型？」。
+4. 仍無法確認就填 `unknown`（封面顯示「—」），**不可填 `Claude` 或憑記憶編造**——模型常會誤報自己是 Claude 或舊版本。
 
 `--depth` 一定要帶：腳本會檢查 `debate_investment.md` 與 `debate_risk.md` 的發言標記是否恰為 `2×depth`、`3×depth` 個（編號 1 到總數各一個），不符就不產生 PDF。
 

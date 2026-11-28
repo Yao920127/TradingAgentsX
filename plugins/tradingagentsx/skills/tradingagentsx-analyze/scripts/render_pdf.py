@@ -3,7 +3,7 @@
 
 用法：
   python render_pdf.py --workdir <資料夾> --ticker 2330 --date 2026-11-26 \
-      [--lang zh-TW|en] [--company 公司名稱] [--model Claude] [--output 路徑] \
+      [--lang zh-TW|en] [--company 公司名稱] --model 模型名稱 [--output 路徑] \
       [--depth 1-5]
 
 --depth 有給時，會先驗證辯論檔的發言標記：debate_investment.md 必須恰有
@@ -213,7 +213,7 @@ def render(
     date: str,
     lang: str = "zh-TW",
     company: Optional[str] = None,
-    model: str = "Claude",
+    model: Optional[str] = "Claude",
     output: Optional[Path] = None,
     font_dir: Optional[Path] = None,
     depth: Optional[int] = None,
@@ -267,6 +267,9 @@ def render(
     }
 
 
+_UNKNOWN_MODELS = {"", "unknown", "未知", "不明", "-", "—", "n/a"}
+
+
 class _Parser(argparse.ArgumentParser):
     def error(self, message: str):  # type: ignore[override]
         raise RenderError(6, message)
@@ -279,15 +282,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--date", required=True, help="分析日期 YYYY-MM-DD")
     parser.add_argument("--lang", default="zh-TW")
     parser.add_argument("--company", default=None)
-    parser.add_argument("--model", default="Claude")
+    parser.add_argument(
+        "--model", required=True,
+        help="執行本 skill 的模型 ID 或全名；真的無法確認時填 unknown（封面顯示 —）",
+    )
     parser.add_argument("--output", default=None, type=Path)
     parser.add_argument("--font-dir", default=None, type=Path)
     parser.add_argument("--depth", default=None, type=int, help="研究深度 1–5；給了就驗證辯論發言標記")
     try:
         args = parser.parse_args(argv)
+        model = None if args.model.strip().lower() in _UNKNOWN_MODELS else args.model.strip()
         result = render(
             args.workdir, args.ticker, args.date, lang=args.lang, company=args.company,
-            model=args.model, output=args.output, font_dir=args.font_dir, depth=args.depth,
+            model=model, output=args.output, font_dir=args.font_dir, depth=args.depth,
         )
     except RenderError as exc:
         print(f"錯誤：{exc}", file=sys.stderr)

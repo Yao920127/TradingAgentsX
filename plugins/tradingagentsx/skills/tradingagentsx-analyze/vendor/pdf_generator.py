@@ -199,7 +199,14 @@ def get_model_display_name(model_id: str | None) -> str | None:
     Falls back to the raw model_id if not in the mapping."""
     if not model_id:
         return None
-    return _MODEL_DISPLAY_NAMES.get(model_id, model_id)
+    if model_id in _MODEL_DISPLAY_NAMES:
+        return _MODEL_DISPLAY_NAMES[model_id]
+    # Tolerate casing / spaces / dots: "Claude Opus 5.5" -> "claude-opus-5-5".
+    slug = model_id.strip().lower().replace(" ", "-")
+    for candidate in (slug, slug.replace(".", "-")):
+        if candidate in _MODEL_DISPLAY_NAMES:
+            return _MODEL_DISPLAY_NAMES[candidate]
+    return model_id
 
 
 # ============================================
